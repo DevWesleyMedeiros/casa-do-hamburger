@@ -1,0 +1,7 @@
+# Ignore bun lock files
+bun.lock
+front-end/bun.lock
+
+# Node / build
+node_modules/
+dist/
