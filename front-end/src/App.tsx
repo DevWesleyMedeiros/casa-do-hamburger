@@ -1,9 +1,8 @@
-import './App.css'
-import { Header } from './components/header/Header'
-
+import "./App.css";
+import { Input } from "./components/input/Input";
 
 function App() {
-  return <Header />
+  return <Input></Input>;
 }
 
-export default App
+export default App;

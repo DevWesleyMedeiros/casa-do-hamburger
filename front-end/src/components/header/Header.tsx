@@ -6,7 +6,7 @@ export const Header = () => {
         <button
           type="button"
           title="Entrar"
-          className="flex h-8.75 w-32.5 cursor-pointer items-center justify-center rounded-md bg-[#F2DAAC]"
+          className="btn-login flex h-8.75 w-32.5 cursor-pointer items-center justify-center rounded-md bg-[#F2DAAC]"
         >
           Entrar
         </button>
