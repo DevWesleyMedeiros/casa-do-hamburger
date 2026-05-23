@@ -9,6 +9,8 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
 
     /* Bundler mode */
     "moduleResolution": "bundler",
