@@ -1,4 +1,4 @@
-import { Input } from "../input/Input";
+import { Input } from "../../components/input/Input";
 import React, { useState } from "react";
 
 export const Register = () => {

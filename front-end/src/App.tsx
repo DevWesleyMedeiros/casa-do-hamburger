@@ -1,11 +1,12 @@
 import "./App.css";
-// import { Login } from './components/login/Login'
-import { Register } from './components/register/Register'
+import { AppRoutes } from "./shared/routes/AppRoutes";
+
 
 function App() {
   return (
-    // <Login />
-    <Register></Register>
+    <>
+      <AppRoutes></AppRoutes>
+    </>
   );
 }
 

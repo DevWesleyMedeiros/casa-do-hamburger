@@ -8,7 +8,7 @@ export const Input: React.FC<InputProps> = (props) => {
     <label htmlFor="input-email">
       <input
         {...props}
-        className="input-email py- h-[8.75] w-87.5 rounded-md bg-white px-2 py-2 text-sm text-[#32343E] placeholder-[#32343E] outline-none"
+        className="input-email h-[8.75] w-87.5 rounded-md bg-white px-2 py-2 text-sm text-[#32343E] placeholder-[#32343E] outline-none"
       />
     </label>
   );

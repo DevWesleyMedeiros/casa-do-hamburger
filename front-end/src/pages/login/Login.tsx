@@ -1,4 +1,4 @@
-import { Input } from "../input/Input";
+import { Input } from "../../components/input/Input";
 import React, { useState } from "react";
 
 export const Login = () => {
@@ -7,7 +7,7 @@ export const Login = () => {
 
   function handleOnSubimit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
-    alert(`Seu Email: ${email}\n sua senha: ${password}`);
+    alert({ email, password });
   }
 
   return (
@@ -27,8 +27,8 @@ export const Login = () => {
           type="password"
           onChange={(e) => setPassword(e.target.value)}
         ></Input>
-        <p className="text-white">Seu email:{email}</p>
-        <p className="text-white">Sua senha:{password}</p>
+        {/* <p className="text-white">Seu email:{email}</p>
+        <p className="text-white">Sua senha:{password}</p> */}
         <button
           className="h-[7.5] w-full cursor-pointer rounded-md bg-[#C92A0E] py-2 text-sm font-bold text-white"
           type="submit"
