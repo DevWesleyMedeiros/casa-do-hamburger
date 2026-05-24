@@ -5,12 +5,10 @@ import './index.css'
 // import './styles/global.css'
 
 // imports components
-import App from './App.tsx'
-import { Header } from "./components/header/Header";
+import App from "./App.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <Header></Header>
     <App />
   </StrictMode>,
 );
