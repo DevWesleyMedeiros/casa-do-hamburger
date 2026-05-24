@@ -1,5 +1,6 @@
 import { Input } from "../../components/input/Input";
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
 export const Register = () => {
   const [name, setName] = useState<string>("");
@@ -19,7 +20,9 @@ export const Register = () => {
       onSubmit={handleOnSubmit}
     >
       <div className="flex flex-col items-center justify-center gap-2">
-        <img src="./logo.png" alt="" className="mb-4" />
+        <Link to="/home">
+          <img src="./logo.png" alt="logo do hamburger" className="mb-4" />
+        </Link>
         <Input
           placeholder="Seu nome"
           type="text"

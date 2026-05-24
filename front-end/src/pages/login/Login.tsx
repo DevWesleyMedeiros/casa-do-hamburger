@@ -1,5 +1,6 @@
-import { Input } from "../../components/input/Input";
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { Input } from "../../components/input/Input";
 
 export const Login = () => {
   const [email, setEmail] = useState<string>("");
@@ -16,7 +17,9 @@ export const Login = () => {
       onSubmit={handleOnSubimit}
     >
       <div className="flex flex-col items-center justify-center gap-2">
-        <img src="./logo.png" alt="" className="mb-4" />
+        <Link to="/home">
+          <img src="./logo.png" alt="" className="mb-4" />
+        </Link>
         <Input
           placeholder="E-mail"
           type="email"
