@@ -13,10 +13,10 @@ import {
 
 const Layout: React.FC = () => {
   return (
-    <>
+    <div className="flex h-screen flex-col bg-red-500">
       <Header></Header>
       <Outlet />
-    </>
+    </div>
   );
 };
 
@@ -27,9 +27,12 @@ export const AppRoutes = () => {
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+
+        {/* Rotas COM header — Layout é o pai, filhos usam Outlet */}
         <Route element={<Layout />}>
           <Route path="/home" element={<Home />} />
         </Route>
+
         <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
     </BrowserRouter>

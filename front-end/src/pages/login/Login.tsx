@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Input } from "../../components/input/Input";
+import { Button } from "../../components/button/Button";
 
 export const Login = () => {
   const [email, setEmail] = useState<string>("");
@@ -32,12 +33,17 @@ export const Login = () => {
         ></Input>
         {/* <p className="text-white">Seu email:{email}</p>
         <p className="text-white">Sua senha:{password}</p> */}
-        <button
-          className="h-[7.5] w-full cursor-pointer rounded-md bg-[#C92A0E] py-2 text-sm font-bold text-white"
+
+        <Button
           type="submit"
-        >
-          Login
-        </button>
+          title="Login"
+          colorVariation="bgRedVariation"
+        ></Button>
+        <Button
+          type="submit"
+          title="Não tem uma conta?"
+          colorVariation="bgWhiteVariation"
+        ></Button>
       </div>
     </form>
   );
