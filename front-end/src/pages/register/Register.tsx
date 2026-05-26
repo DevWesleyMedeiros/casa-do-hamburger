@@ -50,11 +50,14 @@ export const Register = () => {
           onChange={(e) => setCep(e.target.value)}
         />
         <Button title="Criar conta" type="submit"></Button>
-        <Button
-          title="Já tenho uma conta"
-          type="submit"
-          colorVariation="bgWhiteVariation"
-        ></Button>
+
+        <Link to="/login" className="w-full">
+          <Button
+            title="Já tenho uma conta"
+            type="submit"
+            colorVariation="bgWhiteVariation"
+          ></Button>
+        </Link>
       </div>
     </form>
   );

@@ -31,19 +31,22 @@ export const Login = () => {
           type="password"
           onChange={(e) => setPassword(e.target.value)}
         ></Input>
-        {/* <p className="text-white">Seu email:{email}</p>
-        <p className="text-white">Sua senha:{password}</p> */}
 
         <Button
           type="submit"
           title="Login"
           colorVariation="bgRedVariation"
         ></Button>
-        <Button
-          type="submit"
-          title="Não tem uma conta?"
-          colorVariation="bgWhiteVariation"
-        ></Button>
+
+        <Link to="/register" className="w-full">
+          <Button
+            type="submit"
+            title="Não tem uma conta?"
+            colorVariation="bgWhiteVariation"
+          ></Button>
+        </Link>
+
+        {/* com botões, a envelopação acarreta erro no style: pesquisar sobre isso */}
       </div>
     </form>
   );
