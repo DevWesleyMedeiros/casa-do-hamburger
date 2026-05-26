@@ -2,18 +2,34 @@
   "compilerOptions": {
     // Environment setup & latest features
     "lib": ["ESNext"],
-    "target": "ESNext",
-    "module": "Preserve",
-    "moduleDetection": "force",
-    "jsx": "react-jsx",
+    "target": "esnext",
+    "module": "commonjs",
+    "moduleDetection": "auto",
     "allowJs": true,
-    "types": ["bun"],
+    // "outDir": "./dist",
+    // "rootDir": "/index.ts",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"],
 
     // Bundler mode
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
-    "noEmit": true,
+    "moduleResolution": "node",
 
     // Best practices
     "strict": true,
@@ -26,5 +42,4 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
-  }
 }
