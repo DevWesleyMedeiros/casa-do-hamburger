@@ -16,6 +16,10 @@ export { prisma }
 
 // função que cria uma conexão com meu BD
 export async function connection() {
-  await prisma.$connect()
-  console.log('Conectado com o meu Banco de Dados')
+  try {
+    await prisma.$connect()
+    console.log('Conectado com o meu Banco de Dados')
+  } catch (error) {
+    console.log(error)
+  }
 }
