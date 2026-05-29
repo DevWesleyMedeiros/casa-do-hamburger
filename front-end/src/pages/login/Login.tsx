@@ -1,9 +1,9 @@
-import React, { useState, useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { Link } from "react-router-dom";
-import { Input } from "../../components/input/Input";
 import { Button } from "../../components/button/Button";
-import { LoginDate } from "../../shared/services/api/login/Login";
+import { Input } from "../../components/input/Input";
 import { ApiError } from "../../shared/services/api/ApiExceptions";
+import { LoginDate } from "../../shared/services/api/login/Login";
 
 export const Login = () => {
   const [email, setEmail] = useState<string>("");
@@ -23,6 +23,7 @@ export const Login = () => {
       alert(result.message);
       return;
     }
+    console.log("Deu certo a requisição");
 
     return result;
   }, [email, password]);
@@ -38,37 +39,46 @@ export const Login = () => {
       className="flex h-screen items-center justify-center bg-[#161410]"
       onSubmit={handleOnSubimit}
     >
-      <div className="flex flex-col items-center justify-center gap-2">
+      <div className="justify-left flex flex-col items-center gap-2">
         <Link to="/home">
-          <img src="./logo.png" alt="" className="mb-4" />
+          <img src="./logo.png" alt="loga da hamburgeria" className="mb-4" />
         </Link>
-        <Input
-          placeholder="E-mail"
-          type="email"
-          onChange={(e) => setEmail(e.target.value)}
-        ></Input>
-        <Input
-          placeholder="Senha"
-          type="password"
-          onChange={(e) => setPassword(e.target.value)}
-        ></Input>
+        <div />
 
-        {/* botão que tera o type=submit, pois enviará email e senha para o backend */}
-        <Button
-          type="submit"
-          title="Login"
-          colorVariation="bgRedVariation"
-        ></Button>
+        <div className="justify-left flex flex-col gap-2">
+          <Input
+            placeholder="E-mail"
+            type="email"
+            onChange={(e) => setEmail(e.target.value)}
+          ></Input>
 
-        <Link to="/register" className="w-full">
+          <Input
+            placeholder="Senha"
+            type="password"
+            onChange={(e) => setPassword(e.target.value)}
+          ></Input>
+
+          <p className="text-left text-sm font-bold text-red-500">
+            Usuário não encontrado
+          </p>
+
+          {/* botão que tera o type=submit, pois enviará email e senha para o backend */}
           <Button
-            type="button"
-            title="Não tem uma conta?"
-            colorVariation="bgWhiteVariation"
+            type="submit"
+            title="Login"
+            colorVariation="bgRedVariation"
           ></Button>
-        </Link>
 
-        {/* com botões, a envelopação acarreta erro no style: pesquisar sobre isso */}
+          <Link to="/register" className="w-full">
+            <Button
+              type="button"
+              title="Não tem uma conta?"
+              colorVariation="bgWhiteVariation"
+            ></Button>
+          </Link>
+
+          {/* com botões, a envelopação acarreta erro no style: pesquisar sobre isso */}
+        </div>
       </div>
     </form>
   );
