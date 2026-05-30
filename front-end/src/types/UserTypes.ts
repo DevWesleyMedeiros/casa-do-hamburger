@@ -1,5 +1,5 @@
 // Isso garante que saibamos exatamente o formato dos dados que transitam na aplicação.
-export type UserTypes = {
+export type LoginPayload = {
   email: string;
   password: string;
 };

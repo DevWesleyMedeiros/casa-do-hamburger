@@ -1,7 +1,9 @@
 // classes de erro da minha api
 export class ApiError extends Error {
-  constructor(message: string) {
+  public readonly statusCode: number; // guarda o código https do erro que vem do backend
+  constructor(message: string, statusCode: number) {
     super(message);
-    this.message = message;
+    this.name = "ApiError";
+    this.statusCode = statusCode;
   }
 }

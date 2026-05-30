@@ -1,25 +1,22 @@
-import { type UserTypes } from "../../../../types/UserTypes";
+// Login.ts (serviço)
+import axios from "axios";
 import { Api } from "../ApiConfig";
+import { type LoginPayload } from "../../../../types/UserTypes";
 import { ApiError } from "../ApiExceptions";
 
-// Alterado para receber um objeto, combinando com o componente anterior
-const create = async ({
-  email,
-  password,
-}: UserTypes): Promise<UserTypes | ApiError> => {
-  try {
-    // O Axios recebe a rota primeiro (login), e o objeto com os dados (body) {email, password} depois
-    const { data } = await Api().post("/login", { email, password });
-    return data;
-  } catch (err: unknown) {
-    if (err instanceof Error) {
-      return new ApiError(err.message || "Erro desconhecido");
-    }
-    return new ApiError("Erro ao fazer login");
-  }
-};
-
-// agrupador de métodos para buscar dados da api
 export const LoginDate = {
-  create,
+  create: async (payload: LoginPayload) => {
+    try {
+      const { data } = await Api().post("http://localhost:3000/login", payload);
+      return data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const message =
+          error.response?.data?.message ?? "Erro desconhecido ao fazer login";
+        const statusCode = error.response?.status ?? 0;
+        return new ApiError(message, statusCode);
+      }
+      return new ApiError("Erro de conexão com o servidor", 0);
+    }
+  },
 };
