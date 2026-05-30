@@ -11,7 +11,10 @@ export const Login = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleLogin = useCallback(async () => {
-    if (!email || !password) return;
+    if (!email || !password) {
+      setErrorMessage("Email ou Senha são obrigatórios");
+      return;
+    }
 
     setErrorMessage(null); // limpa erro anterior
 
@@ -34,7 +37,7 @@ export const Login = () => {
         setErrorMessage(result.message);
         return;
       }
-      // console.log("Login bem-sucedido:", result);
+      console.log("Login bem-sucedido:", result);
     } catch (error) {
       console.error("Erro inesperado no login:", error);
       setErrorMessage("Ocorreu um erro inesperado. Tente novamente.");
