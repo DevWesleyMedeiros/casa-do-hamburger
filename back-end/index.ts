@@ -47,7 +47,7 @@ app.post('/login', async (req: Request, res: Response) => {
   }
 })
 
-// rota para registro de um usuário
+// lógica para rota de registro de um usuário
 app.post('/register', async (req: Request, res: Response) => {
   try {
     // vem do frontend como payload (formulário de cadastro)

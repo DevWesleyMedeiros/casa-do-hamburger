@@ -44,10 +44,13 @@ export const Login = () => {
     }
   }, [email, password]);
 
-  function handleOnSubmit(e: React.SubmitEvent<HTMLFormElement>) {
-    e.preventDefault();
-    handleLogin();
-  }
+  const handleOnSubmit = useCallback(
+    (e: React.SubmitEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      handleLogin();
+    },
+    [handleLogin],
+  );
 
   return (
     <form
