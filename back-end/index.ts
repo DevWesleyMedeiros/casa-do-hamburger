@@ -1,7 +1,7 @@
 // arquivo inicial padrão do projeto
 import cors from 'cors';
-import express from 'express';
-import { connection, prisma } from './src/db';
+import express, { type Request, type Response } from 'express'
+import { connection, prisma } from './src/db'
 
 const app = express()
 
@@ -19,7 +19,7 @@ app.use(cors())
 // })
 
 // método http post: para enviar informações para o meu banco de dados
-app.post('/login', async (req, res) => {
+app.post('/login', async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body
 
@@ -45,6 +45,38 @@ app.post('/login', async (req, res) => {
     res.status(500).json({ message: 'Erro no servidor' })
     return
   }
+})
+
+// rota para registro de um usuário
+app.post('/register', async (req: Request, res: Response) => {
+  try {
+    // vem do frontend como payload (formulário de cadastro)
+    const { name, email, password, cep } = req.body
+
+    // tratar para ver se as informações vindas do front existem
+    if (!name || !email || !password || !cep) {
+      res.status(400).json({ message: 'Todas as informações são obrigatórias' })
+      return
+    }
+
+    // vamos testar, quando o usuário tentar cadastrar um novo usuário, lá no meu banco de dados, e o email que ele dar, já existir
+    const user = await prisma.user.findFirst({
+      where: { email: email },
+    })
+
+    // uma vez procurado no banco de dados, agora, eu preciso verificar se o que foi encontrado no banco de dados é igual ao que foi passado no payload.? indica que essa pode ser que o email me retorne um undefined
+    if (user?.email) {
+      res.status(409).json({ message: 'Email já cadastrado' })
+      return
+    }
+    // criando um novo usuário no meu banco de dados, de acordo com as informações definidas no schema do prisma que vão virar colunas com tipos de dados no meu banco de dados
+    // Ex.: name(1°) = coluna/schema Prisma: name(2°) = valor vindo do payload (frontend); isso para todos os valores
+    const newUser = await prisma.user.create({
+      data: { name: name, email: email, cep: cep, password: password },
+    })
+
+    res.status(201).json(newUser) // retornado o novo usuário criado
+  } catch (error) {}
 })
 
 // rodando o servidor

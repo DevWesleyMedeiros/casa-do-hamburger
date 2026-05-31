@@ -1,7 +1,7 @@
 // Login.ts (serviço)
 import axios from "axios";
 import { Api } from "../ApiConfig";
-import { type LoginPayload } from "../../../../types/UserTypes";
+import { type LoginPayload } from "../../../../types/Payload";
 import { ApiError } from "../ApiExceptions";
 
 export const LoginDate = {
