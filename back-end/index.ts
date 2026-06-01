@@ -70,13 +70,15 @@ app.post('/register', async (req: Request, res: Response) => {
       return
     }
     // criando um novo usuário no meu banco de dados, de acordo com as informações definidas no schema do prisma que vão virar colunas com tipos de dados no meu banco de dados
-    // Ex.: name(1°) = coluna/schema Prisma: name(2°) = valor vindo do payload (frontend); isso para todos os valores
+    // Ex.: name(1°) = coluna/schema Prisma: email(2°) = valor vindo do payload (frontend); isso para todos os valores
     const newUser = await prisma.user.create({
       data: { name: name, email: email, cep: cep, password: password },
     })
 
     res.status(201).json(newUser) // retornado o novo usuário criado
-  } catch (error) {}
+  } catch (error) {
+    res.status(500).json({ message: 'Erro no servidor' })
+  }
 })
 
 // rodando o servidor
