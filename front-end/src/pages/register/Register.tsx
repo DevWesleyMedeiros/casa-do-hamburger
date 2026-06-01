@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "../../components/button/Button";
 import { Input } from "../../components/input/Input";
 import { RegisterDate } from "../../shared/services/api/register/Register";
+import { EyeOff, Eye } from "lucide-react";
 
 export const Register = () => {
   const [name, setName] = useState<string>("");
@@ -14,6 +15,9 @@ export const Register = () => {
   >(null);
   const [cep, setCep] = useState<string>("");
   const [registerError, setRegisterError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState<boolean>(false);
 
   // validações do meu frontend
   const handleRegister = useCallback(async () => {
@@ -70,6 +74,13 @@ export const Register = () => {
     [handleRegister],
   );
 
+  const togglePasswordVisibility = useCallback(() => {
+    setShowPassword((prev) => !prev);
+  }, []);
+  const toggleConfirmPasswordVisibility = useCallback(() => {
+    setShowConfirmPassword((prev) => !prev);
+  }, []);
+
   return (
     <form
       className="flex h-screen items-center justify-center bg-[#161410]"
@@ -93,18 +104,42 @@ export const Register = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <Input
-            placeholder="Senha"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <Input
-            placeholder="Confirme sua senha"
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          />
+
+          <div className="relative w-full">
+            <Input
+              placeholder="Senha"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <button
+              type="button"
+              onClick={togglePasswordVisibility}
+              className="absolute top-1/2 right-3 -translate-y-1/2 transform text-gray-500"
+              aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
+
+          <div className="relative w-full">
+            <Input
+              placeholder="Confirme sua senha"
+              type={showConfirmPassword ? "text" : "password"}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
+            <button
+              type="button"
+              onClick={toggleConfirmPasswordVisibility}
+              className="absolute top-1/2 right-3 -translate-y-1/2 transform text-gray-500"
+              aria-label={
+                showConfirmPassword ? "Ocultar senha" : "Mostrar senha"
+              }
+            >
+              {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
 
           {matchingPasswordError && (
             <p className="text-left text-sm font-bold text-red-500">
