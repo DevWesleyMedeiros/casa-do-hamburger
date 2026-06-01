@@ -4,11 +4,13 @@ import { Button } from "../../components/button/Button";
 import { Input } from "../../components/input/Input";
 import { ApiError } from "../../shared/services/api/ApiExceptions";
 import { LoginDate } from "../../shared/services/api/login/Login";
+import { EyeOff, Eye } from "lucide-react";
 
 export const Login = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
 
   const handleLogin = useCallback(async () => {
     if (!email || !password) {
@@ -52,6 +54,10 @@ export const Login = () => {
     [handleLogin],
   );
 
+  const togglePasswordVisibility = useCallback(() => {
+    setShowPassword((prev) => !prev);
+  }, []);
+
   return (
     <form
       className="flex h-screen items-center justify-center bg-[#161410]"
@@ -68,11 +74,21 @@ export const Login = () => {
             type="email"
             onChange={(e) => setEmail(e.target.value)}
           />
-          <Input
-            placeholder="Senha"
-            type="password"
-            onChange={(e) => setPassword(e.target.value)}
-          />
+          <div className="relative w-full">
+            <Input
+              placeholder="Senha"
+              onChange={(e) => setPassword(e.target.value)}
+              type={showPassword ? "text" : "password"}
+            />
+            <button
+              type="button"
+              onClick={togglePasswordVisibility}
+              aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+              className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
 
           {errorMessage && (
             <p className="text-left text-sm font-bold text-red-500">
