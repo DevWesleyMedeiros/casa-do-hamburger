@@ -2,6 +2,7 @@
 import cors from 'cors';
 import express, { type Request, type Response } from 'express'
 import { connection, prisma } from './src/db'
+import { genSaltSync, hashSync } from 'bcrypt-ts'
 
 const app = express()
 
@@ -59,6 +60,10 @@ app.post('/register', async (req: Request, res: Response) => {
       return
     }
 
+    const salt = genSaltSync(10) // o hashSync é uma função que recebe a senha e o salt para gerar um hash da senha. O hash é uma forma de proteger a senha, pois ele é irreversível, ou seja, não é possível obter a senha original a partir do hash. O salt é um valor aleatório que é adicionado à senha antes de gerar o hash, para aumentar a segurança.
+    // passando o valor do password para o hashSync para gerar um hash da senha, e passando o salt para aumentar a segurança do hash
+    const hashedPassword = hashSync(password, salt) // o valor do hashedPassword é o hash da senha, que é o que vai ser armazenado no banco de dados, ao invés da senha original, para proteger a senha do usuário
+
     // vamos testar, quando o usuário tentar cadastrar um novo usuário, lá no meu banco de dados, e o email que ele dar, já existir
     const user = await prisma.user.findFirst({
       where: { email: email },
@@ -72,7 +77,7 @@ app.post('/register', async (req: Request, res: Response) => {
     // criando um novo usuário no meu banco de dados, de acordo com as informações definidas no schema do prisma que vão virar colunas com tipos de dados no meu banco de dados
     // Ex.: name(1°) = coluna/schema Prisma: email(2°) = valor vindo do payload (frontend); isso para todos os valores
     const newUser = await prisma.user.create({
-      data: { name: name, email: email, cep: cep, password: password },
+      data: { name: name, email: email, cep: cep, password: hashedPassword },
     })
 
     res.status(201).json(newUser) // retornado o novo usuário criado
