@@ -32,8 +32,8 @@ export const Register = () => {
     }
 
     // Limpa erros anteriores antes de submeter
-    setRegisterError(null);
-    setMatchingPasswordError(null);
+    setRegisterError("");
+    setMatchingPasswordError("");
 
     try {
       const result = await RegisterDate.create({ name, email, password, cep });
@@ -57,7 +57,7 @@ export const Register = () => {
           setRegisterError("Erro interno. Tente novamente mais tarde.");
           break;
         default:
-          setRegisterError(null);
+          setRegisterError("");
           break;
       }
     } catch (error) {

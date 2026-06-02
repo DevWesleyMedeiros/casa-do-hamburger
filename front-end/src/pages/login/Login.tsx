@@ -24,16 +24,27 @@ export const Login = () => {
       const result = await LoginDate.create({ email, password });
 
       if (result instanceof ApiError) {
-        if (result.statusCode === 404) {
-          setErrorMessage("Usuário não encontrado");
-          return;
-        }
+
         if (result.statusCode === 400) {
           setErrorMessage("Email e senha são obrigatórios");
           return;
         }
+        if (result.statusCode === 401) {
+          setErrorMessage("Senha incorreta");
+          return;
+        }
+        if (result.statusCode === 404) {
+          setErrorMessage("Usuário não encontrado");
+          return;
+        }
+
         if (result.statusCode === 500) {
           setErrorMessage("Erro no servidor, tente depois");
+          return;
+        }
+        if (result.statusCode === 200) {
+          setErrorMessage("");
+          console.log({ result });
           return;
         }
         setErrorMessage(result.message);
