@@ -8,7 +8,7 @@ export const RegisterDate = {
   create: async (payload: RegisterPayload) => {
     try {
       const { data } = await Api().post(
-        "http://localhost:3000/register",
+        "http://localhost:3000/auth/register",
         payload,
       );
       return data;

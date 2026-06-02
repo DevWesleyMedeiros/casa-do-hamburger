@@ -8,7 +8,10 @@ import { ApiError } from "../ApiExceptions";
 export const LoginDate = {
   create: async (payload: LoginPayload) => {
     try {
-      const { data } = await Api().post("http://localhost:3000/login", payload);
+      const { data } = await Api().post(
+        "http://localhost:3000/auth/login",
+        payload,
+      );
       return data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
