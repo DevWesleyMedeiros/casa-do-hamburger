@@ -19,7 +19,6 @@ export const authService = {
       throw { status: 401, message: 'Senha incorreta' }
     }
 
-    // Retorna apenas os dados públicos (nunca a senha!)
     return { id: user.id, name: user.name, email: user.email, cep: user.cep }
   },
 

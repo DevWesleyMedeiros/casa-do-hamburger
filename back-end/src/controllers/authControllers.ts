@@ -15,14 +15,37 @@ export const authController = {
         res.status(400).json({ message: 'Email e Senha são obrigatórios' })
         return
       }
-
+      // chamando a função de login do authService, que é onde tem a lógica de comparação de senha e busca do usuário no banco de dados
       const user = await authService.login(email, password)
-      res.status(200).json(user)
+
+      // criar cookie com as informações do usuário (sem a senha) e configurar opções de segurança
+      res.cookie(
+        'user_section',
+        JSON.stringify({
+          id: user.id,
+          email: user.email,
+          username: user.name,
+          cep: user.cep,
+        }),
+        {
+          httpOnly: true, // JS do browser não lê
+          secure: process.env['NODE_ENV'] === 'production', // HTTPS só em prod
+          sameSite: 'lax', // proteção CSRF básica
+          maxAge: 15 * 1000, // definido para 15 segundos  // 7 * 24 * 60 * 60 * 1000,   7 dias = 604.800.000 em missêgundos; 1 segundo equivale a 1000 milissêgundos
+        },
+      )
+
+      res.status(200).json({ user })
     } catch (err: any) {
       const status = err?.status ?? 500
       const message = err?.message ?? 'Erro no servidor'
       res.status(status).json({ message })
     }
+  },
+  // rota de logout para apagar os cookies do usuário
+  logout: (_req: Request, res: Response) => {
+    res.clearCookie('user_section')
+    res.status(200).json({ message: 'Logout realizado com sucesso' })
   },
 
   register: async (req: Request, res: Response) => {
@@ -35,6 +58,7 @@ export const authController = {
       }
 
       const user = await authService.register(name, email, password, cep)
+
       res.status(201).json(user)
     } catch (err: any) {
       const status = err?.status ?? 500
