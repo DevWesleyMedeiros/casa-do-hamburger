@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { Button } from "../../components/button/Button";
 import { Input } from "../../components/input/Input";
@@ -7,10 +8,12 @@ import { LoginDate } from "../../shared/services/api/login/Login";
 import { EyeOff, Eye } from "lucide-react";
 
 export const Login = () => {
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const [email, setEmail] = useState<string | null>("");
+  const [password, setPassword] = useState<string | null>("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState<boolean>(false);
+
+  const navigate = useNavigate();
 
   const handleLogin = useCallback(async () => {
     if (!email || !password) {
@@ -24,7 +27,6 @@ export const Login = () => {
       const result = await LoginDate.create({ email, password });
 
       if (result instanceof ApiError) {
-
         if (result.statusCode === 400) {
           setErrorMessage("Email e senha são obrigatórios");
           return;
@@ -42,20 +44,21 @@ export const Login = () => {
           setErrorMessage("Erro no servidor, tente depois");
           return;
         }
-        if (result.statusCode === 200) {
-          setErrorMessage("");
-          console.log({ result });
-          return;
-        }
         setErrorMessage(result.message);
         return;
       }
+
+      // Se chegou aqui, é porque NÃO é ApiError — ou seja, sucesso
+      setEmail("");
+      setPassword("");
+      navigate("/home");
+
       console.log("Login bem-sucedido:", result);
     } catch (error) {
       console.error("Erro inesperado no login:", error);
       setErrorMessage("Ocorreu um erro inesperado. Tente novamente.");
     }
-  }, [email, password]);
+  }, [email, password, navigate]);
 
   const handleOnSubmit = useCallback(
     (e: React.SubmitEvent<HTMLFormElement>) => {

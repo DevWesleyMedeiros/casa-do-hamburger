@@ -3,12 +3,15 @@
 
 import { prisma } from '../db'
 
+// procura no banco de dados um usuário pelo email, utilizando o método findFirst do Prisma Client. Se encontrar um usuário com o email fornecido, ele retorna os dados desse usuário; caso contrário, retorna null.
 export const userRepository = {
   findByEmail: async (email: string) => {
     return prisma.user.findFirst({
       where: { email: email },
     })
   },
+
+  // cria um novo usuário no banco de dados, utilizando o método create do Prisma Client. Ele recebe um objeto data contendo as informações do usuário (nome, email, senha e cep) e insere esses dados na tabela de usuários do banco de dados. O resultado é o registro do usuário recém-criado.
   create: async (data: { name: string; email: string; password: string; cep: string }) => {
     return prisma.user.create({ data })
   },

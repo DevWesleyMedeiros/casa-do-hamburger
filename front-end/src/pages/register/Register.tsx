@@ -46,13 +46,6 @@ export const Register = () => {
         case 400:
           setRegisterError("Todas as informações são obrigatórias");
           break;
-        case 201:
-          setName("");
-          setEmail("");
-          setPassword("");
-          setConfirmPassword("");
-          setCep("");
-          break;
         case 500:
           setRegisterError("Erro interno. Tente novamente mais tarde.");
           break;
@@ -60,6 +53,14 @@ export const Register = () => {
           setRegisterError("");
           break;
       }
+
+      // deu todo certo após o valores terem sidos registrados, limpa os campos
+      setName("");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+      setCep("");
+
     } catch (error) {
       console.error("Erro inesperado ao registrar:", error);
       setRegisterError("Ocorreu um erro inesperado. Tente novamente.");
