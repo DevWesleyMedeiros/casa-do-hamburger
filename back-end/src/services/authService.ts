@@ -1,4 +1,5 @@
 // camada responsável por lidar com as regras de negócio. Além disso, é onde eu faço a comparação de senha utilizando bcrypt-ts para garantir a segurança dos dados do usuário.
+// Regras de negócio (validar, hashear, comparar). Só conhece o REPOSITORY
 
 import { genSaltSync, hashSync, compare } from 'bcrypt-ts'
 import { userRepository } from '../repositories/userRepositories'

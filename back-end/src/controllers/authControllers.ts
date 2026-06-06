@@ -1,12 +1,14 @@
 // camada responsável por lidar com as requisições relacionadas à autenticação (login e registro)
-// 👨‍🍳 CONTROLLER — ponte entre HTTP e o Service
+// 👨‍🍳 CONTROLLER — ponte entre HTTP e o Service. // esse arquivo é como se fosse o chef: ele coordena os pedidos. Sabe o que fazer, mas não vai ao estoque
 // Só lida com req, res e repassa para o Service
 // vai receber do front, processar e retornar, mas não cria a lógica das regras de negócio. As regras de negócio são importada aqui no authService
+// Receber req/res, chamar Service, retornar resposta. Só conhece os SERVICES
 
 import type { Request, Response } from 'express'
 import { authService } from '../services/authService'
 
 export const authController = {
+  // busco o usuário que foi registrado e o retorno por aqui para o frontend
   login: async (req: Request, res: Response) => {
     try {
       const { email, password } = req.body
@@ -48,6 +50,7 @@ export const authController = {
     res.status(200).json({ message: 'Logout realizado com sucesso' })
   },
 
+  // registra o usuário do frontend para o backend
   register: async (req: Request, res: Response) => {
     try {
       const { name, email, password, cep } = req.body

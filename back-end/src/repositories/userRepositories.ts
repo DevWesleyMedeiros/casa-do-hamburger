@@ -1,5 +1,7 @@
 // camada que irá conversar com o banco de dados, utilizando o Prisma Client para realizar as operações de CRUD (Create, Read, Update, Delete) relacionadas aos usuários.
 // Aqui eu defino as funções para procurar um registro no banco de dados pelo email ou criar um novo usuário.
+// como se fosse um estoquista: conhece cada ingrediente, vai ao banco de dados e busca o que precisa
+// Queries no banco via Prisma. Só conhece o PRISMA
 
 import { prisma } from '../db'
 

@@ -1,3 +1,5 @@
+// por aqui, eu cadastro um usuário no meu banco de dados enviando um payload via post e que são tratados no meu backend
+
 import React, { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "../../components/button/Button";
@@ -60,7 +62,6 @@ export const Register = () => {
       setPassword("");
       setConfirmPassword("");
       setCep("");
-
     } catch (error) {
       console.error("Erro inesperado ao registrar:", error);
       setRegisterError("Ocorreu um erro inesperado. Tente novamente.");
@@ -75,9 +76,12 @@ export const Register = () => {
     [handleRegister],
   );
 
+  // toggle password visibility on input form for password
   const togglePasswordVisibility = useCallback(() => {
     setShowPassword((prev) => !prev);
   }, []);
+
+  // toggle password visibility on input form for confirmPassword
   const toggleConfirmPasswordVisibility = useCallback(() => {
     setShowConfirmPassword((prev) => !prev);
   }, []);
