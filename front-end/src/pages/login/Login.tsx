@@ -1,17 +1,20 @@
-import React, { useCallback, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
+import React, { useCallback, useContext, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../../components/button/Button";
 import { Input } from "../../components/input/Input";
+import { UserContext } from "../../shared/context/UserContext";
 import { ApiError } from "../../shared/services/api/ApiExceptions";
 import { LoginDate } from "../../shared/services/api/login/Login";
-import { EyeOff, Eye } from "lucide-react";
 
 export const Login = () => {
   const [email, setEmail] = useState<string | null>("");
   const [password, setPassword] = useState<string | null>("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState<boolean>(false);
+
+  // variável que desestrutura as variávies de um contexto do tipo UserContex
+  const { setUser } = useContext(UserContext); // somente uso o setUser, pois eu recebo aqui o user, mas o uso será noutro componente
 
   const navigate = useNavigate();
 
@@ -44,11 +47,14 @@ export const Login = () => {
           setErrorMessage("Erro no servidor, tente depois");
           return;
         }
+
         setErrorMessage(result.message);
         return;
       }
 
       // Se chegou aqui, é porque NÃO é ApiError — ou seja, sucesso
+      // setUser é um objeto UserDate {} ou null
+      setUser({ name: result.user.name, email: result.user.email });
       setEmail("");
       setPassword("");
       navigate("/home");
@@ -58,7 +64,7 @@ export const Login = () => {
       console.error("Erro inesperado no login:", error);
       setErrorMessage("Ocorreu um erro inesperado. Tente novamente.");
     }
-  }, [email, password, navigate]);
+  }, [email, password, navigate, setUser]);
 
   const handleOnSubmit = useCallback(
     (e: React.SubmitEvent<HTMLFormElement>) => {

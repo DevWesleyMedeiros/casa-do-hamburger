@@ -1,12 +1,12 @@
 // Login.ts (serviço)
 import axios from "axios";
 import { Api } from "../ApiConfig";
-import { type LoginPayload } from "../../../../types/Payload";
+import { type LoginPayloadInterface } from "../../../../types/Payload";
 import { ApiError } from "../ApiExceptions";
 
 // put, delete, post, get ... somente para a rota login
 export const LoginDate = {
-  create: async (payload: LoginPayload) => {
+  create: async (payload: LoginPayloadInterface) => {
     try {
       const { data } = await Api().post(
         "http://localhost:3000/auth/login",
