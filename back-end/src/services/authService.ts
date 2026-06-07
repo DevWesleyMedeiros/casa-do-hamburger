@@ -45,7 +45,7 @@ export const authService = {
         alg: 'HS256',
       })
       .setIssuedAt()
-      .setExpirationTime('7d') // retorna um valor em
+      .setExpirationTime('7d') // retorna um valor em milissegundos e deve estar alinhado com o maxAge do cookie
       .sign(secret)
     // const { payload } = await jose.jwtVerify(token, secret)
 
