@@ -1,6 +1,6 @@
 import "./App.css";
 import { AppRoutes } from "./shared/routes/AppRoutes";
-import { UserProvider } from "./shared/context/UserContext";
+import { UserProvider } from "./shared/context/UserProvider";
 
 function App() {
   return (
