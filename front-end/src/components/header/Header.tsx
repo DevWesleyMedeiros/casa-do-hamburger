@@ -1,6 +1,6 @@
 import { Box, LayoutDashboard, LogOut, Plus, ShoppingCart } from "lucide-react";
 import { useContext } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { ICON_CONFIG } from "../../constant/iconConfig";
 import { UserContext } from "../../shared/context/UserContext";
 
@@ -8,28 +8,49 @@ export const Header = () => {
   // desestruturando variável user
   const { user } = useContext(UserContext);
 
+  //variável que inicia location
+  const location = useLocation();
+  console.log(location.pathname);
+
+  // função que implementa um active no ícone de acordo com a pathname do location
+  const setNavItemActiveClass = (pathname: string): string => {
+    const baseClass =
+      "flex h-[8.75] w-[8.75] items-center justify-center rounded-md p-1.5";
+    return pathname === location.pathname
+      ? `${baseClass} border-2 border-amber-200 text-[#161410] bg-[#F2DAAC]`
+      : `${baseClass}`;
+  };
+
   return (
     <div className="bg-[#161410]">
       <div className="mx-auto flex w-full items-center justify-between p-3 md:w-184.25 md:p-0">
-        <img src="./logo.png" alt="Logo link caso do Hamburger" />
+        <Link to="/">
+          <img src="./logo.png" alt="Logo link caso do Hamburger" />
+        </Link>
 
         {user ? (
           <div className="flex items-center gap-6 text-white">
             <div className="flex gap-2 text-[#F2DAAC]">
-              <div className="flex h-[8.75] w-[8.75] items-center justify-center rounded-md">
-                <Box
-                  size={ICON_CONFIG.size}
-                  strokeWidth={ICON_CONFIG.strokWidth}
-                  className="cursor-pointer"
-                />
-              </div>
-              <div className="flex h-[8.75] w-[8.75] items-center justify-center rounded-md">
-                <LayoutDashboard
-                  size={ICON_CONFIG.size}
-                  strokeWidth={ICON_CONFIG.strokWidth}
-                  className="cursor-pointer"
-                />
-              </div>
+              <Link to="/home">
+                <div className={setNavItemActiveClass("/home")}>
+                  <Box
+                    size={ICON_CONFIG.size}
+                    strokeWidth={ICON_CONFIG.strokWidth}
+                    className="cursor-pointer"
+                  />
+                </div>
+              </Link>
+
+              <Link to="/pedidos">
+                <div className={setNavItemActiveClass("/pedidos")}>
+                  <LayoutDashboard
+                    size={ICON_CONFIG.size}
+                    strokeWidth={ICON_CONFIG.strokWidth}
+                    className="cursor-pointer"
+                  />
+                </div>
+              </Link>
+
               <div className="flex h-[8.75] w-[8.75] items-center justify-center rounded-md">
                 <Plus
                   size={ICON_CONFIG.size}

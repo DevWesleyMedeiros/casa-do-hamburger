@@ -1,9 +1,7 @@
-import { Link } from "react-router-dom";
-export default function Home() {
+export const Home = () => {
   return (
-    <div>
-      <Link to="/login">Login</Link>
-      <Link to="/register">Registro</Link>
+    <div className="flex gap-2 text-white">
+      <p>Cardápio</p>
     </div>
   );
-}
+};
