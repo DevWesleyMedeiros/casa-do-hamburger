@@ -13,9 +13,10 @@ export const Login = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
-  // variável que desestrutura as variávies de um contexto do tipo UserContex
-  const { setUser } = useContext(UserContext); // somente uso o setUser, pois eu recebo aqui o user, mas o uso será noutro componente
+  // variável que desestrutura as variávies de um contexto do tipo UserContext
+  const { setUser } = useContext(UserContext); // somente uso o setUser, pois eu recebo o user, mas o uso será noutro componente
 
+  // variável de navegação
   const navigate = useNavigate();
 
   const handleLogin = useCallback(async () => {
@@ -59,7 +60,7 @@ export const Login = () => {
       setPassword("");
       navigate("/home");
 
-      console.log("Login bem-sucedido:", result);
+      // console.log("Login bem-sucedido:", result);
     } catch (error) {
       console.error("Erro inesperado no login:", error);
       setErrorMessage("Ocorreu um erro inesperado. Tente novamente.");
@@ -128,4 +129,4 @@ export const Login = () => {
       </div>
     </form>
   );
-};
+};;

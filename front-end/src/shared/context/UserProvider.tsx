@@ -1,3 +1,5 @@
+//  componente provedor do contexto. Tudo que tiver envelopado por ele poderá usar o user e setUSer
+
 import { type ReactNode, useState } from "react";
 import { type UserDate } from "../../types/Payload";
 import { UserContext } from "../context/UserContext";

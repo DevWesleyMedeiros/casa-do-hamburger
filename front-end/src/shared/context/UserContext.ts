@@ -1,4 +1,4 @@
-// componente de contexto
+// função de contexto que criará contexto que será consumido
 
 import { createContext } from "react";
 import { type UserContextTypes } from "../../types/Payload";
@@ -7,5 +7,5 @@ import { type UserContextTypes } from "../../types/Payload";
 // UserContext é o que será consumido. Ele será consumido pelo hook useContexto do react, no componente que eu for utilizá-lo
 export const UserContext = createContext<UserContextTypes>({
   user: null,
-  setUser: () => {},
+  setUser: () => void {},
 });
