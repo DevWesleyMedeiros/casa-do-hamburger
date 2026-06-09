@@ -12,10 +12,8 @@ export const Login = () => {
   const [password, setPassword] = useState<string | null>("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState<boolean>(false);
-
   // variável que desestrutura as variávies de um contexto do tipo UserContext
-  const { setUser } = useContext(UserContext); // somente uso o setUser, pois eu recebo o user, mas o uso será noutro componente
-
+  const { setUser } = useContext(UserContext); // somente uso o setUser, pois eu recebo o user, mas o  uso será noutro componente
   // variável de navegação
   const navigate = useNavigate();
 
@@ -129,4 +127,4 @@ export const Login = () => {
       </div>
     </form>
   );
-};;
+};

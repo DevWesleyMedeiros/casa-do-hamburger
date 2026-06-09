@@ -8,4 +8,5 @@ import { type UserContextTypes } from "../../types/Payload";
 export const UserContext = createContext<UserContextTypes>({
   user: null,
   setUser: () => void {},
+  logout: async () => {}
 });

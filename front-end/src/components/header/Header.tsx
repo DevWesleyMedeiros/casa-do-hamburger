@@ -1,16 +1,26 @@
 import { Box, LayoutDashboard, LogOut, Plus, ShoppingCart } from "lucide-react";
-import { useContext } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useCallback, useContext } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ICON_CONFIG } from "../../constant/iconConfig";
 import { UserContext } from "../../shared/context/UserContext";
 
 export const Header = () => {
   // desestruturando variável user
-  const { user } = useContext(UserContext);
+  const { user, setUser, logout } = useContext(UserContext);
 
   //variável que inicia location
   const location = useLocation();
-  console.log(location.pathname);
+  // console.log(location.pathname);
+
+  const navigate = useNavigate();
+
+  // função de logout
+  const handleLogout = useCallback(async () => {
+    alert("saindo...");
+    logout();
+    setUser(null);
+    navigate("/login");
+  }, [logout, navigate, setUser]);
 
   // função que implementa um active no ícone de acordo com a pathname do location
   const setNavItemActiveClass = (pathname: string): string => {
@@ -76,6 +86,7 @@ export const Header = () => {
                 size={ICON_CONFIG.size}
                 strokeWidth={ICON_CONFIG.strokWidth}
                 className="cursor-pointer"
+                onClick={handleLogout}
               />
             </div>
           </div>

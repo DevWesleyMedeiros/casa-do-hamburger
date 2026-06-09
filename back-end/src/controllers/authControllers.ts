@@ -1,10 +1,14 @@
 // camada responsável por lidar com as requisições relacionadas à autenticação (login e registro)
-// 👨‍🍳 CONTROLLER — ponte entre HTTP e o Service. // esse arquivo é como se fosse o chef: ele coordena os pedidos. Sabe o que fazer, mas não vai ao estoque
+// 👨‍🍳 CONTROLLER — ponte entre HTTP e o Service. 
+// // esse arquivo é como se fosse o chef: ele coordena os pedidos. Sabe o que fazer, mas não vai ao estoque
 // Só lida com req, res e repassa para o Service
 // vai receber do front, processar e retornar, mas não cria a lógica das regras de negócio. As regras de negócio são importada aqui no authService
 // Receber req/res, chamar Service, retornar resposta. Só conhece os SERVICES
 
 import type { Request, Response } from 'express'
+// request - o que vem do frontend: requisição
+// response - tudo o que meu backand reponde para o frontend
+
 import { authService } from '../services/authService'
 
 export const authController = {
@@ -29,17 +33,11 @@ export const authController = {
       })
 
       res.status(200).json({ user })
-      
     } catch (err: any) {
       const status = err?.status ?? 500
       const message = err?.message ?? 'Erro no servidor'
       res.status(status).json({ message })
     }
-  },
-  // rota de logout para apagar os cookies do usuário
-  logout: (_req: Request, res: Response) => {
-    res.clearCookie('user_section')
-    res.status(200).json({ message: 'Logout realizado com sucesso' })
   },
 
   // registra o usuário do frontend para o backend
@@ -60,5 +58,33 @@ export const authController = {
       const message = err?.message ?? 'Erro no servidor'
       res.status(status).json({ message })
     }
+  },
+
+  // implementação do userAuth — lê o cookie e devolve o usuário decodificado
+  userAuth: async (req: Request, res: Response) => {
+    const token = req.cookies?.user_section
+
+    if (!token) {
+      res.status(401).json({ message: 'Usuário não autentificado' })
+      return
+    }
+
+    try {
+      const user = await authService.getMe(token)
+      res.status(200).json({ user })
+    } catch (error: any) {
+      res.status(error?.status ?? 401).json({ message: error?.message ?? 'Token inválido' })
+    }
+  },
+
+  // rota de logout para apagar os cookies do usuário. A requisição que vem do frontend com os cookies e vamos verificar aqui se eles existem. Pega pelo nome do cookie. Vai em aplicação no devtools que consegue ver o nome
+  logout: async (req: Request, res: Response) => {
+    const { user_section } = req.cookies // cookie que vem do front
+
+    if(user_section){
+      res.clearCookie('user_section')
+      // user_section - nome do meu cookie
+    }  
+    res.status(200).json({ message: 'Logout realizado com sucesso' })
   },
 }
