@@ -60,8 +60,10 @@ export const authController = {
     }
   },
 
-  // implementação do userAuth — lê o cookie e devolve o usuário decodificado
+  // Implementação do userAuth — lê o cookie e devolve o usuário decodificado.
+  // O cookie da requisição fica disponível graças ao middleware 'cookie-parser'.
   userAuth: async (req: Request, res: Response) => {
+    // O '?' (Optional Chaining) evita erros caso 'req.cookies' seja indefinido.
     const token = req.cookies?.user_section
 
     if (!token) {
@@ -79,12 +81,11 @@ export const authController = {
 
   // rota de logout para apagar os cookies do usuário. A requisição que vem do frontend com os cookies e vamos verificar aqui se eles existem. Pega pelo nome do cookie. Vai em aplicação no devtools que consegue ver o nome
   logout: async (req: Request, res: Response) => {
-    const { user_section } = req.cookies // cookie que vem do front
+    // requireAuth já garantiu que o usuário está autenticado
+    // só limpa o cookie e responde
 
-    if(user_section){
-      res.clearCookie('user_section')
-      // user_section - nome do meu cookie
-    }  
+    // user_section - nome do meu cookie
+    res.clearCookie('user_section')
     res.status(200).json({ message: 'Logout realizado com sucesso' })
   },
 }

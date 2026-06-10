@@ -5,12 +5,20 @@
 // 🍽️ ROUTE — só mapeia URL para o Controller
 import { Router } from 'express'
 import { authController } from '../controllers/authControllers'
+import { clearAuthCookie } from '../middlewares/clearAuthCookie'
+
+import { requireAuth } from '../middlewares/authMiddlewares'
 
 const router = Router()
 
 router.post('/login', authController.login)
 router.post('/register', authController.register)
-router.get('/me', authController.userAuth)
-router.post('/logout', authController.logout)
+
+// Usa o requireAuth normal para obter os dados do usuário logado
+router.get('/me', requireAuth, authController.userAuth)
+
+// requiredAuth como segundo parâmetro - roda antes do controller por causa do next()
+//// Usa o clearAuthCookie para limpar o cookie ANTES de cair no controller de logout
+router.post('/logout', clearAuthCookie, authController.logout)
 
 export default router

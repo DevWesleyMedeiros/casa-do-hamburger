@@ -4,13 +4,7 @@
 import { compare, genSaltSync, hashSync } from 'bcrypt-ts'
 import * as jose from 'jose'
 import { userRepository } from '../repositories/userRepositories'
-
-// helper interno para obter o secret como Uint8Array
-const getSecret = () => {
-  const jwtSecretEnv = process.env['JWT_SECRET']
-  if (!jwtSecretEnv) throw new Error('Variável de ambiente ainda não foi configurada')
-  return new TextEncoder().encode(jwtSecretEnv)
-}
+import { getJwtSecret } from '../config/jwt'
 
 export const authService = {
   // pegando usuário cadastrado no banco de dados
@@ -29,6 +23,7 @@ export const authService = {
     }
 
     // CORREÇÃO DE SEGURANÇA: Filtrar os dados do usuário para NÃO incluir a senha no payload
+    // O payload abaixo é o que será tokenizado
     const tokenPayload = {
       id: user.id,
       name: user.name,
@@ -42,8 +37,8 @@ export const authService = {
         alg: 'HS256',
       })
       .setIssuedAt()
-      .setExpirationTime('7d') // retorna um valor em milissegundos e deve estar alinhado com o maxAge do cookie
-      .sign(getSecret())
+      .setExpirationTime('7d') // define expiração em 7 dias — jose calcula o timestamp exp automaticamente e deve estar alinhado com o maxAge do cookie
+      .sign(getJwtSecret())
 
     // 3. RETORNO IDEAL: Retorna o token gerado e os dados públicos para o Controller enviar ao Front-end
     return {
@@ -55,7 +50,7 @@ export const authService = {
   // função que decodifica o token vindo do cookie
   getMe: async (token: string) => {
     try {
-      const { payload } = await jose.jwtVerify(token, getSecret())
+      const { payload } = await jose.jwtVerify(token, getJwtSecret())
       return {
         id: payload['id'],
         name: payload['name'],
