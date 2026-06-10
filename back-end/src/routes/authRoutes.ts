@@ -11,6 +11,6 @@ const router = Router()
 router.post('/login', authController.login)
 router.post('/register', authController.register)
 router.get('/me', authController.userAuth)
-router.post('logout', authController.logout)
+router.post('/logout', authController.logout)
 
 export default router

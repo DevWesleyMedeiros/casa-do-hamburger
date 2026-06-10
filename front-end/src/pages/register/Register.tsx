@@ -1,11 +1,12 @@
 // por aqui, eu cadastro um usuário no meu banco de dados enviando um payload via post e que são tratados no meu backend
 
 import React, { useState, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../../components/button/Button";
 import { Input } from "../../components/input/Input";
 import { RegisterDate } from "../../shared/services/api/register/Register";
 import { EyeOff, Eye } from "lucide-react";
+import { Login } from "../login/Login";
 
 export const Register = () => {
   const [name, setName] = useState<string>("");
@@ -20,6 +21,8 @@ export const Register = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] =
     useState<boolean>(false);
+
+  const navigate = useNavigate();
 
   // validações do meu frontend
   const handleRegister = useCallback(async () => {
@@ -62,11 +65,12 @@ export const Register = () => {
       setPassword("");
       setConfirmPassword("");
       setCep("");
+      navigate("/login");
     } catch (error) {
       console.error("Erro inesperado ao registrar:", error);
       setRegisterError("Ocorreu um erro inesperado. Tente novamente.");
     }
-  }, [name, email, password, confirmPassword, cep]);
+  }, [name, email, password, confirmPassword, cep, navigate]);
 
   const handleOnSubmit = useCallback(
     (e: React.SubmitEvent<HTMLFormElement>) => {
