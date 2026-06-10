@@ -29,6 +29,7 @@ export const UserProvider = ({ children }: propsChildren) => {
 
   const logout = useCallback(async () => {
     await userLogOut?.();
+    setUser(null);
   }, []);
 
   const values = useMemo(

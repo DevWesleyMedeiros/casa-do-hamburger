@@ -3,10 +3,11 @@ import { useCallback, useContext } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ICON_CONFIG } from "../../constant/iconConfig";
 import { UserContext } from "../../shared/context/UserContext";
+import { toast } from "sonner";
 
 export const Header = () => {
   // desestruturando variável user
-  const { user, setUser, logout } = useContext(UserContext);
+  const { user, logout } = useContext(UserContext);
 
   //variável que inicia location
   const location = useLocation();
@@ -16,11 +17,15 @@ export const Header = () => {
 
   // função de logout
   const handleLogout = useCallback(async () => {
-    alert("saindo...");
-    logout();
-    setUser(null);
+    toast("saindo...");
+
+    // use o await para travar o setTimeout. Do contrário, o que vier depois será executado sobre ele
+    await new Promise((resolve) => setTimeout(resolve, 4000));
+
+    toast.success("Usuário deslogado");
+    await logout();
     navigate("/login");
-  }, [logout, navigate, setUser]);
+  }, [logout, navigate]);
 
   // função que implementa um active no ícone de acordo com a pathname do location
   const setNavItemActiveClass = (pathname: string): string => {

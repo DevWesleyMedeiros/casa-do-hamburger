@@ -1,10 +1,12 @@
 import "./App.css";
 import { AppRoutes } from "./shared/routes/AppRoutes";
 import { UserProvider } from "./shared/context/UserProvider";
+import { Toaster } from "sonner";
 
 function App() {
   return (
     <>
+      <Toaster position="top-center" richColors duration={4000} />
       <UserProvider>
         <AppRoutes></AppRoutes>
 
