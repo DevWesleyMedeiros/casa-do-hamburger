@@ -7,11 +7,13 @@ import { UserContext } from "../../shared/context/UserContext";
 import { ApiError } from "../../shared/services/api/ApiExceptions";
 import { LoginDate } from "../../shared/services/api/login/Login";
 
+
 export const Login = () => {
   const [email, setEmail] = useState<string | null>("");
   const [password, setPassword] = useState<string | null>("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // variável que desestrutura as variávies de um contexto do tipo UserContext
   const { setUser } = useContext(UserContext); // somente uso o setUser, pois eu recebo o user, mas o  uso será noutro componente
@@ -71,6 +73,7 @@ export const Login = () => {
     (e: React.SubmitEvent<HTMLFormElement>) => {
       e.preventDefault();
       handleLogin();
+      setIsLoading(true);
     },
     [handleLogin],
   );
@@ -84,10 +87,16 @@ export const Login = () => {
       className="flex h-screen items-center justify-center bg-[#161410]"
       onSubmit={handleOnSubmit}
     >
-      <div className="justify-left flex flex-col items-center gap-2">
+      <div className="justify-left flex flex-col items-center gap-2 rounded-xl border-[0.5px] border-white/13 p-7">
         <Link to="/home">
           <img src="./logo.png" alt="logo da hamburgeria" className="mb-4" />
         </Link>
+
+        <div className="mb-4 border-amber-100">
+          <p className="text-center font-bold text-[#F2DAAC]">
+            Bem vindo à Casa do Hamburguer!!
+          </p>
+        </div>
 
         <div className="justify-left flex flex-col gap-2">
           <Input
@@ -117,14 +126,21 @@ export const Login = () => {
             </p>
           )}
 
-          <Button type="submit" title="Login" colorVariation="bgRedVariation" />
-          <Link to="/register" className="w-full">
-            <Button
-              type="button"
-              title="Não tem uma conta?"
-              colorVariation="bgWhiteVariation"
-            />
-          </Link>
+          <Button
+            type="submit"
+            title={isLoading ? "Entrando" : "Entar"}
+            colorVariation="bgRedVariation"
+          />
+
+          <div>
+            <Link to="/register" className="w-full">
+              <Button
+                type="button"
+                title="Não tem uma conta?"
+                colorVariation="bgWhiteVariation"
+              />
+            </Link>
+          </div>
         </div>
       </div>
     </form>

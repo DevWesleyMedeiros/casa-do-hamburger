@@ -1,41 +1,67 @@
+import type React from "react";
+
+// exportado para poder ser reusado em outros componentes
+export type ColorVariation =
+  | "bgRedVariation"
+  | "bgWhiteVariation"
+  | "bgGoogleVariation" // ← novo: OAuth / ação secundária em tema dark
+  | "bgDarkVariation"; // ← novo: ação terciária em tema dark
+
 type ButtonType = {
   title: string;
   type: "button" | "submit";
-  colorVariation?: "bgRedVariation" | "bgWhiteVariation";
+  colorVariation?: ColorVariation;
+  leftIcon?: React.ReactNode; // ← novo: suporte a ícone à esquerda do texto
 } & React.ButtonHTMLAttributes<HTMLButtonElement>;
 
 export const Button = ({
   title,
   type,
   colorVariation = "bgRedVariation",
+  leftIcon,
   ...props
 }: ButtonType) => {
   const BASE =
-    "w-full cursor-pointer rounded-md border-2 py-2 text-sm font-bold " + // estilos gerais
-    "transition-all duration-200 ease-in-out " + // transição suave
-    "active:scale-[0.98] " + // feedback de clique
-    "disabled:opacity-50 disabled:cursor-not-allowed"; // estado desabilitado
+    "w-full cursor-pointer rounded-md py-2 text-sm font-bold " +
+    "flex items-center justify-center gap-2 " + // suporte ao leftIcon
+    "transition-all duration-200 ease-in-out " +
+    "active:scale-[0.98] " +
+    "disabled:opacity-50 disabled:cursor-not-allowed";
 
-  const VARIANTS = {
+  const VARIANTS: Record<ColorVariation, string> = {
+    // CTA principal — fundo vermelho sólido
     bgRedVariation:
-      "border-[#C92A0E] bg-[#C92A0E] text-white " + // fundo vermelho
-      "hover:bg-[#a82209] hover:border-[#a82209] " + // escurece no hover
-      "hover:shadow-[0_0_12px_rgba(201,42,14,0.5)] " + // brilho vermelho
-      "focus-visible:ring-2 focus-visible:ring-[#C92A0E] focus-visible:ring-offset-2",
+      "border-2 border-redVariation bg-redVariation text-white " +
+      "hover:shadow-[0_0_12px_rgba(201,42,14,0.5)] " +
+      "focus-visible:ring-2 focus-visible:ring-redVariation focus:border-amber/50 focus-visible:ring-offset-2",
 
+    // ação secundária — fundo branco com borda vermelha (contexto claro)
     bgWhiteVariation:
-      "border-[#C92A0E] bg-white text-[#C92A0E] " + // fundo branco
-      "hover:bg-[#fff0ee] " + // fundo levemente rosado
+      "border-2 border-redVariation bg-white text-redVariation " +
+      "hover:bg-[#fff0ee] " +
       "hover:shadow-[0_0_12px_rgba(201,42,14,0.25)] " +
-      "focus-visible:ring-2 focus-visible:ring-[#C92A0E] focus-visible:ring-offset-2",
+      "focus-visible:ring-2 focus-visible:ring-redVariation focus:border-amber/50 focus-visible:ring-offset-2",
+
+    // OAuth / ação secundária — semitransparente escuro (tema dark)
+    bgGoogleVariation:
+      "border border-white/[0.13] bg-white/[0.05] text-white/80 " +
+      "hover:bg-white/[0.10] hover:border-white/[0.20] " +
+      "focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-0",
+
+    // ação terciária — outline sutil (tema dark)
+    bgDarkVariation:
+      "border border-white/[0.08] bg-white/[0.03] text-white/60 " +
+      "hover:bg-white/[0.07] hover:border-white/[0.14] " +
+      "focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-0",
   };
 
   return (
     <button
       {...props}
       type={type}
-      className={`${BASE} ${VARIANTS[colorVariation ?? "bgRedVariation"]}`}
+      className={`${BASE} ${VARIANTS[colorVariation]}`}
     >
+      {leftIcon}
       {title}
     </button>
   );
