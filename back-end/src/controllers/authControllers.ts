@@ -26,7 +26,8 @@ export const authController = {
 
       // criar cookie com as informações do usuário (sem a senha) e configurar opções de segurança
       res.cookie('user_section', token, {
-        httpOnly: true, // JS do browser não lê
+        httpOnly: true, // JS do browser não lê. O cookie é exclusivo do HTTP — o browser o envia automaticamente nas requisições, mas bloqueia qualquer acesso via JavaScript, incluindo document.cookie. É uma proteção de segurança contra ataques XSS.
+
         secure: process.env['NODE_ENV'] === 'production', // faz ler HTTPS somente no modo produção
         sameSite: 'lax', // proteção CSRF básica
         maxAge: 7 * 24 * 60 * 60 * 1000, // definido para 15 segundos  // 7 * 24 * 60 * 60 * 1000,   7 dias = 604.800.000 em missêgundos; 1 segundo equivale a 1000 milissêgundos

@@ -18,13 +18,17 @@ type propsChildren = {
 
 export const UserProvider = ({ children }: propsChildren) => {
   const [user, setUser] = useState<UserDate | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  // A forma correta de saber se o usuário está logado no frontend. Como o JavaScript não lê cookies httpOnly, o padrão é perguntar ao backend. Isso já é implementado — é exatamente o GET /me do seu UserProvider:
+  // espere o componete carregar para só depois executá-lo
   useEffect(() => {
-    getAuth.getMe().then((date) => {
-      if (date) {
-        setUser(date);
-      }
-    });
+    getAuth
+      .getMe()
+      .then((data) => {
+        if (data) setUser(data);
+      })
+      .finally(() => setIsLoading(false)); // só false quando me respondeu
   }, []);
 
   const logout = useCallback(async () => {
@@ -37,8 +41,9 @@ export const UserProvider = ({ children }: propsChildren) => {
       user,
       setUser,
       logout,
+      isLoading,
     }),
-    [user, setUser, logout],
+    [user, setUser, logout, isLoading],
   );
 
   return (

@@ -45,7 +45,7 @@ export const Header = () => {
 
         {user ? (
           <div className="flex items-center gap-6 text-white">
-            {/* vai começar não renderizando nada, pois, qualquer user cadastrado no Banco de Dados é admin false; user.admin = mostre o que está entre parêntese; user.admin = false não mostre o que está entre parênteses */}
+            {/* vai começar não renderizando nada, pois, qualquer user cadastrado no Banco de Dados é admin false; user.admin = true mostre o que está entre parêntese; user.admin = false não mostre o que está entre parênteses */}
 
             {user.admin && (
               <div className="flex gap-2 text-[#F2DAAC]">

@@ -1,15 +1,16 @@
-import { Login } from "../../pages/login/Login";
-import { Register } from "../../pages/register/Register";
-import { Home } from "../../pages/home/Home";
 import { Header } from "../../components/header/Header";
+import { PublicRoutes } from "./publicRoutes/PublicRoutes";
+import { Home } from "../../pages/home/Home";
+import { Login } from "../../pages/login/Login";
 import { Pedidos } from "../../pages/pedidos/Pedidos";
+import { Register } from "../../pages/register/Register";
 
 import {
   BrowserRouter,
-  Route,
-  Routes,
   Navigate,
   Outlet,
+  Route,
+  Routes,
 } from "react-router-dom";
 
 const Layout: React.FC = () => {
@@ -27,8 +28,26 @@ export const AppRoutes = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Navigate to="/home" replace />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+
+        {/* PublicRoutes é um componente que defini que serão os outros componentes que serão público.
+        Se eu acessar a rota de login, a lógica do componente PublicRoutes será executado antes */}
+        <Route
+          path="/login"
+          element={
+            <PublicRoutes>
+              <Login />
+            </PublicRoutes>
+          }
+        />
+
+        <Route
+          path="/register"
+          element={
+            <PublicRoutes>
+              <Register />
+            </PublicRoutes>
+          }
+        />
 
         {/* Rotas COM header — Layout é o pai, filhos usam Outlet */}
         <Route element={<Layout />}>
