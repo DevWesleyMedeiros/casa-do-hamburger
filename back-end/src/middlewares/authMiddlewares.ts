@@ -2,12 +2,13 @@ import type { Request, Response, NextFunction } from 'express'
 import * as jose from 'jose'
 import { getJwtSecret } from '../config/jwt'
 
-// função que requiredAuth que será usada como middleware para o logout, me entre outras rotas
+// função que requiredAuth que será usada como middleware para o decodificar token do usuário
 export const requireAuth = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<Response | void> => {
+  
   // 1. lê o cookie — só existe graças ao cookie-parser no index.ts
   const token = req.cookies?.user_section
 

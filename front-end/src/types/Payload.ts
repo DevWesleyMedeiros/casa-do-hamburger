@@ -12,15 +12,18 @@ export interface RegisterPayloadInterface {
   cep: string;
 }
 
+// UserLogin pega a interface RegisterPayloadInterface, omit duas propriedades: "password" e "confirmPassword" e cria mais um id
+// UserLogin = { id: string, name: string, email: string, cep: string}
 export type UserLogin = Omit<
   RegisterPayloadInterface,
   "password" | "confirmPassword"
 > & {
   id: string;
+  admin: string
 };
 
 export type UserDate = Pick<LoginPayloadInterface, "email"> &
-  Pick<RegisterPayloadInterface, "name">;
+  Pick<RegisterPayloadInterface, "name"> & Pick<UserLogin, "admin">;
 
 export type UserContextTypes = {
   user: UserDate | null;

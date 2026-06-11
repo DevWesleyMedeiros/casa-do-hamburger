@@ -6,7 +6,7 @@ import { Button } from "../../components/button/Button";
 import { Input } from "../../components/input/Input";
 import { RegisterDate } from "../../shared/services/api/register/Register";
 import { EyeOff, Eye } from "lucide-react";
-import { Login } from "../login/Login";
+import { toast } from "sonner";
 
 export const Register = () => {
   const [name, setName] = useState<string>("");
@@ -60,11 +60,17 @@ export const Register = () => {
       }
 
       // deu todo certo após o valores terem sidos registrados, limpa os campos
+      // ativa as toast
+      toast("Criando usuário ...");
+
+      await new Promise((resolve) => setTimeout(resolve, 4000));
+
       setName("");
       setEmail("");
       setPassword("");
       setConfirmPassword("");
       setCep("");
+      toast.success("Usuário criado com sucesso");
       navigate("/login");
     } catch (error) {
       console.error("Erro inesperado ao registrar:", error);

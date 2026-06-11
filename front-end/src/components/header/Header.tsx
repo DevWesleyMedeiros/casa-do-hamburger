@@ -1,9 +1,9 @@
 import { Box, LayoutDashboard, LogOut, Plus, ShoppingCart } from "lucide-react";
 import { useCallback, useContext } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { ICON_CONFIG } from "../../constant/iconConfig";
 import { UserContext } from "../../shared/context/UserContext";
-import { toast } from "sonner";
 
 export const Header = () => {
   // desestruturando variável user
@@ -45,35 +45,39 @@ export const Header = () => {
 
         {user ? (
           <div className="flex items-center gap-6 text-white">
-            <div className="flex gap-2 text-[#F2DAAC]">
-              <Link to="/home">
-                <div className={setNavItemActiveClass("/home")}>
-                  <Box
+            {/* vai começar não renderizando nada, pois, qualquer user cadastrado no Banco de Dados é admin false; user.admin = mostre o que está entre parêntese; user.admin = false não mostre o que está entre parênteses */}
+
+            {user.admin && (
+              <div className="flex gap-2 text-[#F2DAAC]">
+                <Link to="/home">
+                  <div className={setNavItemActiveClass("/home")}>
+                    <Box
+                      size={ICON_CONFIG.size}
+                      strokeWidth={ICON_CONFIG.strokWidth}
+                      className="cursor-pointer"
+                    />
+                  </div>
+                </Link>
+
+                <Link to="/pedidos">
+                  <div className={setNavItemActiveClass("/pedidos")}>
+                    <LayoutDashboard
+                      size={ICON_CONFIG.size}
+                      strokeWidth={ICON_CONFIG.strokWidth}
+                      className="cursor-pointer"
+                    />
+                  </div>
+                </Link>
+
+                <div className="flex h-[8.75] w-[8.75] items-center justify-center rounded-md">
+                  <Plus
                     size={ICON_CONFIG.size}
                     strokeWidth={ICON_CONFIG.strokWidth}
                     className="cursor-pointer"
                   />
                 </div>
-              </Link>
-
-              <Link to="/pedidos">
-                <div className={setNavItemActiveClass("/pedidos")}>
-                  <LayoutDashboard
-                    size={ICON_CONFIG.size}
-                    strokeWidth={ICON_CONFIG.strokWidth}
-                    className="cursor-pointer"
-                  />
-                </div>
-              </Link>
-
-              <div className="flex h-[8.75] w-[8.75] items-center justify-center rounded-md">
-                <Plus
-                  size={ICON_CONFIG.size}
-                  strokeWidth={ICON_CONFIG.strokWidth}
-                  className="cursor-pointer"
-                />
               </div>
-            </div>
+            )}
 
             <div className="relative cursor-pointer">
               <ShoppingCart
@@ -84,7 +88,6 @@ export const Header = () => {
                 1
               </p>
             </div>
-
             <div className="item-center flex gap-2">
               <p className="text-white">{user.name}!</p>
               <LogOut

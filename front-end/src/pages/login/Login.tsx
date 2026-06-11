@@ -22,6 +22,7 @@ export const Login = () => {
   const navigate = useNavigate();
 
   const handleLogin = useCallback(async () => {
+    setIsLoading(true);
     if (!email || !password) {
       setErrorMessage("Email ou Senha são obrigatórios");
       return;
@@ -39,6 +40,7 @@ export const Login = () => {
         }
         if (result.statusCode === 401) {
           setErrorMessage("Senha incorreta");
+          setIsLoading(false);
           return;
         }
         if (result.statusCode === 404) {
@@ -57,12 +59,16 @@ export const Login = () => {
 
       // Se chegou aqui, é porque NÃO é ApiError — ou seja, sucesso
       // setUser é um objeto UserDate {} ou null
-      setUser({ name: result.user.name, email: result.user.email });
+      setUser({
+        name: result.user.name,
+        email: result.user.email,
+        admin: result.user.admin,
+      });
       setEmail("");
       setPassword("");
       navigate("/home");
 
-      // console.log("Login bem-sucedido:", result);
+      console.log("Login bem-sucedido:", result); // dados do usuário cadastrado num objeto padrão
     } catch (error) {
       console.error("Erro inesperado no login:", error);
       setErrorMessage("Ocorreu um erro inesperado. Tente novamente.");
@@ -73,7 +79,7 @@ export const Login = () => {
     (e: React.SubmitEvent<HTMLFormElement>) => {
       e.preventDefault();
       handleLogin();
-      setIsLoading(true);
+      // setIsLoading(true);
     },
     [handleLogin],
   );
@@ -128,7 +134,7 @@ export const Login = () => {
 
           <Button
             type="submit"
-            title={isLoading ? "Entrando" : "Entar"}
+            title={isLoading ? "Entrando" : "Entrar"}
             colorVariation="bgRedVariation"
           />
 

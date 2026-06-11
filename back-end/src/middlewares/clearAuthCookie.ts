@@ -23,7 +23,7 @@ export const clearAuthCookie = async (
     if (token) {
       await jose.jwtVerify(token, getJwtSecret())
     }
-    next()
+    next() 
   } catch (error) {
     // Se o token era inválido ou expirado, o cookie já foi limpo acima. Segue em frente.
     next()

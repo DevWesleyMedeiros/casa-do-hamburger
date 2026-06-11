@@ -23,12 +23,13 @@ export const authService = {
     }
 
     // CORREÇÃO DE SEGURANÇA: Filtrar os dados do usuário para NÃO incluir a senha no payload
-    // O payload abaixo é o que será tokenizado
+    // O payload abaixo é o que será tokenizado. Se eu encontro o usuário cadastrado no banco de dados pelo email dele, então eu retorno o que está abaixo para o front
     const tokenPayload = {
       id: user.id,
       name: user.name,
       email: user.email,
       cep: user.cep,
+      admin: user.admin,
     }
 
     // gerando a assinatura do payload. Pega o token informações do usuário e as codifica
@@ -43,7 +44,7 @@ export const authService = {
     // 3. RETORNO IDEAL: Retorna o token gerado e os dados públicos para o Controller enviar ao Front-end
     return {
       token,
-      user: { id: user.id, name: user.name, email: user.email, cep: user.cep },
+      user: { id: user.id, name: user.name, email: user.email, admin: user.admin, cep: user.cep },
     }
   },
 
