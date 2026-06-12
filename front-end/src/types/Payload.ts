@@ -19,7 +19,7 @@ export type UserLogin = Omit<
   "password" | "confirmPassword"
 > & {
   id: string;
-  admin: string
+  admin: boolean;
 };
 
 export type UserDate = Pick<LoginPayloadInterface, "email"> &

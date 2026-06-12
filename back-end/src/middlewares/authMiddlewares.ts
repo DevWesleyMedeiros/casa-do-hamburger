@@ -27,6 +27,7 @@ export const requireAuth = async (
       name: payload['name'],
       email: payload['email'],
       cep: payload['cep'],
+      admin: payload['admin'],
     }
 
     next() // libera para o controller

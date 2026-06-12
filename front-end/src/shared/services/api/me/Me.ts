@@ -8,7 +8,7 @@ export const getAuth = {
       const response = await Api().get("/auth/me");
       return response.data.user ?? null;
       // retorno do dado de verdade. Se não existir, nada é retornado
-    } catch (error: unknown) {
+    } catch {
       return null;
     }
   },

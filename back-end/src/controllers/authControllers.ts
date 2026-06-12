@@ -81,7 +81,7 @@ export const authController = {
   },
 
   // rota de logout para apagar os cookies do usuário. A requisição que vem do frontend com os cookies e vamos verificar aqui se eles existem. Pega pelo nome do cookie. Vai em aplicação no devtools que consegue ver o nome
-  logout: async (req: Request, res: Response) => {
+  logout: async (res: Response) => {
     // requireAuth já garantiu que o usuário está autenticado
     // só limpa o cookie e responde
 

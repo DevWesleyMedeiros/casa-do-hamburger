@@ -1,10 +1,10 @@
 // camada responsável por lidar com as regras de negócio. Além disso, é onde eu faço a comparação de senha utilizando bcrypt-ts para garantir a segurança dos dados do usuário.
 // Regras de negócio (validar, hashear, comparar). Só conhece o REPOSITORY
 
-import { compare, genSaltSync, hashSync } from 'bcrypt-ts'
-import * as jose from 'jose'
-import { userRepository } from '../repositories/userRepositories'
-import { getJwtSecret } from '../config/jwt'
+import { compare, genSaltSync, hashSync } from 'bcrypt-ts';
+import * as jose from 'jose';
+import { getJwtSecret } from '../config/jwt';
+import { userRepository } from '../repositories/userRepositories';
 
 export const authService = {
   // pegando usuário cadastrado no banco de dados
@@ -48,7 +48,7 @@ export const authService = {
     }
   },
 
-  // função que decodifica o token vindo do cookie
+  // função que decodifica o token vindo do cookie do frontend com o payload abaixo
   getMe: async (token: string) => {
     try {
       const { payload } = await jose.jwtVerify(token, getJwtSecret())
@@ -57,6 +57,7 @@ export const authService = {
         name: payload['name'],
         email: payload['email'],
         cep: payload['cep'],
+        admin: payload['admin'],
       }
     } catch (error) {
       // lança uma excesão se o token adulterado, expirado ou adulterado
