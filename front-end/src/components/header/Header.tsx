@@ -53,7 +53,7 @@ export const Header = () => {
                 <Link to="/home">
                   <div className={setNavItemActiveClass("/home")}>
                     <Box
-                      size={ICON_CONFIG.size}
+                      size={ICON_CONFIG.mxSize}
                       strokeWidth={ICON_CONFIG.strokWidth}
                       className="cursor-pointer"
                     />
@@ -63,7 +63,7 @@ export const Header = () => {
                 <Link to="/pedidos">
                   <div className={setNavItemActiveClass("/pedidos")}>
                     <LayoutDashboard
-                      size={ICON_CONFIG.size}
+                      size={ICON_CONFIG.mxSize}
                       strokeWidth={ICON_CONFIG.strokWidth}
                       className="cursor-pointer"
                     />
@@ -72,7 +72,7 @@ export const Header = () => {
 
                 <div className="flex h-[8.75] w-[8.75] items-center justify-center rounded-md">
                   <Plus
-                    size={ICON_CONFIG.size}
+                    size={ICON_CONFIG.mxSize}
                     strokeWidth={ICON_CONFIG.strokWidth}
                     className="cursor-pointer"
                   />
@@ -82,7 +82,7 @@ export const Header = () => {
 
             <div className="relative cursor-pointer">
               <ShoppingCart
-                size={ICON_CONFIG.size}
+                size={ICON_CONFIG.mxSize}
                 strokeWidth={ICON_CONFIG.strokWidth}
               />
               <p className="absolute -top-3 -right-3 flex h-5 w-5 items-center justify-center rounded-md bg-amber-200 text-[#161410]">
@@ -92,7 +92,7 @@ export const Header = () => {
             <div className="item-center flex gap-2">
               <p className="text-white">{user.name}!</p>
               <LogOut
-                size={ICON_CONFIG.size}
+                size={ICON_CONFIG.mxSize}
                 strokeWidth={ICON_CONFIG.strokWidth}
                 className="cursor-pointer"
                 onClick={handleLogout}

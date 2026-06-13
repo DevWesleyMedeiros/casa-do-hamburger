@@ -1,6 +1,7 @@
 // Lucide default icons setup
 
 export const ICON_CONFIG = {
-  size: 25,
+  mxSize: 25,
+  mnSize: 16,
   strokWidth: 2,
 };

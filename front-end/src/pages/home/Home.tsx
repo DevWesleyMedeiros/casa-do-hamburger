@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { Products } from "../../components/products/Products";
+import { Pedidos } from "../pedidos/Pedidos";
 
 export const Home = () => {
-  const [selectedItemClass, setSelectedItemClass] = useState("");
+  const [selectedItemClass, setSelectedItemClass] = useState("Hamburguer");
 
   const selectedItem = (newItem: string) => {
     setSelectedItemClass(newItem);
@@ -17,7 +19,7 @@ export const Home = () => {
   };
 
   return (
-    <div className="mx-auto flex w-full gap-2 px-3 text-white md:w-184.25 md:px-0">
+    <div className="mx-auto flex w-full flex-col gap-2 px-3 text-white md:w-184.25 md:px-0">
       <div className="my-2 flex gap-2 md:my-3">
         {/* Adicionado gap para separar os botões */}
         {/* Item 1: Hamburguer */}
@@ -43,6 +45,15 @@ export const Home = () => {
         >
           Porções
         </div>
+      </div>
+
+      <p className="text-brand-amber mb-2 font-bold uppercase">
+        {selectedItemClass}
+      </p>
+      <div className="flex flex-col gap-3 md:gap-3">
+        <Products />
+        <Products />
+        <Products />
       </div>
     </div>
   );

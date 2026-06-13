@@ -1,4 +1,5 @@
 // Isso garante que saibamos exatamente o formato dos dados que transitam na aplicação.
+// usados aqui somente para payloads da nossa api
 export interface LoginPayloadInterface {
   email: string;
   password: string;
@@ -23,7 +24,8 @@ export type UserLogin = Omit<
 };
 
 export type UserDate = Pick<LoginPayloadInterface, "email"> &
-  Pick<RegisterPayloadInterface, "name"> & Pick<UserLogin, "admin">;
+  Pick<RegisterPayloadInterface, "name"> &
+  Pick<UserLogin, "admin">;
 
 export type UserContextTypes = {
   user: UserDate | null;
