@@ -1,6 +1,12 @@
 /* tudo que vier aqui sobrescreve o tailwindcss */
 @import url('https://fonts.googleapis.com/css2?family=Sen:wght@400..800&display=swap');
-@import 'tailwindcss';
+
+/* Importa todo o Tailwind v4 */
+@import "tailwindcss";
+
+/* Aponta para o seu tailwind.config.ts (compatibilidade v4) */
+@config "../tailwind.config.ts";
+
 
 *{
     font-family: "Sen", sans-serif;

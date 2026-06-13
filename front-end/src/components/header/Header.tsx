@@ -48,7 +48,8 @@ export const Header = () => {
             {/* vai começar não renderizando nada, pois, qualquer user cadastrado no Banco de Dados é admin false; user.admin = true mostre o que está entre parêntese; user.admin = false não mostre o que está entre parênteses */}
 
             {user.admin && (
-              <div className="flex gap-2 text-[#F2DAAC]">
+              // md:flex - tamanhas maiores de 768px (md), mostre o conteúdo. Menor que isso, hidden
+              <div className="hidden gap-2 text-[#F2DAAC] md:flex">
                 <Link to="/home">
                   <div className={setNavItemActiveClass("/home")}>
                     <Box
