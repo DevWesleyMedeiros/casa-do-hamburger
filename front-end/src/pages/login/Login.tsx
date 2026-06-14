@@ -6,7 +6,7 @@ import { Input } from "../../components/input/Input";
 import { UserContext } from "../../shared/context/UserContext";
 import { ApiError } from "../../shared/services/api/ApiExceptions";
 import { LoginDate } from "../../shared/services/api/login/Login";
-
+import { inputTrimToValue } from "../../shared/utils/Utils";
 
 export const Login = () => {
   const [email, setEmail] = useState<string | null>("");
@@ -30,8 +30,14 @@ export const Login = () => {
 
     setErrorMessage(null); // limpa erro anterior
 
+    const trimEmail = inputTrimToValue(email);
+    const trimPassword = inputTrimToValue(password);
+
     try {
-      const result = await LoginDate.create({ email, password });
+      const result = await LoginDate.create({
+        email: trimEmail,
+        password: trimPassword,
+      });
 
       if (result instanceof ApiError) {
         if (result.statusCode === 400) {

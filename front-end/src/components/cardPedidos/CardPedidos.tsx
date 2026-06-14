@@ -1,5 +1,6 @@
 import { CalendarDays, Clock, Timer, UserRound } from "lucide-react";
 import { ICON_CONFIG } from "../../constant/iconConfig";
+import { brazilinaCurrencyFormat } from "../../shared/utils/Utils";
 
 type CardOrdersTypes = {
   id: number;
@@ -56,7 +57,7 @@ export const CardPedidos = ({
       </div>
       <div className="mx-auto mt-1 h-0 w-49.75 justify-center border text-[#32343E]"></div>
       <p className="mx-4 my-1 text-right text-lg font-bold text-[#32343E]">
-        R${price}
+        R${brazilinaCurrencyFormat(price)}
       </p>
     </div>
   );

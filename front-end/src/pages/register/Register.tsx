@@ -7,6 +7,7 @@ import { Input } from "../../components/input/Input";
 import { RegisterDate } from "../../shared/services/api/register/Register";
 import { EyeOff, Eye } from "lucide-react";
 import { toast } from "sonner";
+import { inputTrimToValue } from "../../shared/utils/Utils";
 
 export const Register = () => {
   const [name, setName] = useState<string>("");
@@ -41,7 +42,12 @@ export const Register = () => {
     setMatchingPasswordError("");
 
     try {
-      const result = await RegisterDate.create({ name, email, password, cep });
+      const result = await RegisterDate.create({
+        name: inputTrimToValue(name),
+        email: inputTrimToValue(email),
+        password: inputTrimToValue(password),
+        cep: inputTrimToValue(cep),
+      });
 
       // erros do backend
       switch (result.status) {
