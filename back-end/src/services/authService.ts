@@ -7,7 +7,7 @@ import { getJwtSecret } from '../config/jwt';
 import { userRepository } from '../repositories/userRepositories';
 
 export const authService = {
-  // pegando usuário cadastrado no banco de dados
+  // pegando usuário cadastrado no banco de dados (POST)
   login: async (email: string, password: string) => {
     const user = await userRepository.findByEmail(email)
 
@@ -41,14 +41,14 @@ export const authService = {
       .setExpirationTime('7d') // define expiração em 7 dias — jose calcula o timestamp exp automaticamente e deve estar alinhado com o maxAge do cookie
       .sign(getJwtSecret())
 
-    // 3. RETORNO IDEAL: Retorna o token gerado e os dados públicos para o Controller enviar ao Front-end
+    // RETORNO IDEAL: Retorna o token gerado e os dados públicos para o Controller enviar ao Front-end
     return {
       token,
       user: { id: user.id, name: user.name, email: user.email, admin: user.admin, cep: user.cep },
     }
   },
 
-  // função que decodifica o token vindo do cookie do frontend com o payload abaixo
+  // função que decodifica o token vindo do cookie do frontend com o payload abaixo (GET)
   getMe: async (token: string) => {
     try {
       const { payload } = await jose.jwtVerify(token, getJwtSecret())
@@ -65,7 +65,7 @@ export const authService = {
     }
   },
 
-  // registrar usuário no banco de dados
+  // registrar usuário no banco de dados (POSR)
   register: async (name: string, email: string, password: string, cep: string) => {
     const existing = await userRepository.findByEmail(email)
 
@@ -79,5 +79,16 @@ export const authService = {
     const newUser = await userRepository.create({ name, email, password: hashedPassword, cep })
 
     return { id: newUser.id, name: newUser.name, email: newUser.email, cep: newUser.cep }
+  },
+
+  // buscar produtos do banco de dados (GET)
+  products: async () => {
+    const productsDate = await userRepository.findManyProducts()
+
+    // arrays vazios [] são valores truthy do javascript, portanto uma validação de negação unicamentem, aqui não funcionaria
+    if (productsDate.length === 0) {
+      throw { status: 404, message: 'Nenhum produto cadastrado no sistema' }
+    }
+    return productsDate
   },
 }

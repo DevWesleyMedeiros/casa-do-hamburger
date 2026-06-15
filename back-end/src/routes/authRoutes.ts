@@ -21,4 +21,7 @@ router.get('/me', requireAuth, authController.userAuth)
 //// Usa o clearAuthCookie para limpar o cookie ANTES de cair no controller de logout
 router.post('/logout', clearAuthCookie, authController.logout)
 
+//rota de produtos
+router.get('/products', authController.getProducts)
+
 export default router
