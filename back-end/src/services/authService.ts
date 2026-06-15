@@ -48,7 +48,7 @@ export const authService = {
     }
   },
 
-  // função que decodifica o token vindo do cookie do frontend com o payload abaixo (GET)
+  // regra que decodifica o token vindo do cookie do frontend com o payload abaixo (GET)
   getMe: async (token: string) => {
     try {
       const { payload } = await jose.jwtVerify(token, getJwtSecret())

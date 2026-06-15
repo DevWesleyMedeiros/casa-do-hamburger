@@ -6,8 +6,8 @@
 import { Router } from 'express'
 import { authController } from '../controllers/authControllers'
 import { clearAuthCookie } from '../middlewares/clearAuthCookie'
-
 import { requireAuth } from '../middlewares/authMiddlewares'
+// import { requiredAdmin } from '../middlewares/requiredAdmin'
 
 const router = Router()
 
@@ -19,7 +19,7 @@ router.get('/me', requireAuth, authController.userAuth)
 
 // requiredAuth como segundo parâmetro - roda antes do controller por causa do next()
 //// Usa o clearAuthCookie para limpar o cookie ANTES de cair no controller de logout
-router.post('/logout', clearAuthCookie, authController.logout)
+router.post('/logout', requireAuth, clearAuthCookie, authController.logout)
 
 //rota de produtos
 router.get('/products', authController.getProducts)

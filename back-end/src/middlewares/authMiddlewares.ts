@@ -1,3 +1,5 @@
+// O requireAuth já verifica o token e popula req.user antes do controller rodar.
+
 import type { Request, Response, NextFunction } from 'express'
 import * as jose from 'jose'
 import { getJwtSecret } from '../config/jwt'
@@ -8,7 +10,6 @@ export const requireAuth = async (
   res: Response,
   next: NextFunction,
 ): Promise<Response | void> => {
-  
   // 1. lê o cookie — só existe graças ao cookie-parser no index.ts
   const token = req.cookies?.user_section
 
@@ -16,7 +17,7 @@ export const requireAuth = async (
     return res.status(401).json({ message: 'Usuário não autentificado' })
   }
 
-  // verifica e decodifica o jwt
+  // verifica e decodifica o token jwt
   try {
     const { payload } = await jose.jwtVerify(token, getJwtSecret())
 

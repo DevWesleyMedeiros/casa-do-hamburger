@@ -60,24 +60,13 @@ export const authController = {
 
   // Implementação do userAuth — lê o cookie e devolve o usuário decodificado.
   // O cookie da requisição fica disponível graças ao middleware 'cookie-parser'.
-  // rotas que usam o get vão devolver o res, portanto não usam o req. Use o _req para dizer ao typescript isole esse parâmetro, que se trata de uma assinatura do express. Ele não gera um erro, mas é para assegura que ele foi declarado, porém não foi usado. Daí o typescript para de reclamar
+  // o cookie já foi decodificado com a função requiredAuth. Aqui eu só retorno
   userAuth: async (req: Request, res: Response) => {
-    // O '?' (Optional Chaining) evita erros caso 'req.cookies' seja indefinido.
-    const token = req.cookies?.user_section
-
-    if (!token) {
-      res.status(401).json({ message: 'Usuário não autentificado' })
-      return
-    }
-
-    try {
-      const user = await authService.getMe(token)
-      res.status(200).json({ user })
-    } catch (error: any) {
-      res.status(error?.status ?? 401).json({ message: error?.message ?? 'Token inválido' })
-    }
+    const user = req['user']
+    res.status(200).json({ user })
   },
 
+  // rotas que usam o get vão devolver o res, portanto não usam o req. Use o _req para dizer ao typescript isole esse parâmetro, que se trata de uma assinatura do express. Ele não gera um erro, mas é para assegura que ele foi declarado, porém não foi usado. Daí o typescript para de reclamar
   // rota de logout para apagar os cookies do usuário. A requisição que vem do frontend com os cookies e vamos verificar aqui se eles existem. Pega pelo nome do cookie. Vai em aplicação no devtools que consegue ver o nome
   logout: async (_req: Request, res: Response) => {
     // requireAuth já garantiu que o usuário está autenticado

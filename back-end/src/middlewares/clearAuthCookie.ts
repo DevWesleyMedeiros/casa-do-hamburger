@@ -1,31 +1,18 @@
 import type { Request, Response, NextFunction } from 'express'
-import * as jose from 'jose'
-import { getJwtSecret } from '../config/jwt'
+// funçõa requiredAuth vai verficar se existem os cookies e este middleware clearAuthCookie vai ser o responsál pelo retorno res do cookies limpos
 
 export const clearAuthCookie = async (
-  req: Request,
+  _req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<Response | void> => {
-  const token = req.cookies?.user_section
-
-  // Se o cookie existe, limpa ele preventivamente
-  if (token) {
-    res.clearCookie('user_section', {
-      httpOnly: true,
-      secure: process.env['NODE_ENV'] === 'production',
-      sameSite: 'lax',
-    })
-  }
-
-  // Tenta decodificar para garantir que o usuário saiba que foi desconectado com sucesso
-  try {
-    if (token) {
-      await jose.jwtVerify(token, getJwtSecret())
-    }
-    next() 
-  } catch (error) {
-    // Se o token era inválido ou expirado, o cookie já foi limpo acima. Segue em frente.
-    next()
-  }
+  // só limpa o cookie e passa para o controller de logout
+  // a verificação de autenticidade já foi feita pelo requireAuth antes desse middleware
+  res.clearCookie('user_section', {
+    httpOnly: true,
+    secure: process.env['NODE_ENV'] === 'production',
+    sameSite: 'lax',
+  })
+  // passa para o controller
+  next()
 }
