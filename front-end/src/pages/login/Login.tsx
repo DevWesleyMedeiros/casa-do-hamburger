@@ -1,8 +1,10 @@
 import { Eye, EyeOff } from "lucide-react";
 import React, { useCallback, useContext, useState } from "react";
+import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../../components/button/Button";
 import { Input } from "../../components/input/Input";
+import { ICON_CONFIG } from "../../constant/iconConfig";
 import { UserContext } from "../../shared/context/UserContext";
 import { ApiError } from "../../shared/services/api/ApiExceptions";
 import { LoginDate } from "../../shared/services/api/login/Login";
@@ -96,7 +98,7 @@ export const Login = () => {
 
   return (
     <form
-      className="flex h-screen items-center justify-center bg-[#161410]"
+      className="bg-brand-dark flex h-screen items-center justify-center"
       onSubmit={handleOnSubmit}
     >
       <div className="justify-left flex flex-col items-center gap-2 rounded-xl border-[0.5px] border-white/13 p-7">
@@ -104,54 +106,67 @@ export const Login = () => {
           <img src="./logo.png" alt="logo da hamburgeria" className="mb-4" />
         </Link>
 
-        <div className="mb-4 border-amber-100">
-          <p className="text-center font-bold text-[#F2DAAC]">
-            Bem vindo à Casa do Hamburguer!!
-          </p>
-        </div>
-
-        <div className="justify-left flex flex-col gap-2">
-          <Input
-            placeholder="E-mail"
-            type="email"
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <div className="relative w-full">
-            <Input
-              placeholder="Senha"
-              onChange={(e) => setPassword(e.target.value)}
-              type={showPassword ? "text" : "password"}
-            />
-            <button
-              type="button"
-              onClick={togglePasswordVisibility}
-              aria-label={showPassword ? "Mostrar senha" : "Ocultar senha"}
-              className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400"
-            >
-              {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
-            </button>
-          </div>
-
-          {errorMessage && (
-            <p className="text-left text-sm font-bold text-red-500">
-              {errorMessage}
+        <div className="w-full rounded-2xl border-white/13 bg-[#1b1a16] px-4 py-4">
+          <div className="mb-4 border-amber-100">
+            <p className="text-center font-bold text-[#F2DAAC]">
+              Bem vindo à Casa do Hamburguer!!
             </p>
-          )}
-
-          <Button
-            type="submit"
-            title={isLoading ? "Entrando" : "Entrar"}
-            colorVariation="bgRedVariation"
-          />
-
-          <div>
-            <Link to="/register" className="w-full">
-              <Button
-                type="button"
-                title="Não tem uma conta?"
-                colorVariation="bgWhiteVariation"
+          </div>
+          <div className="justify-left flex flex-col gap-2">
+            <Input
+              placeholder="E-mail"
+              type="email"
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <div className="relative w-full">
+              <Input
+                placeholder="Senha"
+                onChange={(e) => setPassword(e.target.value)}
+                type={showPassword ? "text" : "password"}
               />
-            </Link>
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                aria-label={showPassword ? "Mostrar senha" : "Ocultar senha"}
+                className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400"
+              >
+                {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
+              </button>
+            </div>
+            {errorMessage && (
+              <p className="text-left text-sm font-bold text-red-500">
+                {errorMessage}
+              </p>
+            )}
+            <Button
+              type="submit"
+              title={isLoading ? "Entrando" : "Entrar"}
+              colorVariation="bgDarkVariation"
+            />
+            <div className="flex w-full justify-center align-super text-[#595753]">
+              <div className="my-2 h-0 w-full border"></div>
+              <div className="mx-1 text-sm"> OU </div>
+              <div className="my-2 h-0 w-full border"></div>
+            </div>
+            <div className="">
+              <div className="flex flex-col">
+                <Button
+                  type="button"
+                  title="Cadastrar com Google"
+                  colorVariation="bgGoogleVariation"
+                >
+                  <FcGoogle size={ICON_CONFIG.mxSize} />
+                </Button>
+                <div className="align-center my-3 flex justify-center gap-1">
+                  <p className="font-bold text-[#4c4b48]">Não tem uma conta?</p>
+                  <Link to="/register">
+                    <span className="text-brand-amber text-right text-sm">
+                      Criar um conta
+                    </span>
+                  </Link>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

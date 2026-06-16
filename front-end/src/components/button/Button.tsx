@@ -11,14 +11,14 @@ type ButtonType = {
   title: string;
   type: "button" | "submit";
   colorVariation?: ColorVariation;
-  leftIcon?: React.ReactNode; // ← novo: suporte a ícone à esquerda do texto
+  children?: React.ReactNode;
 } & React.ButtonHTMLAttributes<HTMLButtonElement>;
 
 export const Button = ({
   title,
   type,
   colorVariation = "bgRedVariation",
-  leftIcon,
+  children,
   ...props
 }: ButtonType) => {
   const BASE =
@@ -31,28 +31,28 @@ export const Button = ({
   const VARIANTS: Record<ColorVariation, string> = {
     // CTA principal — fundo vermelho sólido
     bgRedVariation:
-      "border-2 border-redVariation bg-redVariation text-white " +
+      "border-1 border-redVariation bg-redVariation text-white " +
       "hover:shadow-[0_0_12px_rgba(201,42,14,0.5)] " +
       "focus-visible:ring-2 focus-visible:ring-redVariation focus:border-amber/50 focus-visible:ring-offset-2",
 
     // ação secundária — fundo branco com borda vermelha (contexto claro)
     bgWhiteVariation:
-      "border-2 border-redVariation bg-white text-redVariation " +
+      "bg-white text-redVariation " +
       "hover:bg-[#fff0ee] " +
       "hover:shadow-[0_0_12px_rgba(201,42,14,0.25)] " +
       "focus-visible:ring-2 focus-visible:ring-redVariation focus:border-amber/50 focus-visible:ring-offset-2",
 
     // OAuth / ação secundária — semitransparente escuro (tema dark)
     bgGoogleVariation:
-      "border border-white/[0.13] bg-white/[0.05] text-white/80 " +
+      "border border-white/[0.13] bg-white/[0.05] text-[#faf9f5] " +
       "hover:bg-white/[0.10] hover:border-white/[0.20] " +
       "focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-0",
 
     // ação terciária — outline sutil (tema dark)
     bgDarkVariation:
-      "border border-white/[0.08] bg-white/[0.03] text-white/60 " +
+      "border border-white/[0.08] bg-white/[0.03] text-[#faf9f5] " +
       "hover:bg-white/[0.07] hover:border-white/[0.14] " +
-      "focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-0",
+      "focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-0 mt-6",
   };
 
   return (
@@ -61,7 +61,7 @@ export const Button = ({
       type={type}
       className={`${BASE} ${VARIANTS[colorVariation]}`}
     >
-      {leftIcon}
+      {children}
       {title}
     </button>
   );
