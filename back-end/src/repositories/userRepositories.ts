@@ -26,5 +26,5 @@ export const userRepository = {
     // select: { id: true, name: true, Description: true, price: true }
     // usando o comando select do Postgresql no prisma para retornar alguns atributos apenas, daqueles que forma cadastrados
     return await prisma.products.findMany()
-    }
+  }
 }

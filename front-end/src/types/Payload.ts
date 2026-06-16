@@ -13,7 +13,7 @@ export interface RegisterPayloadInterface {
   cep: string;
 }
 
-// UserLogin pega a interface RegisterPayloadInterface, omit duas propriedades: "password" e "confirmPassword" e cria mais um id
+// UserLogin pega a interface RegisterPayloadInterface, omit duas propriedades: "password" e "confirmPassword" e cria mais um id e admin
 // UserLogin = { id: string, name: string, email: string, cep: string}
 export type UserLogin = Omit<
   RegisterPayloadInterface,

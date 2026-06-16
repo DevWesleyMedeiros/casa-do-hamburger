@@ -6,6 +6,7 @@ export const clearAuthCookie = async (
   res: Response,
   next: NextFunction,
 ): Promise<Response | void> => {
+
   // só limpa o cookie e passa para o controller de logout
   // a verificação de autenticidade já foi feita pelo requireAuth antes desse middleware
   res.clearCookie('user_section', {

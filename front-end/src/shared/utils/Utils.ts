@@ -12,11 +12,11 @@ export const getItemSelectedClass = (
 };
 
 // format brazilian currency
-export const brazilinaCurrencyFormat = (currencyValue: number): number => {
+export const brazilinaCurrencyFormat = (currencyValue: number): string => {
   if (Number.isNaN(currencyValue)) {
     throw new Error("Valor não é moeda");
   }
-  return parseFloat(currencyValue.toFixed(2));
+  return `R$${currencyValue.toFixed(2).replace(".", ",")}`;
 };
 
 // input trim
@@ -25,4 +25,15 @@ export const inputTrimToValue = (value: string): string => {
     throw new Error("Input vazio");
   }
   return value.trim();
+};
+
+// envia nome de produtos uppercase
+export const toUpperCase = (productName: string): string => {
+  if (!productName) {
+    throw new Error("Não do produto de ser passado");
+  }
+  if (productName === "") {
+    throw new Error("O produto deve conter título");
+  }
+  return inputTrimToValue(productName.toUpperCase());
 };

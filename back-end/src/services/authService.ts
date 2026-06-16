@@ -65,7 +65,7 @@ export const authService = {
     }
   },
 
-  // registrar usuário no banco de dados (POSR)
+  // registrar usuário no banco de dados (POST)
   register: async (name: string, email: string, password: string, cep: string) => {
     const existing = await userRepository.findByEmail(email)
 

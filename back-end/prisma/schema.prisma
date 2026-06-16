@@ -8,19 +8,19 @@ datasource db {
 }
 
 model User {
-  id       String @id @default(uuid())
+  id       String  @id @default(uuid())
   name     String
-  email    String @unique
-  password String
+  email    String  @unique
   cep      String
-  admin Boolean @default(false)
+  password String
+  admin    Boolean @default(false)
 }
 
 model Products {
-  id String @id @default(cuid())
-  name String
-  Description String
-  price Int
-  img String
-  createAt DateTime @default(now())
+  id          String  @id @default(cuid())
+  name        String
+  description String
+  price       Int
+  img         String
+  createAt    DateTime @default(now())
 }

@@ -66,13 +66,13 @@ export const authController = {
     res.status(200).json({ user })
   },
 
-  // rotas que usam o get vão devolver o res, portanto não usam o req. Use o _req para dizer ao typescript isole esse parâmetro, que se trata de uma assinatura do express. Ele não gera um erro, mas é para assegura que ele foi declarado, porém não foi usado. Daí o typescript para de reclamar
+  // rotas que usam o get vão devolver o res, portanto não usam o req. Use o _req para dizer ao typescript isole esse parâmetro, que se trata de uma assinatura do express. Ele não gera um erro, mas é para assegura que ele foi declarado, porém não foi usado.
   // rota de logout para apagar os cookies do usuário. A requisição que vem do frontend com os cookies e vamos verificar aqui se eles existem. Pega pelo nome do cookie. Vai em aplicação no devtools que consegue ver o nome
   logout: async (_req: Request, res: Response) => {
     // requireAuth já garantiu que o usuário está autenticado
     // só limpa o cookie e responde
-
     // user_section - nome do meu cookie
+
     res.clearCookie('user_section')
     res.status(200).json({ message: 'Logout realizado com sucesso' })
   },

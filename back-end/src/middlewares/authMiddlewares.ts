@@ -1,4 +1,4 @@
-// O requireAuth já verifica o token e popula req.user antes do controller rodar.
+// O requireAuth já verifica o token e popula req.user antes do controller rodar
 
 import type { Request, Response, NextFunction } from 'express'
 import * as jose from 'jose'
@@ -31,7 +31,7 @@ export const requireAuth = async (
       admin: payload['admin'],
     }
 
-    next() // libera para o controller
+    next() // libera o req['user'] para o controller
     return
   } catch (error) {
     // jose lança automaticamente se expirado ou adulterado
