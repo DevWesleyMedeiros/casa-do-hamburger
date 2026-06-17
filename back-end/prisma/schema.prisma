@@ -21,6 +21,7 @@ model Products {
   name        String
   description String
   price       Int
+  category String
   img         String
   createAt    DateTime @default(now())
 }

@@ -37,3 +37,8 @@ export const toUpperCase = (productName: string): string => {
   }
   return inputTrimToValue(productName.toUpperCase());
 };
+
+// itera sobre array e retorna seus valores como toUpperCase
+export const toUpperCaseDate = (arrayDate: string[]): string[] => {
+  return arrayDate.map((item) => item.toUpperCase());
+};

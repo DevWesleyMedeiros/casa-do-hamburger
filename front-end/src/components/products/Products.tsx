@@ -4,6 +4,7 @@ import { type ProductsInterface } from "../../types/Products";
 
 export const Products = ({
   id,
+  category,
   name,
   description,
   price,

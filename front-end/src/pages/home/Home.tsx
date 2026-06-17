@@ -1,16 +1,22 @@
 import { useCallback, useEffect, useState } from "react";
 import { Products } from "../../components/products/Products";
-import { getItemSelectedClass } from "../../shared/utils/Utils";
+import {
+  getItemSelectedClass,
+  toUpperCaseDate,
+} from "../../shared/utils/Utils";
 import { getProductsDate } from "../../shared/services/api/products/Products";
 import { type ProductsInterface } from "../../types/Products";
 
 export const Home = () => {
   // defini FILTER_PRODUCTS = Hamburguer, Bebidas e Porções como readonly - evita typos
-  const FILTER_PRODUCTS = ["Hamburguer", "Bebidas", "Porções"] as const;
+  const FILTER_PRODUCTS = toUpperCaseDate([
+    "Hamburguer",
+    "Bebidas",
+    "Porções",
+  ] as const);
   type FilterProducts = (typeof FILTER_PRODUCTS)[number];
 
-  const [selectedItemClass, setSelectedItemClass] =
-    useState<FilterProducts>("Hamburguer");
+  const [category, setCategory] = useState<FilterProducts>("Hamburguer");
 
   // products inicia com array vazio até ser configurado novo valor
   const [products, setProducts] = useState<ProductsInterface[]>([]);
@@ -29,6 +35,11 @@ export const Home = () => {
     productsDate();
   }, [productsDate]);
 
+  // filtar produtos pela sua categoria usando um filter: vamos iterar no array product (recebe os produtos pelo setProducts que vem do meu banco de dados) e verificar se o produto filtrado product.category === category (array de estado). Se for, monte um novo array como a condição
+  const filteredProductsByCategory = products.filter((product) => {
+    return product.category === category;
+  });
+
   return (
     <div className="mx-auto flex w-full flex-col gap-2 px-3 text-white md:w-184.25 md:px-0">
       <div className="my-2 flex gap-2 md:my-3">
@@ -39,21 +50,20 @@ export const Home = () => {
         {FILTER_PRODUCTS.map((item) => (
           <div
             key={item}
-            className={getItemSelectedClass(item, selectedItemClass)}
-            onClick={() => setSelectedItemClass(item)} // ← seta o clicado
+            className={getItemSelectedClass(item, category)}
+            onClick={() => setCategory(item)} // ← seta o clicado
           >
             {item}
           </div>
         ))}
       </div>
 
-      <p className="text-brand-amber mb-2 font-bold uppercase">
-        {selectedItemClass}
-      </p>
+      <p className="text-brand-amber mb-2 font-bold uppercase">{category}</p>
       <div className="flex flex-col gap-3 md:gap-3">
-        {products.map((product) => (
+        {filteredProductsByCategory.map((product) => (
           <Products
             id={product.id}
+            category={product.category}
             name={product.name}
             description={product.description}
             img={product.img}
@@ -61,6 +71,10 @@ export const Home = () => {
             key={product.id}
           />
         ))}
+        {/* caso eu não tenha nada inserido naquela categoria, eu retrono um elemento com mensagem */}
+        {filteredProductsByCategory.length === 0 && (
+          <p>Não existem produtos nessa categoria</p>
+        )}
       </div>
     </div>
   );
