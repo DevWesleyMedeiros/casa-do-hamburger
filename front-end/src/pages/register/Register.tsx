@@ -1,15 +1,18 @@
 // por aqui, eu cadastro um usuário no meu banco de dados enviando um payload via post e que são tratados no meu backend
 
-import React, { useState, useCallback } from "react";
+import { Eye, EyeOff } from "lucide-react";
+import { useCallback, useState } from "react";
+import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { Button } from "../../components/button/Button";
 import { Input } from "../../components/input/Input";
+import { ICON_CONFIG } from "../../constant/iconConfig";
 import { RegisterDate } from "../../shared/services/api/register/Register";
-import { EyeOff, Eye } from "lucide-react";
-import { toast } from "sonner";
 import { inputTrimToValue } from "../../shared/utils/Utils";
 
 export const Register = () => {
+  // estados para campos de formulário
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -17,6 +20,8 @@ export const Register = () => {
   const [matchingPasswordError, setMatchingPasswordError] = useState<
     string | null
   >(null);
+
+  // estados para erros
   const [cep, setCep] = useState<string>("");
   const [registerError, setRegisterError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -104,15 +109,21 @@ export const Register = () => {
 
   return (
     <form
-      className="flex h-screen items-center justify-center bg-[#161410]"
+      className="bg-brand-dark flex h-screen items-center justify-center"
       onSubmit={handleOnSubmit}
     >
-      <div className="flex flex-col items-center justify-center gap-2">
-        <Link to="/home">
-          <img src="./logo.png" alt="logo do hamburger" className="mb-4" />
-        </Link>
+      <div className="flex flex-col items-center justify-center rounded-xl border-[0.5px] border-white/13 px-5 py-3">
+        {/* <Link to="/home">
+          <img src="./logo.png" alt="logo do hamburger" className="mb-1" />
+        </Link> */}
 
-        <div className="justify-left flex flex-col gap-2">
+        <div className="mb-4 border-amber-100">
+          <p className="text-center font-bold text-[#F2DAAC]">
+            Bem vindo à Casa do Hamburguer!!
+          </p>
+        </div>
+
+        <div className="justify-left flex flex-col gap-1.5 rounded-2xl border-white/13 bg-[#1b1a16] px-5 py-4 text-red-500">
           <Input
             placeholder="Seu nome"
             type="text"
@@ -163,7 +174,7 @@ export const Register = () => {
           </div>
 
           {matchingPasswordError && (
-            <p className="text-left text-sm font-bold text-red-500">
+            <p className="text-left text-sm font-bold">
               {matchingPasswordError}
             </p>
           )}
@@ -176,22 +187,40 @@ export const Register = () => {
           />
 
           {registerError && (
-            <p className="text-left text-sm font-bold text-red-500">
-              {registerError}
-            </p>
+            <p className="text-left text-sm font-bold">{registerError}</p>
           )}
         </div>
 
-        <div className="mt-2 flex w-full flex-col gap-1">
-          <Button title="Criar conta" type="submit" />
+        <div className="flex w-full flex-col justify-start gap-1">
+          <Button
+            title="Criar conta"
+            type="submit"
+            colorVariation="bgDarkVariation"
+          />
 
-          <Link to="/login" className="w-full">
+          <div className="flex w-full justify-center align-super text-[#595753]">
+            <div className="my-2 h-0 w-full border"></div>
+            <div className="mx-1 text-sm"> OU </div>
+            <div className="my-2 h-0 w-full border"></div>
+          </div>
+
+          <div className="flex flex-col gap-2">
             <Button
-              title="Já tenho uma conta"
               type="button"
-              colorVariation="bgWhiteVariation"
-            />
-          </Link>
+              title="Cadastrar com Google"
+              colorVariation="bgGoogleVariation"
+            >
+              <FcGoogle size={ICON_CONFIG.mxSize} />
+            </Button>
+            <div className="align-center my-1 flex justify-center gap-1">
+              <p className="font-bold text-[#4c4b48]">Já tenho uma conta</p>
+              <Link to="/login">
+                <span className="text-brand-amber text-right text-sm">
+                  Entrar
+                </span>
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </form>
