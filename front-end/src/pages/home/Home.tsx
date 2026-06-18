@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { Products } from "../../components/products/Products";
+import { getProductsDate } from "../../shared/services/api/products/Products";
 import {
   getItemSelectedClass,
   toUpperCaseDate,
 } from "../../shared/utils/Utils";
-import { getProductsDate } from "../../shared/services/api/products/Products";
 import { type ProductsInterface } from "../../types/Products";
 
 export const Home = () => {
@@ -17,7 +17,7 @@ export const Home = () => {
   type FilterProducts = (typeof FILTER_PRODUCTS)[number];
 
   // filtro de itens
-  const [category, setCategory] = useState<FilterProducts>("Hamburguer");
+  const [category, setCategory] = useState<FilterProducts>("HAMBURGUER");
 
   // products inicia com array vazio até ser configurado novo valor
   const [products, setProducts] = useState<ProductsInterface[]>([]);
