@@ -16,6 +16,7 @@ export const Home = () => {
   ] as const);
   type FilterProducts = (typeof FILTER_PRODUCTS)[number];
 
+  // filtro de itens
   const [category, setCategory] = useState<FilterProducts>("Hamburguer");
 
   // products inicia com array vazio até ser configurado novo valor
