@@ -43,7 +43,7 @@ export const registerSchema = z
     // o Zod não consegue comparar password com confirmPassword dentro do .object()
     // porque cada campo é validado de forma isolada
   })
-  // o método refine com (date) itera sobre cada campo do schema e captura suas propriedades
+  // o método refine com (date) itera sobre cada campo do schema e captura suas propriedades, funções etc. e podermos manipularmos
   .refine((date) => date.password === date.confirmPassword, {
     message: "As senhas não coincidem",
     path: ["confirmPassword"], // aponta o erro no campo confirmPassword
