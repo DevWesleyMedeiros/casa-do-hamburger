@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 // conector que faz o react-hook-form conversar com o Zod
 
 import { Eye, EyeOff } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useState} from "react";
 import { useForm } from "react-hook-form";
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom";
@@ -17,6 +17,7 @@ import {
   type registerInput,
 } from "../../shared/schemas/authSchemas";
 import { RegisterDate } from "../../shared/services/api/register/Register";
+import { displayStrongPassword } from "../../shared/utils/Utils";
 
 export const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -34,11 +35,17 @@ export const Register = () => {
   const {
     register,
     handleSubmit,
+    watch, // lê o valor atual de um campo sem causar re-render excessivo
     formState: { errors },
     reset,
   } = useForm<registerInput>({
     resolver: zodResolver(registerSchema), // antes de chamar o submit pelo useForm, o zod irá validar
   });
+
+  // watch('password') assina o campo e retorna o valor atual
+  // usado para calcular a força em tempo real enquanto o usuário digita
+  const passwordValue = watch("password") ?? "";
+  const strength = displayStrongPassword(passwordValue);
 
   // enviando meus dados para o backend
   // onSubmit só é chamado se todos os campos passarem na validação do Zod
@@ -57,15 +64,15 @@ export const Register = () => {
         });
 
         // manipular os erros vindo do backend com as toast
-        if (result.status === 409) {
+        if (result?.status === 409) {
           toast.error("Email já cadastrado");
           return;
         }
-        if (result.status === 400) {
+        if (result?.status === 400) {
           toast.error("Todas as informações são obrigatórias");
           return;
         }
-        if (result.status === 500) {
+        if (result?.status === 500) {
           toast.error("Erro interno. Tente novamente mais tarde.");
           return;
         }
@@ -124,7 +131,7 @@ export const Register = () => {
           {/* email */}
           <Input placeholder="E-mail" type="email" {...register("email")} />
           {errors.email && (
-            <p className="mt-1 text-left text-xs font-bold text-red-500">
+            <p className="mt-0.5 text-left text-xs font-bold text-red-500">
               {errors.email.message}
             </p>
           )}
@@ -144,8 +151,27 @@ export const Register = () => {
             >
               {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
             </button>
+            {/* só aparece quando o usuário começa a digitar */}
+            {passwordValue && (
+              <div className="mt-1.5 flex items-center gap-1 px-0.5">
+                {strength.bars.map((active, i) => (
+                  <div
+                    key={i}
+                    className="h-0.5 flex-1 rounded-full transition-all duration-300"
+                    style={{
+                      background: active
+                        ? strength.color
+                        : "rgba(255,255,255,0.1)",
+                    }}
+                  />
+                ))}
+                <span className="ml-1.5 text-[11px] text-white/35">
+                  {strength.label}
+                </span>
+              </div>
+            )}
             {errors.password && (
-              <p className="mt-1 text-left text-xs font-bold text-red-500">
+              <p className="mt-0.5 text-left text-xs font-bold text-red-500">
                 {errors.password.message}
               </p>
             )}
@@ -169,7 +195,7 @@ export const Register = () => {
               {showConfirmPassword ? <Eye size={20} /> : <EyeOff size={20} />}
             </button>
             {errors.confirmPassword && (
-              <p className="mt-1 text-left text-xs font-bold text-red-500">
+              <p className="mt-0.5 text-left text-xs font-bold text-red-500">
                 {errors.confirmPassword.message}
               </p>
             )}
@@ -177,11 +203,11 @@ export const Register = () => {
 
           {/* cep */}
           <Input placeholder="Seu CEP" type="text" {...register("cep")} />
-          <p className="mt-1 text-left text-xs text-white/30">
+          <p className="mt-0.5 text-left text-xs text-white/30">
             formato: 00000-000
           </p>
           {errors.cep && (
-            <p className="mt-1 text-left text-xs font-bold text-red-500">
+            <p className="mt-0.5 text-left text-xs font-bold text-red-500">
               {errors.cep.message}
             </p>
           )}
@@ -222,4 +248,4 @@ export const Register = () => {
       </div>
     </form>
   );
-};
+};;

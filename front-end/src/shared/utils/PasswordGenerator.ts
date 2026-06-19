@@ -61,3 +61,4 @@ const randowIndex = (max: number): number => {
   return array[0] % max;
 };
 // código que pode ser evoluído para um algorítmo de (Fisher-Yates)
+

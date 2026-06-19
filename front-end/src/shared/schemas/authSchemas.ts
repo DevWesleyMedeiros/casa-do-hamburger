@@ -43,7 +43,7 @@ export const registerSchema = z
     // o Zod não consegue comparar password com confirmPassword dentro do .object()
     // porque cada campo é validado de forma isolada
   })
-  // o método refine com (date) itera sobre cada campo do schema e captura suas propriedades, funções etc. e podermos manipularmos
+  // o método refine com (date) itera sobre cada campo do schema e captura suas propriedades, funções etc. e podermos manipularmos. Trata-se de uma regra de validação personalizada
   .refine((date) => date.password === date.confirmPassword, {
     message: "As senhas não coincidem",
     path: ["confirmPassword"], // aponta o erro no campo confirmPassword
@@ -53,8 +53,20 @@ export const registerSchema = z
 // RegisterInput = { name: string, email: string, password: string, confirmPassword: string, cep: string }
 // exporto eles como types, uma vez que serão tipos seguidos pelo meus inputs
 // com Zod — TypeScript lê o schema e infere o tipo automaticamente
-export type registerInput = z.infer<typeof registerSchema>;
 
+// definindo um schema para as validações de login
+export const loginSchema = z.object({
+  email: z
+    .string()
+    .min(1, "E-mail é obrigatório")
+    .email("Formato de email inválido")
+    .trim(),
+
+  password: z.string().min(1, "Senha é obrigatória").trim(),
+  // aqui não colocamos regra de força de senha, pois já temos ela ao registrar
+});
+
+export type registerInput = z.infer<typeof registerSchema>;
 // meu registerInput é literalmente um interface RegisterInput =
 // { name: string
 //   email: string
@@ -62,3 +74,5 @@ export type registerInput = z.infer<typeof registerSchema>;
 //   confirmPassword: string
 //   cep: string
 // }
+
+export type loginInput = z.infer<typeof loginSchema>;
