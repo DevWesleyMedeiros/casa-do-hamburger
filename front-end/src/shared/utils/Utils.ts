@@ -43,11 +43,15 @@ export const displayStrongPassword = (password: string) => {
   if (password.length >= 9) score++;
 
   // 2. Ganha ponto se contiver pelo menos uma letra maiúscula
-  if (/[A-Z]/.test(password)) score++;
+  if (/[a-z]/.test(password)) score++;
 
   // 3. Ganha ponto se contiver letras minúsculas OU números OU especiais
   // Usamos [ ... ] sem o ^ e $ para verificar se esses elementos existem na string
-  if (/[a-z0-9!@#$%^&*()_+=\- [\]{};':"\\|,.<>/?]/.test(password)) score++;
+  if (
+    /[A-Z0-9]/.test(password) &&
+    /[!@#$%^&*()_+=\- [\]{};':"\\|,.<>/?]/.test(password)
+  )
+    score++;
 
   if (score === 1) return { label: "fraca", bars: [1, 0, 0], color: "#C41E00" };
   if (score === 2) return { label: "média", bars: [1, 1, 0], color: "#F59E0B" };
