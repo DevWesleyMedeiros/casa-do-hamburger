@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Copy, Eye, EyeOff, Wand2, X } from "lucide-react";
 import { useCallback, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type SubmitHandler } from "react-hook-form";
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -33,9 +33,9 @@ export const Register = () => {
   const [suggestedPassword, setSugestedPassword] = useState<string>("");
 
   // useForm conectado ao Zod via zodResolver
-  // register   → conecta cada input ao useForm
+  // register → conecta cada input ao useForm (como se fosse o value e setValue de um input)
   // handleSubmit → envolve o onSubmit, só chama se o schema validar
-  // formState   → carrega os erros de cada campo
+  // formState → carrega os erros de cada campo
   // reset → reseta os campos do input
   const {
     register,
@@ -44,10 +44,19 @@ export const Register = () => {
     // é uma função que permite alterar dinamicamente o valor de um campo de forma programática, sem precisar que o usuário digite ou interaja diretamente
     watch,
     // lê o valor atual de um campo sem causar re-render excessivo
-    formState: { errors },
+    formState: { errors, isSubmitting },
+    // ainda dentro do formState, temos um propriedade disable -> usada para gerar formulários de visualização somente
     reset,
   } = useForm<registerInput>({
     resolver: zodResolver(registerSchema), // antes de chamar o submit pelo useForm, o zod irá validar
+    // defaultValues: {
+    //   name: "Seu nome",
+    //   email: "E-mail",
+    //   password: "Sua senha",
+    //   confirmPassword: "Confirme sua senha",
+    //   cep: "Digite um cep",
+    // },
+    // passe os defaults values se você sabe os status inicial dos seus inputs
   });
 
   // abre uma janela popover com uma sugestão de senha
@@ -89,9 +98,9 @@ export const Register = () => {
   // enviando meus dados para o backend
   // onSubmit só é chamado se todos os campos passarem na validação do Zod
   // data já vem tipado como RegisterInput — sem precisar ler campo por campo
-  const onSubmit = useCallback(
-    async (data: registerInput) => {
-      setIsLoading(true);
+  const onSubmit: SubmitHandler<registerInput> = useCallback(
+    async (data) => {
+      setIsLoading((prev) => !prev);
 
       try {
         const result = await RegisterDate.create({
@@ -127,7 +136,7 @@ export const Register = () => {
       } catch {
         toast.error("Ocorreu um erro inesperado. Tente novamente.");
       } finally {
-        setIsLoading(false);
+        setIsLoading((prev) => !prev);
       }
     },
     [navigate, reset],
@@ -137,7 +146,6 @@ export const Register = () => {
   const togglePasswordVisibility = useCallback(() => {
     setShowPassword((prev) => !prev);
   }, []);
-
   const toggleConfirmPasswordVisibility = useCallback(() => {
     setShowConfirmPassword((prev) => !prev);
   }, []);
@@ -147,10 +155,15 @@ export const Register = () => {
       className="bg-brand-dark flex h-screen flex-col items-center justify-center"
       onSubmit={handleSubmit(onSubmit)} // ← handleSubmit valida antes de chamar onSubmit
     >
-      <div className="flex flex-col items-center justify-center rounded-xl border-[0.5px] border-white/13 bg-red-500 px-5 py-3">
-        <div className="justify-left flex flex-col gap-1.5 rounded-2xl border-white/13 bg-[#1b1a16] px-5 py-4 text-red-500">
+      <div className="flex flex-col items-center justify-center rounded-xl border-[0.5px] border-white/13 px-5 py-3">
+        <div className="justify-left third-level flex flex-col gap-1.5 rounded-2xl border-white/13 bg-[#1b1a16] px-5 py-4">
           {/* nome */}
-          <Input placeholder="Seu nome" type="text" {...register("name")} />
+          <Input
+            placeholder="Seu nome"
+            type="text"
+            {...register("name")}
+            disabled={isSubmitting}
+          />
           {errors.name && (
             <p className="text-brand-red mt-1 text-left text-xs font-bold">
               {errors.name.message}
@@ -158,27 +171,37 @@ export const Register = () => {
           )}
 
           {/* email */}
-          <Input placeholder="E-mail" type="email" {...register("email")} />
+          <Input
+            placeholder="E-mail"
+            type="email"
+            {...register("email")}
+            disabled={isSubmitting}
+          />
           {errors.email && (
             <p className="mt-0.5 text-left text-xs font-bold text-red-500">
               {errors.email.message}
             </p>
           )}
 
-          <div className="relative w-full">
+          <div className="relative flex w-full flex-col">
             {/* password */}
             <Input
               placeholder="Senha"
               type={showPassword ? "text" : "password"}
               {...register("password")}
+              disabled={isSubmitting}
             />
             <button
               type="button"
               onClick={togglePasswordVisibility}
-              className="absolute top-1/2 right-3 -translate-y-1/2 transform text-gray-500"
+              className="absolute top-1/2 right-8 -translate-y-1/2 transform text-gray-500"
               aria-label={showPassword ? "Mostrar senha" : "Ocultar senha"}
             >
-              {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
+              {showPassword ? (
+                <Eye size={ICON_CONFIG.mnSize} />
+              ) : (
+                <EyeOff size={ICON_CONFIG.mnSize} />
+              )}
             </button>
 
             {/* ícone varinha — abre o popover de sugestão */}
@@ -189,7 +212,7 @@ export const Register = () => {
               aria-label="Sugerir senha forte"
               title="Sugerir senha forte"
             >
-              <Wand2 size={ICON_CONFIG.mxSize} />
+              <Wand2 size={ICON_CONFIG.mnSize} />
             </button>
           </div>
 
@@ -207,7 +230,7 @@ export const Register = () => {
                   className="shrink-0 text-white/40 transition-colors hover:text-[#F2DAAC]"
                   aria-label="Copiar senha sugerida"
                 >
-                  <Copy size={ICON_CONFIG.mxSize} />
+                  <Copy size={ICON_CONFIG.mnSize} />
                 </button>
               </div>
 
@@ -258,76 +281,95 @@ export const Register = () => {
               </span>
             </div>
           )}
+
           {errors.password && (
             <p className="mt-0.5 text-left text-xs font-bold text-red-500">
               {errors.password.message}
             </p>
           )}
-        </div>
+          <div className="relative flex flex-col gap-2">
+            {/* div campos formulário */}
+            {/* confirmar senha */}
+            <Input
+              placeholder="Confirme sua senha"
+              type={showConfirmPassword ? "text" : "password"}
+              {...register("confirmPassword")}
+              disabled={isSubmitting}
+            />
+            <button
+              type="button"
+              onClick={toggleConfirmPasswordVisibility}
+              className="absolute top-5 right-3 -translate-y-1/2 transform text-gray-500"
+              aria-label={
+                showConfirmPassword ? "Mostrar senha" : "Ocultar senha"
+              }
+            >
+              {showConfirmPassword ? (
+                <Eye size={ICON_CONFIG.mnSize} />
+              ) : (
+                <EyeOff size={ICON_CONFIG.mnSize} />
+              )}
+            </button>
+            {errors.confirmPassword && (
+              <p className="mt-0.5 text-left text-xs font-bold text-red-500">
+                {errors.confirmPassword.message}
+              </p>
+            )}
 
-        <div className="relative w-full">
-          {/* confirmar senha */}
-          <Input
-            placeholder="Confirme sua senha"
-            type={showConfirmPassword ? "text" : "password"}
-            {...register("confirmPassword")}
-          />
-          <button
-            type="button"
-            onClick={toggleConfirmPasswordVisibility}
-            className="absolute top-1/2 right-3 -translate-y-1/2 transform text-gray-500"
-            aria-label={showConfirmPassword ? "Mostrar senha" : "Ocultar senha"}
-          >
-            {showConfirmPassword ? <Eye size={20} /> : <EyeOff size={20} />}
-          </button>
-          {errors.confirmPassword && (
-            <p className="mt-0.5 text-left text-xs font-bold text-red-500">
-              {errors.confirmPassword.message}
+            {/* cep */}
+            <Input
+              placeholder="Seu CEP"
+              type="text"
+              {...register("cep")}
+              disabled={isSubmitting}
+            />
+            <p className="mt-0.5 text-left text-xs text-white/30">
+              formato: 00000-000
             </p>
-          )}
-        </div>
+            {errors.cep && (
+              <p className="mt-0.5 text-left text-xs font-bold text-red-500">
+                {errors.cep.message}
+              </p>
+            )}
 
-        {/* cep */}
-        <Input placeholder="Seu CEP" type="text" {...register("cep")} />
-        <p className="mt-0.5 text-left text-xs text-white/30">
-          formato: 00000-000
-        </p>
-        {errors.cep && (
-          <p className="mt-0.5 text-left text-xs font-bold text-red-500">
-            {errors.cep.message}
-          </p>
-        )}
-      </div>
+            <div className="flex flex-col justify-center">
+              <Button
+                title={isLoading ? "Cadastrando" : "Cadastrar"}
+                type="submit"
+                colorVariation="bgDarkVariation"
+                disabled={isLoading}
+                // desabilitar o botão durante o envio dos dados para registro
+              />
 
-      <div className="flex flex-col justify-start gap-1 bg-blue-600">
-        <Button
-          title={isLoading ? "Cadastrando" : "Cadastrar"}
-          type="submit"
-          colorVariation="bgDarkVariation"
-          disabled={isLoading}
-        />
+              <div className="flex w-full justify-center align-super text-[#595753]">
+                <div className="my-2 h-0 w-full border"></div>
+                <div className="mx-1 text-sm"> OU </div>
+                <div className="my-2 h-0 w-full border"></div>
+              </div>
 
-        <div className="flex w-full justify-center align-super text-[#595753]">
-          <div className="my-2 h-0 w-full border"></div>
-          <div className="mx-1 text-sm"> OU </div>
-          <div className="my-2 h-0 w-full border"></div>
-        </div>
+              <div className="flex flex-col gap-2">
+                <Button
+                  type="button"
+                  title="Registrar com Google"
+                  colorVariation="bgGoogleVariation"
+                  disabled={isSubmitting}
+                >
+                  <FcGoogle size={ICON_CONFIG.mxSize} />
+                </Button>
 
-        <div className="flex flex-col gap-2">
-          <Button
-            type="button"
-            title="Registrar com Google"
-            colorVariation="bgGoogleVariation"
-          >
-            <FcGoogle size={ICON_CONFIG.mxSize} />
-          </Button>
-          <div className="align-center my-1 flex justify-center gap-1">
-            <p className="font-bold text-[#4c4b48]">Já tenho uma conta</p>
-            <Link to="/login">
-              <span className="text-brand-amber text-right text-sm">
-                Entrar
-              </span>
-            </Link>
+                <div className="align-center my-1 flex justify-center gap-1">
+                  <p className="font-bold text-[#4c4b48]">Já tenho uma conta</p>
+                  <Link to={isSubmitting ? "#" : "/login"}>
+                    <span
+                      className={`text-brand-amber text-right text-sm ${isSubmitting ? "pointer-events-none cursor-not-allowed opacity-50 select-none" : ""}`}
+                    >
+                      Entrar
+                    </span>
+                  </Link>
+                  ,
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
