@@ -93,6 +93,11 @@ export const authService = {
   },
   deleteProduct: async (id: string) => {
     const deleted = await userRepository.findProductAndDelete(id)
+
+    if (!deleted) {
+      throw { status: 404, message: 'produto não encontrado ou já foi deletado' }
+    }
     return deleted
+    // me retorna o produto deletado
   },
 }

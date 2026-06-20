@@ -5,8 +5,8 @@
 // 🍽️ ROUTE — só mapeia URL para o Controller
 import { Router } from 'express'
 import { authController } from '../controllers/authControllers'
-import { clearAuthCookie } from '../middlewares/clearAuthCookie'
 import { requireAuth } from '../middlewares/authMiddlewares'
+import { clearAuthCookie } from '../middlewares/clearAuthCookie'
 import { requiredAdmin } from '../middlewares/requiredAdmin'
 // import { requiredAdmin } from '../middlewares/requiredAdmin'
 
@@ -27,6 +27,8 @@ router.get('/products', authController.getProducts)
 
 // rota para deletar produto
 // rota — "id" é uma string literal, não um parâmetro de rota, por isso os :
-router.delete('/delete-product/:id', requireAuth, requiredAdmin, authController.deleteProduct)
+// :id isso é só o "molde" do parâmetro. Na rota é só a sintaxe de declaração do Express — ele diz "aqui vai um parâmetro dinâmico chamado id". Quando faz a requisição de verdade, não inclui os dois pontos:
+// acesso minha rota products normal, porém muda o método e devo passar um id
+router.delete('/products/:id', requireAuth, requiredAdmin, authController.deleteProduct)
 
 export default router

@@ -3,6 +3,7 @@
 // como se fosse um estoquista: conhece cada ingrediente, vai ao banco de dados e busca o que precisa
 // Queries no banco via Prisma. Só conhece o PRISMA
 
+import { Prisma } from '../../generated/prisma/client'
 import { prisma } from '../db'
 
 // procura no banco de dados um usuário pelo email, utilizando o método findFirst do Prisma Client. Se encontrar um usuário com o email fornecido, ele retorna os dados desse usuário; caso contrário, retorna null.
@@ -29,9 +30,18 @@ export const userRepository = {
   },
 
   // função que buscará por um produto específico identificado pelo id e fazer a deleção
+
   findProductAndDelete: async (id: string) => {
-    return await prisma.products.delete({
-      where: { id: id },
-    })
+    try {
+      return await prisma.products.delete({
+        where: { id: id },
+      })
+    } catch (error) {
+      // P2025 = "Record to delete does not exist" — código oficial do Prisma
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+        return null // ← converte a exceção do Prisma em um retorno previsível. A partir da daí que eu já posso manipular um retorno com status caso id não encontrado
+      }
+      throw error // qualquer outro erro (conexão, etc.) continua subindo normalmente
+    }
   },
 }

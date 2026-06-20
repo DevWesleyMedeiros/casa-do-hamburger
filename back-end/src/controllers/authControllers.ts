@@ -3,7 +3,7 @@
 // esse arquivo é como se fosse o chef: ele coordena os pedidos. Sabe o que fazer, mas não vai ao estoque
 // Só lida com req, res e repassa para o Service
 // vai receber do front, processar e retornar, mas não cria a lógica das regras de negócio. As regras de negócio são importada aqui no authService
-// Receber req/res, chamar Service, retornar resposta. Só conhece os SERVICES
+// Receber req/res, chamar Service, retornar resposta. São métodos que devem ser usados somente nos controllers Só conhece os SERVICES
 
 import type { Request, Response } from 'express';
 import { authService } from '../services/authService';
@@ -88,8 +88,9 @@ export const authController = {
   deleteProduct: async (req: Request, res: Response) => {
     try {
       const { id } = req.params
+      // id vem exatamente de onde eu passo :id na rota
 
-      // O método Array.isArray() verifica se um determinado valor ou objeto é um array (ou vetor). Ele retorna true se o valor for um array e false caso contrário
+      //O método Array.isArray() verifica se um determinado valor ou objeto é um array (ou vetor). Ele retorna true se o valor for um array e false caso contrário
       if (!id || Array.isArray(id)) {
         return res.status(400).json({ message: 'ID do produto inválido' })
       }
