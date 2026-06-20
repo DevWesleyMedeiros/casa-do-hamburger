@@ -1,11 +1,11 @@
 //  componente provedor do contexto. Tudo que tiver envelopado por ele poderá usar o user e setUSer
 
 import {
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
+    type ReactNode,
+    useCallback,
+    useEffect,
+    useMemo,
+    useState,
 } from "react";
 import { type UserDate } from "../../types/Payload";
 import { UserContext } from "../context/UserContext";
@@ -24,7 +24,7 @@ export const UserProvider = ({ children }: propsChildren) => {
   // espere o componete carregar para só depois executá-lo
   useEffect(() => {
     getAuth
-      .getMe()
+      .getMe() // resolva o getMe route e retorne o valor no .then data
       .then((data) => {
         if (data) setUser(data);
       })
@@ -52,3 +52,6 @@ export const UserProvider = ({ children }: propsChildren) => {
     // O children permite o encapsulamento de outros componente dentro do privider e que, quem estiver dentro do provider poderá usar os values passados, que, nesse caso, são os user e setUser
   );
 };
+
+// setUser -> no Login.tsx pois me retorna informações do usuário cadastrado {id, name, email, ... cep}
+// user -> uma vez que eu tenho o setUser com os dados de usuário, eu posso usá-los em qualquer lugar com user.
