@@ -229,6 +229,7 @@ export const Register = () => {
                   onClick={handleCopyPassword}
                   className="shrink-0 text-white/40 transition-colors hover:text-[#F2DAAC]"
                   aria-label="Copiar senha sugerida"
+                  title="Copiar senha"
                 >
                   <Copy size={ICON_CONFIG.mnSize} />
                 </button>
