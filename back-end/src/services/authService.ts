@@ -91,4 +91,8 @@ export const authService = {
     }
     return productsDate
   },
+  deleteProduct: async (id: string) => {
+    const deleted = await userRepository.findProductAndDelete(id)
+    return deleted
+  },
 }

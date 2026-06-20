@@ -23,8 +23,15 @@ export const userRepository = {
   // função que irá buscar os produtos cadastrados no banco de dados
   findManyProducts: async () => {
     // return await prisma.products.findMany({
-    // select: { id: true, name: true, Description: true, price: true }
-    // usando o comando select do Postgresql no prisma para retornar alguns atributos apenas, daqueles que forma cadastrados
+    // se fosse com o método select: { id: true, name: true, Description: true, price: true }
+    // comando select do Postgresql no prisma para retornar alguns atributos apenas, daqueles que forma cadastrados. true garante o retorno
     return await prisma.products.findMany()
-  }
+  },
+
+  // função que buscará por um produto específico identificado pelo id e fazer a deleção
+  findProductAndDelete: async (id: string) => {
+    return await prisma.products.delete({
+      where: { id: id },
+    })
+  },
 }

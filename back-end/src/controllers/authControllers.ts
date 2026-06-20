@@ -85,4 +85,21 @@ export const authController = {
       res.status(error?.status ?? 500).json({ message: error?.message })
     }
   },
+  deleteProduct: async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params
+
+      // O método Array.isArray() verifica se um determinado valor ou objeto é um array (ou vetor). Ele retorna true se o valor for um array e false caso contrário
+      if (!id || Array.isArray(id)) {
+        return res.status(400).json({ message: 'ID do produto inválido' })
+      }
+
+      await authService.deleteProduct(id)
+      return res.status(200).json({ message: 'Produto deletado com sucesso' })
+    } catch (error: any) {
+      return res
+        .status(error?.status ?? 500)
+        .json({ message: error?.message ?? 'Erro no servidor' })
+    }
+  },
 }

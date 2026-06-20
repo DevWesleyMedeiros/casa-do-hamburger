@@ -7,6 +7,7 @@ import { Router } from 'express'
 import { authController } from '../controllers/authControllers'
 import { clearAuthCookie } from '../middlewares/clearAuthCookie'
 import { requireAuth } from '../middlewares/authMiddlewares'
+import { requiredAdmin } from '../middlewares/requiredAdmin'
 // import { requiredAdmin } from '../middlewares/requiredAdmin'
 
 const router = Router()
@@ -23,5 +24,9 @@ router.post('/logout', requireAuth, clearAuthCookie, authController.logout)
 
 //rota de produtos
 router.get('/products', authController.getProducts)
+
+// rota para deletar produto
+// rota — "id" é uma string literal, não um parâmetro de rota, por isso os :
+router.delete('/delete-product/:id', requireAuth, requiredAdmin, authController.deleteProduct)
 
 export default router
