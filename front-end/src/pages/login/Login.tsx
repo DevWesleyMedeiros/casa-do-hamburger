@@ -12,12 +12,12 @@ import { UserContext } from "../../shared/context/UserContext";
 import { loginSchema, type loginInput } from "../../shared/schemas/authSchemas";
 import { ApiError } from "../../shared/services/api/ApiExceptions";
 import { LoginDate } from "../../shared/services/api/login/Login";
+import { toast } from "sonner";
 
 export const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [backendError, setBackendError] = useState<string | null>(null);
-  // ↑ renomeado de errorMessage para backendError
   // erros de campo (email inválido, senha vazia) ficam em formState.errors
   // erros do servidor (usuário não encontrado, senha incorreta) ficam aqui
 
@@ -27,7 +27,7 @@ export const Login = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     reset,
   } = useForm<loginInput>({
     resolver: zodResolver(loginSchema),
@@ -53,6 +53,9 @@ export const Login = () => {
           else setBackendError(result.message);
           return;
         }
+
+        toast("Logando ...");
+        await new Promise((resolve) => setTimeout(resolve, 4000));
 
         // sucesso
         setUser({
@@ -95,7 +98,12 @@ export const Login = () => {
           <div className="justify-left flex flex-col gap-2">
             {/* email */}
             <div>
-              <Input placeholder="E-mail" type="email" {...register("email")} />
+              <Input
+                placeholder="E-mail"
+                type="email"
+                {...register("email")}
+                disabled={isSubmitting}
+              />
               {errors.email && (
                 <p className="mt-1 text-left text-xs font-bold text-red-500">
                   {errors.email.message}
@@ -110,6 +118,7 @@ export const Login = () => {
                   placeholder="Senha"
                   type={showPassword ? "text" : "password"}
                   {...register("password")}
+                  disabled={isSubmitting}
                 />
                 <button
                   type="button"
@@ -151,14 +160,19 @@ export const Login = () => {
               type="button"
               title="Cadastrar com Google"
               colorVariation="bgGoogleVariation"
+              disabled={isSubmitting}
             >
               <FcGoogle size={ICON_CONFIG.mxSize} />
             </Button>
 
             <div className="my-2 flex justify-center gap-1 text-sm">
               <p className="font-bold text-[#4c4b48]">Não tem uma conta?</p>
-              <Link to="/register">
-                <span className="text-brand-amber text-right">Criar conta</span>
+              <Link to={isSubmitting ? "#" : "/register"}>
+                <span
+                  className={`text-brand-amber text-right text-sm ${isSubmitting ? "pointer-events-none cursor-not-allowed opacity-50 select-none" : ""}`}
+                >
+                  Criar conta
+                </span>
               </Link>
             </div>
           </div>

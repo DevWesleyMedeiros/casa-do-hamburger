@@ -18,10 +18,15 @@ app.use(cookieParser())
 
 connection()
 
-// Todas as rotas de auth sob o prefixo /auth (opcional mas recomendado para fins de organização do código) ou seja, http://localhost:3000/auth/register
+// Todas as rotas de auth sob o prefixo /auth (opcional mas recomendado para fins de organização do código) ou seja, http://localhost:3000/auth/resto-da-rota
 app.use('/auth', authRoutes)
 
 // rodando o servidor
 app.listen(3000, () => {
   console.log('Server is running on port 3000')
 })
+
+// index.ts — middlewares globais (rodam em TODA requisição)
+// app.use(cors())
+// app.use(cookieParser())
+// app.use(express.json())
