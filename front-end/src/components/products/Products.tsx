@@ -2,7 +2,10 @@ import { ShoppingCart } from "lucide-react";
 import { brazilinaCurrencyFormat } from "../../shared/utils/Utils";
 import { type ProductsInterface } from "../../types/Products";
 import { UserContext } from "../../shared/context/UserContext";
-import { useContext } from "react";
+import { useCallback, useContext } from "react";
+import { deleteProductById } from "../../shared/services/api/delete/DeleteProduct";
+import { toast } from "sonner";
+import { ApiError } from "../../shared/services/api/ApiExceptions";
 
 export const Products = ({
   id,
@@ -11,8 +14,41 @@ export const Products = ({
   description,
   price,
   img,
+  setProducts,
 }: ProductsInterface) => {
   const { user } = useContext(UserContext);
+
+  // função que irá deletar um produto pelo id
+  const handleDeleteProdutcById = useCallback(
+    async (id: string) => {
+      if (!id) return;
+
+      const result = await deleteProductById.deleteProduct(id);
+
+      if (result instanceof ApiError) {
+        if (result.statusCode === 404) {
+          toast.error("Produto não foi encontrado ou já foi deletado");
+        } else if (result.statusCode === 403) {
+          toast.error("Acesso restrito aos administradores");
+        } else if (result.statusCode === 401) {
+          toast.error("Você precisa estar logado");
+          return;
+        } else {
+          toast.error(result.message);
+        }
+        return;
+      }
+      // se não caiu em nenhuma das excessões, então o produto foi deletado
+      toast.success("Produto deletado com sucesso");
+
+      // após eu ter deletado um produto, eu preciso atualizar a lista de produto local sem o produto deletado
+      setProducts((prev: ProductsInterface[]) =>
+        prev.filter((product) => product.id !== id),
+      );
+    },
+    [setProducts],
+  );
+
   return (
     <div>
       <div className="container-products relative flex gap-2">
@@ -33,7 +69,7 @@ export const Products = ({
                 </p>
                 <div
                   className="text-brand-red flex cursor-pointer items-center rounded-md border px-1 text-sm"
-                  onClick={() => alert(`${name} deletado`)}
+                  onClick={() => handleDeleteProdutcById(id)}
                 >
                   Deletar
                 </div>

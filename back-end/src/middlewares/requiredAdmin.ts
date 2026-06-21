@@ -1,4 +1,4 @@
-// meu usuário admin poderá executar ações com os produtos que outros usuário não poderão executar. Logo, esse middleware aqui será responsável por essa verificação
+// meu usuário admin poderá executar ações com os produtos que outros usuário não poderão executar, com inserir um produto, deletar um produto etc. Logo, esse middleware aqui será responsável por essa verificação
 // quando for para cadastrar produtos com admin
 // Error status 403 Forbidden: O cliente não tem direitos de acesso ao conteúdo; ou seja, não é autorizado, portanto o servidor está se recusando a fornecer o recurso solicitado. Ao contrário do 401 Unauthorized, a identidade do cliente é conhecida pelo servidor.
 

@@ -7,4 +7,5 @@ export interface ProductsInterface {
   price: number;
   img: string;
   createAt?: Date;
+  setProducts: React.Dispatch<React.SetStateAction<ProductsInterface[]>>;
 }

@@ -24,7 +24,7 @@ export const Home = () => {
   // buscar produtos (GET)
   const productsDate = useCallback(async () => {
     try {
-      getProductsDate.getProducts().then((data) => {
+      await getProductsDate.getProducts().then((data) => {
         if (data) setProducts(data);
       });
     } catch (error: unknown) {
@@ -70,6 +70,7 @@ export const Home = () => {
             img={product.img}
             price={product.price}
             key={product.id}
+            setProducts={setProducts}
           />
         ))}
         {/* caso eu não tenha nada inserido naquela categoria, eu retrono um elemento com mensagem */}

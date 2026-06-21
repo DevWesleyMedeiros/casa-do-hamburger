@@ -1,6 +1,6 @@
 // O requireAuth já verifica o token e popula req.user antes do controller rodar
 
-import type { Request, Response, NextFunction } from 'express'
+import type { NextFunction, Request, Response } from 'express'
 import * as jose from 'jose'
 import { getJwtSecret } from '../config/jwt'
 
@@ -20,6 +20,7 @@ export const requireAuth = async (
   // verifica e decodifica o token jwt
   try {
     const { payload } = await jose.jwtVerify(token, getJwtSecret())
+    // payload = token decodificado contendo todas as propriedades do usuário logado
 
     // 4. injeta os dados do usuário na requisição para o controller usar
     // req['user'] = user - nome da propriedade crida da interface (um objeto) de tipos do Request
