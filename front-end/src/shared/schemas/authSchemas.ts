@@ -66,6 +66,7 @@ export const loginSchema = z.object({
   // aqui não colocamos regra de força de senha, pois já temos ela ao registrar
 });
 
+
 export type registerInput = z.infer<typeof registerSchema>;
 // meu registerInput é literalmente um interface RegisterInput =
 // { name: string

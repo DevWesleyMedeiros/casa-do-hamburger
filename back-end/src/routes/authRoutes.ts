@@ -8,12 +8,13 @@ import { authController } from '../controllers/authControllers'
 import { requireAuth } from '../middlewares/authMiddlewares'
 import { clearAuthCookie } from '../middlewares/clearAuthCookie'
 import { requiredAdmin } from '../middlewares/requiredAdmin'
-// import { requiredAdmin } from '../middlewares/requiredAdmin'
+import { validateBody } from '../middlewares/validateBody'
+import { loginSchema, registerSchema } from '../schemas/authSchemas'
 
 const router = Router()
 
-router.post('/login', authController.login)
-router.post('/register', authController.register)
+router.post('/login', validateBody(loginSchema), authController.login)
+router.post('/register', validateBody(registerSchema), authController.register)
 
 // Usa o requireAuth normal para obter os dados do usuário logado
 router.get('/me', requireAuth, authController.userAuth)

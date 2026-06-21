@@ -42,19 +42,13 @@ export const authController = {
   register: async (req: Request, res: Response) => {
     try {
       const { name, email, password, cep } = req.body
-
-      if (!name || !email || !password || !cep) {
-        res.status(400).json({ message: 'Todas as informações são obrigatórias' })
-        return
-      }
-
       const user = await authService.register(name, email, password, cep)
-
       res.status(201).json(user)
+
     } catch (err: any) {
       const status = err?.status ?? 500
       const message = err?.message ?? 'Erro no servidor'
-      res.status(status).json({ message })
+      res.status(status).json({ message, status })
     }
   },
 
@@ -62,7 +56,7 @@ export const authController = {
   // O cookie da requisição fica disponível graças ao middleware 'cookie-parser'.
   // o cookie já foi decodificado com a função requiredAuth. Aqui eu só retorno
   userAuth: async (req: Request, res: Response) => {
-    const user = req['user']
+    const user = req.user
     res.status(200).json({ user })
   },
 
