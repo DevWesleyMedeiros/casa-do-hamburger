@@ -82,7 +82,7 @@ export const authController = {
   deleteProduct: async (req: Request, res: Response) => {
     try {
       const { id } = req.params
-      // id vem exatamente de onde eu passo :id na rota
+      // id vem exatamente de onde eu passo :id na rota no frontend num objeto junto de outra propriedades no req.parama, porém aqui eu só preciso dele para deleção
 
       //O método Array.isArray() verifica se um determinado valor ou objeto é um array (ou vetor). Ele retorna true se o valor for um array e false caso contrário
       if (!id || Array.isArray(id)) {

@@ -1,12 +1,13 @@
+import axios from "axios";
 import { Api } from "../ApiConfig";
 import { ApiError } from "../ApiExceptions";
-import axios from "axios";
 
 // Consumir a rota de delete de um produto
 export const deleteProductById = {
   deleteProduct: async (
     id: string,
   ): Promise<{ message: string } | ApiError> => {
+    // retorno aqui é um objeto message: "produto deletado com sucesso" ou uma instância de ApiError
     try {
       // id vem como params
       const response = await Api().delete(`/auth/products/${id}`);
@@ -15,7 +16,7 @@ export const deleteProductById = {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         // typeguard de para me garantir de que o erro gerado pelo próprio axios
-        // Aqui o seu editor sabe que 'erro' tem a propriedade 'response'
+        // garantir que o editor sabe que 'erro' tem a propriedade 'response'
         const message = error.response?.data?.message ?? "Erro desconhecido";
         const statusCode = error.response?.status ?? 0;
         return new ApiError(message, statusCode);

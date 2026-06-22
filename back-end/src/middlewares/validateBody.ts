@@ -1,7 +1,7 @@
 // vamos criar um middleware genérico e reutilizável
 // Em vez de validar Zod manualmente em cada controller, um middleware genérico resolve para qualquer schema futuro (login, Register, products, etc.)
 
-import { ZodType } from 'zod'
+import { ZodType } from 'zod' // zodType = qualquer schema zod criado que valida valores do req (front)
 import type { Request, Response, NextFunction } from 'express'
 
 export const validateBody = (schema: ZodType) => {

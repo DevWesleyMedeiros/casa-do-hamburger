@@ -41,7 +41,7 @@ export const Products = ({
       // se não caiu em nenhuma das excessões, então o produto foi deletado
       toast.success("Produto deletado com sucesso");
 
-      // após eu ter deletado um produto, eu preciso atualizar a lista de produto local sem o produto deletado
+      // após eu ter deletado um produto, eu preciso atualizar a lista de produto local sem o produto deletado. A lista de produtos é preenchida no Home.tsx
       setProducts((prev: ProductsInterface[]) =>
         prev.filter((product) => product.id !== id),
       );

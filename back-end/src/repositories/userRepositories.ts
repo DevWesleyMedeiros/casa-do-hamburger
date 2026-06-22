@@ -39,7 +39,7 @@ export const userRepository = {
     } catch (error) {
       // P2025 = "Record to delete does not exist" — código oficial do Prisma
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        return null // ← converte a exceção do Prisma em um retorno previsível. A partir da daí que eu já posso manipular um retorno com status caso id não encontrado
+        return null // ← converte a exceção do Prisma em um retorno previsível. A partir da daí que eu já posso manipular um retorno com status personalizado caso id não encontrado
       }
       throw error // qualquer outro erro (conexão, etc.) continua subindo normalmente
     }
