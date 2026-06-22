@@ -21,10 +21,13 @@ export const Cart = () => {
           <div className="img">
             <img src="./duplo-da-casa-mobile.png" alt="#" />
           </div>
-          <div className="texto mx-3 flex flex-col bg-amber-950">
-            <p className="title">Duplo da casa</p>
-            <p className="price">R$28,90</p>
-            <div className="chevrons flex items-center justify-center gap-2">
+
+          <div className="texto mx-2 flex flex-1 flex-col bg-amber-950 py-1">
+            <p className="title text-brand-dark text-xl font-bold">
+              Duplo da casa
+            </p>
+            <p className="price text-[#FFFF]">R$28,90</p>
+            <div className="chevrons flex h-4.75 w-22.75 items-center gap-2 border">
               <CircleChevronLeft /> 1 <CircleChevronRight />
             </div>
           </div>
