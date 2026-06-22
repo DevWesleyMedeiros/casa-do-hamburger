@@ -1,9 +1,10 @@
 import { Box, LayoutDashboard, LogOut, Plus, ShoppingCart } from "lucide-react";
-import { useCallback, useContext } from "react";
+import { useCallback, useContext, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { ICON_CONFIG } from "../../constant/iconConfig";
 import { UserContext } from "../../shared/context/UserContext";
+import { Cart } from "../cart/Cart";
 
 export const Header = () => {
   // desestruturando variável user
@@ -14,6 +15,14 @@ export const Header = () => {
   // console.log(location.pathname);
 
   const navigate = useNavigate();
+
+  // variável de estado para manipular visibility do meu cart
+  // true = showcart; false hiddencart
+  const [showCart, setShowCart] = useState<boolean>(false);
+  // função que irá esconder ou mostrar cart invertendo seu valor lógico
+  const handleCartVisibility = useCallback(() => {
+    setShowCart((prev) => !prev);
+  }, []);
 
   // função de logout
   const handleLogout = useCallback(async () => {
@@ -37,7 +46,8 @@ export const Header = () => {
   };
 
   return (
-    <div className="bg-[#161410]">
+    <div className="bg-brand-dark">
+      {showCart && <Cart></Cart>}
       <div className="mx-auto flex w-full items-center justify-between p-3 md:w-184.25 md:p-0">
         <Link to="/">
           <img src="./logo.png" alt="Logo link caso do Hamburger" />
@@ -84,8 +94,9 @@ export const Header = () => {
               <ShoppingCart
                 size={ICON_CONFIG.mxSize}
                 strokeWidth={ICON_CONFIG.strokWidth}
+                onClick={() => handleCartVisibility()}
               />
-              <p className="absolute -top-3 -right-3 flex h-5 w-5 items-center justify-center rounded-md bg-amber-200 text-[#161410]">
+              <p className="text-brand-dark absolute -top-3 -right-3 flex h-5 w-5 items-center justify-center rounded-md bg-amber-200">
                 1
               </p>
             </div>
