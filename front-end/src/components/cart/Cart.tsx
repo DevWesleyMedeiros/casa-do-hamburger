@@ -1,47 +1,34 @@
-import {
-  CircleChevronLeft,
-  CircleChevronRight,
-  OctagonX,
-  Trash2,
-} from "lucide-react";
+import { OctagonX } from "lucide-react";
 import { ICON_CONFIG } from "../../constant/iconConfig";
 import { Button } from "../button/Button";
+import { CartItem } from "../cartItem/CartItem";
 
-export const Cart = () => {
+type CartProps = {
+  setShowCart: React.Dispatch<React.SetStateAction<boolean>>;
+  showCart: boolean;
+};
+
+export const Cart = ({ showCart, setShowCart }: CartProps) => {
   return (
-    <div className="conteiner-cart bg-brand-amber absolute right-0 flex h-208.25 w-93.75 flex-col">
+    <div className="conteiner-cart bg-brand-amber transforme absolute right-0 z-10 flex h-208.25 w-73.75 flex-col transition-transform duration-500 ease-in-out">
       <div className="cart-title_and_X text-brand-dark mx-5 my-5 flex flex-row-reverse items-center justify-between px-0.5 py-1 font-bold uppercase">
         <p>Meu carrinho</p>
-        <OctagonX size={ICON_CONFIG.mxSize} className="cursor-pointer" />
+        <OctagonX
+          size={ICON_CONFIG.mxSize}
+          className="cursor-pointer"
+          onClick={() => setShowCart(!showCart)}
+          // setShowCart definida no header vem com uma prop do tipo dispatch e me permite alterar o valor da janela Cart
+        />
       </div>
 
-      <div className="conteiner-item-cart mx-5 flex-1 bg-red-500">
-        {/* flex-1 seta o conteiner item-cart para main e joga o botão para baixo */}
-        <div className="product-selected-card flex items-center justify-between bg-green-500">
-          <div className="img">
-            <img src="./duplo-da-casa-mobile.png" alt="#" />
-          </div>
-
-          <div className="texto mx-2 flex flex-1 flex-col bg-amber-950 py-1">
-            <p className="title text-brand-dark text-xl font-bold">
-              Duplo da casa
-            </p>
-            <p className="price text-[#FFFF]">R$28,90</p>
-            <div className="chevrons flex h-4.75 w-22.75 items-center gap-2 border">
-              <CircleChevronLeft /> 1 <CircleChevronRight />
-            </div>
-          </div>
-          <div className="trash-icon">
-            <Trash2 />
-          </div>
-        </div>
+      <div className="mx-3 flex flex-1 flex-col gap-2.5">
+        <CartItem></CartItem>
+        <CartItem></CartItem>
       </div>
-
-      {/* botão finalizar pedido */}
       <Button
         title="Finalizar pedido"
         type="button"
-        className="bg-brand-red"
+        colorVariation="bgRedVariation"
       ></Button>
     </div>
   );

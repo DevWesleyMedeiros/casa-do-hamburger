@@ -31,7 +31,7 @@ export const Button = ({
   const VARIANTS: Record<ColorVariation, string> = {
     // CTA principal — fundo vermelho sólido
     bgRedVariation:
-      "border-1 border-redVariation bg-redVariation text-white " +
+      "border-1 border-redVariation bg-brand-red text-white " +
       "hover:shadow-[0_0_12px_rgba(201,42,14,0.5)] " +
       "focus-visible:ring-2 focus-visible:ring-redVariation focus:border-amber/50 focus-visible:ring-offset-2",
 
