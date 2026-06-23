@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom";
 
+import { toast } from "sonner";
 import { Button } from "../../components/button/Button";
 import { Input } from "../../components/input/Input";
 import { ICON_CONFIG } from "../../constant/iconConfig";
@@ -12,7 +13,6 @@ import { UserContext } from "../../shared/context/UserContext";
 import { loginSchema, type loginInput } from "../../shared/schemas/authSchemas";
 import { ApiError } from "../../shared/services/api/ApiExceptions";
 import { LoginDate } from "../../shared/services/api/login/Login";
-import { toast } from "sonner";
 
 export const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -85,7 +85,11 @@ export const Login = () => {
     >
       <div className="justify-left flex flex-col items-center gap-2 rounded-xl border-[0.5px] border-white/13 p-7">
         <Link to="/home">
-          <img src="./logo.png" alt="logo da hamburgeria" className="mb-4" />
+          <img
+            src="./logo-casa-do-hamburguer.png"
+            alt="logo da hamburgeria"
+            className="mb-4"
+          />
         </Link>
 
         <div className="w-full rounded-2xl border-white/13 bg-[#1b1a16] px-4 py-4">

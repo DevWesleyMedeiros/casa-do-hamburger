@@ -16,7 +16,11 @@ export const brazilinaCurrencyFormat = (currencyValue: number): string => {
   if (Number.isNaN(currencyValue)) {
     throw new Error("Valor não é moeda");
   }
-  return `R$${currencyValue.toFixed(2).replace(".", ",")}`;
+  const intToFloatValue = currencyValue / 100;
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(intToFloatValue);
 };
 
 // envia nome de produtos uppercase
