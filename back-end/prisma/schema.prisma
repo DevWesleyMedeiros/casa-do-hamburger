@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../generated/prisma"
 }
 
@@ -14,6 +14,7 @@ model User {
   cep      String
   password String
   admin    Boolean @default(false)
+  cardItem CartItem[]
 }
 
 model Products {
@@ -32,4 +33,5 @@ model CartItem {
   productId String
   userId String
   product Products @relation(fields: [productId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 }
