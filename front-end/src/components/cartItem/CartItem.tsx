@@ -1,3 +1,5 @@
+// item do carrinho - CartItem -, componente que vai dentro do Cart
+
 import { CircleChevronLeft, CircleChevronRight, Trash2 } from "lucide-react";
 import { ICON_CONFIG } from "../../constant/iconConfig";
 

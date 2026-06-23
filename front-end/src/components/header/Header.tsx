@@ -47,6 +47,7 @@ export const Header = () => {
 
   return (
     <div className="bg-brand-dark">
+      {/* render janela lateral do cart */}
       {showCart && <Cart setShowCart={setShowCart} showCart={showCart}></Cart>}
       <div className="mx-auto flex w-full items-center justify-between p-3 md:w-184.25 md:p-0">
         <Link to="/">
