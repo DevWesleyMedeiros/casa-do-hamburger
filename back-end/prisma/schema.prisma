@@ -24,4 +24,12 @@ model Products {
   category String
   img         String
   createAt    DateTime @default(now())
+  cartItem CartItem[]
+}
+
+model CartItem {
+  id String @id @default(uuid())
+  productId String
+  userId String
+  product Products @relation(fields: [productId], references: [id])
 }
