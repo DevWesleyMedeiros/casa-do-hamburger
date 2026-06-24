@@ -3,6 +3,7 @@
 // como se fosse um estoquista: conhece cada ingrediente, vai ao banco de dados e busca o que precisa
 // Queries no banco via Prisma. Só conhece o PRISMA
 
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client'
 import { Prisma } from '../../generated/prisma/client'
 import { prisma } from '../db'
 
@@ -16,7 +17,7 @@ export const userRepository = {
     })
   },
 
-  // cria um novo usuário no banco de dados, utilizando o método create do Prisma Client. Ele recebe um objeto data contendo as informações do usuário (nome, email, senha e cep) e insere esses dados na tabela de usuários do banco de dados. O resultado é o registro do usuário recém-criado.
+  // cria um novo usuário no banco de dados, utilizando o método create do Prisma Client. Ele recebe um objeto data contendo as informações do usuário (nome, email, senha e cep) e os insere esses dados na tabela de usuários do banco de dados. O resultado é o registro do usuário recém-criado.
   create: async (data: { name: string; email: string; password: string; cep: string }) => {
     return await prisma.user.create({ data })
   },
@@ -29,8 +30,7 @@ export const userRepository = {
     return await prisma.products.findMany()
   },
 
-  // função que buscará por um produto específico identificado pelo id e fazer a deleção
-
+  // função que buscará por um produto específico identificado pelo id e fazer a deleção. O retorno aqui é do id do produto deletado (usamos ele para aplicar um filtro e atualizar no lista display no frontend)
   findProductAndDelete: async (id: string) => {
     try {
       return await prisma.products.delete({
@@ -39,9 +39,25 @@ export const userRepository = {
     } catch (error) {
       // P2025 = "Record to delete does not exist" — código oficial do Prisma
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        return null // ← converte a exceção do Prisma em um retorno previsível. A partir da daí que eu já posso manipular um retorno com status personalizado caso id não encontrado
+        return null // ← converte a exceção do Prisma em um retorno previsível. A partir da daí, eu já posso manipular um retorno com status personalizado caso id não encontrado, no arquivo authServices
       }
       throw error // qualquer outro erro (conexão, etc.) continua subindo normalmente
+    }
+  },
+
+  // função para buscar os CartItems no meu banco de dados. O parâmetro include foi dado, uma vez que dentro da minha tabela CartItem possui um atributo product e ele é um chave estrangeira que faz referência ao produto cadastrado na tabela Products. Sendo assim, eu consigo pegar as informações desse produto como nome, descrição etc. O mesmo eu poderia fazer com o meu user
+  findDbCartItemProduct: async (userId: string) => {
+    try {
+      return await prisma.cartItem.findMany({
+        where: { userId: userId },
+        include: { user: true },
+        // product: true,
+      })
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
+        return null
+      }
+      throw error
     }
   },
 }

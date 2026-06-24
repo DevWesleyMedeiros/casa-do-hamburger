@@ -14,7 +14,7 @@ model User {
   cep      String
   password String
   admin    Boolean @default(false)
-  cardItem CartItem[]
+  cartItem CartItem[]
 }
 
 model Products {

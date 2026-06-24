@@ -2,7 +2,7 @@
 // esse arquivo é como se fosse um garçom: recebe os pedidos e os passa adiante. Não cozinha nada
 // vai mapear URL + método HTTP. Só conhece os CONTROLLERS
 
-// 🍽️ ROUTE — só mapeia URL para o Controller
+// ROUTE — só mapeia URL para o Controller
 import { Router } from 'express'
 import { authController } from '../controllers/authControllers'
 import { requireAuth } from '../middlewares/authMiddlewares'
@@ -31,5 +31,8 @@ router.get('/products', authController.getProducts)
 // :id isso é só o "molde" do parâmetro. Na rota é só a sintaxe de declaração do Express — ele diz "aqui vai um parâmetro dinâmico chamado id". Quando faz a requisição de verdade, não inclui os dois pontos:
 // acesso minha rota products normal, porém muda o método e devo passar um id
 router.delete('/products/:id', requireAuth, requiredAdmin, authController.deleteProduct)
+
+// rota do tipo get que irá buscar um item de CartItem
+router.get('/get-cart-items', requireAuth, authController.productFindInCartItem)
 
 export default router

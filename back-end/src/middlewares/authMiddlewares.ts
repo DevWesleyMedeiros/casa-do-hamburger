@@ -1,4 +1,4 @@
-// O requireAuth já verifica o token e popula req.user antes do controller rodar
+// O requireAuth já verifica o token e popula req.user antes do controller rodar. Decodifica o token e traz as informações do usuário logado
 
 import type { NextFunction, Request, Response } from 'express'
 import * as jose from 'jose'

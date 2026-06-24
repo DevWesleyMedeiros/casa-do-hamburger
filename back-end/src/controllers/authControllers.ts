@@ -1,5 +1,5 @@
 // camada responsável por lidar com as requisições relacionadas à autenticação (login e registro)
-// 👨‍🍳 CONTROLLER — ponte entre HTTP e o Service.
+// CONTROLLER — ponte entre HTTP e o Service.
 // esse arquivo é como se fosse o chef: ele coordena os pedidos. Sabe o que fazer, mas não vai ao estoque
 // Só lida com req, res e repassa para o Service
 // vai receber do front, processar e retornar, mas não cria a lógica das regras de negócio. As regras de negócio são importada aqui no authService
@@ -7,6 +7,8 @@
 
 import type { Request, Response } from 'express';
 import { authService } from '../services/authService';
+import { User } from '../../generated/prisma/index';
+import { Payload } from '../../generated/prisma/internal/prismaNamespace';
 
 export const authController = {
   // busco o usuário que foi registrado e o retorno por aqui para o frontend
@@ -44,7 +46,6 @@ export const authController = {
       const { name, email, password, cep } = req.body
       const user = await authService.register(name, email, password, cep)
       res.status(201).json(user)
-
     } catch (err: any) {
       const status = err?.status ?? 500
       const message = err?.message ?? 'Erro no servidor'
@@ -95,6 +96,18 @@ export const authController = {
       return res
         .status(error?.status ?? 500)
         .json({ message: error?.message ?? 'Erro no servidor' })
+    }
+  },
+  productFindInCartItem: async (req: Request, res: Response) => {
+    try {
+      const { user } = req
+      if(!user){
+        return res.status(404).json({message: "Usuário não econtrado"})
+      }
+      const getProductsFound = await authService.findProductInCartItem(user.id)
+      return res.status(200).json(getProductsFound)
+    } catch (error: any) {
+      return res.status(error?.status ?? 500).json({ message: error?.message })
     }
   },
 }

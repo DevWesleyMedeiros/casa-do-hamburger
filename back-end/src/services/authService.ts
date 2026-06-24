@@ -5,6 +5,7 @@ import { compare, genSaltSync, hashSync } from 'bcrypt-ts';
 import * as jose from 'jose';
 import { getJwtSecret } from '../config/jwt';
 import { userRepository } from '../repositories/userRepositories';
+import { string } from 'zod'
 
 export const authService = {
   // pegando usuário cadastrado no banco de dados (POST)
@@ -99,5 +100,12 @@ export const authService = {
     }
     return deleted
     // me retorna o produto deletado
+  },
+  findProductInCartItem: async (userId: string) => {
+    const productsFound = await userRepository.findDbCartItemProduct(userId)
+    if (!productsFound) {
+      throw { status: 404, message: 'produtos não encontrados ou já foram deletados' }
+    }
+    return productsFound
   },
 }
