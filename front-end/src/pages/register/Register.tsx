@@ -342,7 +342,7 @@ export const Register = () => {
                 // desabilitar o botão durante o envio dos dados para registro
               />
 
-              <div className="flex w-full justify-center align-super text-[#595753]">
+              <div className="my-1 flex w-full justify-center align-super text-[#595753]">
                 <div className="my-2 h-0 w-full border"></div>
                 <div className="mx-1 text-sm"> OU </div>
                 <div className="my-2 h-0 w-full border"></div>

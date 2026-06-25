@@ -54,6 +54,7 @@ export const Login = () => {
           return;
         }
 
+        // criar um efeito de espera de 4 segundos
         toast("Logando ...");
         await new Promise((resolve) => setTimeout(resolve, 4000));
 

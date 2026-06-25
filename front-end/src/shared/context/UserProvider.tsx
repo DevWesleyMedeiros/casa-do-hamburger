@@ -1,4 +1,5 @@
 //  componente provedor do contexto. Tudo que tiver envelopado por ele poderá usar o user e setUSer
+// vai no App.tsx com children AppRoutes que contém as demais páginas que usarão contexto
 
 import {
     type ReactNode,
@@ -49,7 +50,7 @@ export const UserProvider = ({ children }: propsChildren) => {
   return (
     // UserProvider será o que encapsulará os demais componentes
     <UserContext.Provider value={values}>{children}</UserContext.Provider>
-    // O children permite o encapsulamento de outros componente dentro do privider e que, quem estiver dentro do provider poderá usar os values passados, que, nesse caso, são os user e setUser
+    // O children permite o encapsulamento de outros componente dentro do provider e que, quem estiver dentro do provider, poderá usar os values passados, que, nesse caso, são os user e setUser
   );
 };
 

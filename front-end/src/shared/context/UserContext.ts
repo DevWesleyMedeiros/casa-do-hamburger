@@ -1,3 +1,4 @@
+// context API para criar contextos que serão consumidos por outros componentes
 // função de contexto que criará contexto que será consumido
 
 import { createContext } from "react";
