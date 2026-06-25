@@ -42,11 +42,11 @@ export const useUserStore = create<UserStore>()(
       fetchUser: async () => {
         try {
           const data = await getAuth.getMe();
-          if (data) set({ user: data }, false, "initializeAuth/success");
+          if (data) set({ user: data }, false, "fetch/success");
         } catch {
           // Silencioso: usuário não autenticado é estado válido
         } finally {
-          set({ isLoading: false }, false, "initializeAuth/done");
+          set({ isLoading: false }, false, "fetch/done");
           // Independentemente de dar erro no backend, limpamos o front e user volta ao seu estodo atual
         }
       },

@@ -9,7 +9,7 @@ export const FetchUser = () => {
 
   useEffect(() => {
     fetchUser();
-  }, [fetchUser]); // roda uma vez na montagem, igual ao seu useEffect anterior
+  }, [fetchUser]); // roda uma única vez na montagem, igual ao seu useEffect anterior
 
   return null; // componente invisível
 };
