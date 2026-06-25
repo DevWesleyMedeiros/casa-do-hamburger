@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
-import { UserContext } from "../../context/UserContext";
-import { useContext } from "react";
 import { Navigate } from "react-router-dom";
+import { useUserStore } from "../../stores";
 
 export const PublicRoutes = ({ children }: { children: ReactNode }) => {
-  const { user, isLoading } = useContext(UserContext);
+  // O componente SÓ vai re-renderizar se o `user` ou `isLoading` mudarem.
+  const user = useUserStore((state) => state.user);
+  const isLoading = useUserStore((state) => state.isLoading);
 
   if (isLoading) return null;
 

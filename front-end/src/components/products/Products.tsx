@@ -1,8 +1,10 @@
 import { ShoppingCart } from "lucide-react";
 import { brazilinaCurrencyFormat } from "../../shared/utils/Utils";
 import { type ProductsInterface } from "../../types/Products";
-import { UserContext } from "../../shared/context/UserContext";
-import { useCallback, useContext } from "react";
+// import { UserContext } from "../../shared/context/UserContext";
+// import { useContext} from 'react'
+import { useUserStore } from "../../shared/stores";
+import { useCallback} from "react";
 import { deleteProductById } from "../../shared/services/api/delete/DeleteProduct";
 import { toast } from "sonner";
 import { ApiError } from "../../shared/services/api/ApiExceptions";
@@ -16,7 +18,9 @@ export const Products = ({
   img,
   setProducts,
 }: ProductsInterface) => {
-  const { user } = useContext(UserContext);
+  
+  const user= useUserStore((state) => state.user)
+  // const { user } = useContext(UserContext);
 
   // função que irá deletar um produto pelo id
   const handleDeleteProdutcById = useCallback(

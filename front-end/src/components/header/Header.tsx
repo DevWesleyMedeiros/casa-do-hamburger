@@ -1,14 +1,19 @@
 import { Box, LayoutDashboard, LogOut, Plus, ShoppingCart } from "lucide-react";
-import { useCallback, useContext, useState } from "react";
+import { useCallback, useState } from "react";
+// import { useContext } from 'react'
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { ICON_CONFIG } from "../../constant/iconConfig";
-import { UserContext } from "../../shared/context/UserContext";
+// import { UserContext } from "../../shared/context/UserContext";
 import { Cart } from "../cart/Cart";
+import { useUserStore } from "../../shared/stores";
 
 export const Header = () => {
-  // desestruturando variável user
-  const { user, logout } = useContext(UserContext);
+  // desestruturando variável UserContext
+  // const { user, logout } = useContext(UserContext);
+
+  const user = useUserStore((state) => state.user);
+  const logout = useUserStore((state) => state.logout);
 
   //variável que inicia location
   const location = useLocation();

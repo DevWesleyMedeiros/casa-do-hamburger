@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
-import { useCallback, useContext, useState } from "react";
+import { useCallback, useState } from "react";
+// import { useContext } from 'react'
 import { useForm } from "react-hook-form";
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom";
@@ -9,10 +10,11 @@ import { toast } from "sonner";
 import { Button } from "../../components/button/Button";
 import { Input } from "../../components/input/Input";
 import { ICON_CONFIG } from "../../constant/iconConfig";
-import { UserContext } from "../../shared/context/UserContext";
+// import { UserContext } from "../../shared/context/UserContext";
 import { loginSchema, type loginInput } from "../../shared/schemas/authSchemas";
 import { ApiError } from "../../shared/services/api/ApiExceptions";
 import { LoginDate } from "../../shared/services/api/login/Login";
+import { useUserStore } from "../../shared/stores";
 
 export const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -21,7 +23,11 @@ export const Login = () => {
   // erros de campo (email inválido, senha vazia) ficam em formState.errors
   // erros do servidor (usuário não encontrado, senha incorreta) ficam aqui
 
-  const { setUser } = useContext(UserContext);
+  // const { setUser } = useContext(UserContext);
+  // consumindo minhas função do meu store via um hook personalida
+  const setUser = useUserStore((state) => state.setUser);
+
+  
   const navigate = useNavigate();
 
   const {
@@ -185,4 +191,4 @@ export const Login = () => {
       </div>
     </form>
   );
-};
+};;

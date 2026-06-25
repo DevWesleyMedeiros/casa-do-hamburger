@@ -1,14 +1,14 @@
 // context API para criar contextos que serão consumidos por outros componentes
 // função de contexto que criará contexto que será consumido
 
-import { createContext } from "react";
-import { type UserContextTypes } from "../../types/Payload";
+// import { createContext } from "react";
+// import { type UserContextTypes } from "../../types/Payload";
 
-// Permite você criar um contexto que os componentes podem prover algo ou lê-los
-// UserContext é o que será consumido. Ele será consumido pelo hook useContexto do react, no componente que eu for utilizá-lo
-export const UserContext = createContext<UserContextTypes>({
-  user: null,
-  setUser: () => void {},
-  logout: async () => {},
-  isLoading: false,
-});
+// // Permite você criar um contexto que os componentes podem prover algo ou lê-los
+// // UserContext é o que será consumido. Ele será consumido pelo hook useContexto do react, no componente que eu for utilizá-lo
+// export const UserContext = createContext<UserContextTypes>({
+//   user: null,
+//   setUser: () => void {},
+//   logout: async () => {},
+//   isLoading: false,
+// });
