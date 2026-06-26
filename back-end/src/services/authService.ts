@@ -4,8 +4,7 @@
 import { compare, genSaltSync, hashSync } from 'bcrypt-ts';
 import * as jose from 'jose';
 import { getJwtSecret } from '../config/jwt';
-import { userRepository } from '../repositories/userRepositories';
-import { string } from 'zod'
+import { userRepository } from '../repositories/userRepositories'
 
 export const authService = {
   // pegando usuário cadastrado no banco de dados (POST)

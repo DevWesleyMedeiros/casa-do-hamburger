@@ -50,7 +50,7 @@ export const userRepository = {
     try {
       return await prisma.cartItem.findMany({
         where: { userId: userId },
-        include: { user: true },
+        include: { user: true, product: true },
         // product: true,
       })
     } catch (error) {

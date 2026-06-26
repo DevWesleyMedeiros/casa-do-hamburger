@@ -6,9 +6,7 @@
 // Receber req/res, chamar Service, retornar resposta. São métodos que devem ser usados somente nos controllers Só conhece os SERVICES
 
 import type { Request, Response } from 'express';
-import { authService } from '../services/authService';
-import { User } from '../../generated/prisma/index';
-import { Payload } from '../../generated/prisma/internal/prismaNamespace';
+import { authService } from '../services/authService'
 
 export const authController = {
   // busco o usuário que foi registrado e o retorno por aqui para o frontend

@@ -23,6 +23,7 @@ interface UserStore {
 export const useUserStore = create<UserStore>()(
   devtools(
     (set) => ({
+      // o set ó responsável por alterar valores do meu useUseStore
       // Estado inicial
       user: null,
       isLoading: true,
@@ -44,7 +45,7 @@ export const useUserStore = create<UserStore>()(
           const data = await getAuth.getMe();
           if (data) set({ user: data }, false, "fetch/success");
         } catch {
-          // Silencioso: usuário não autenticado é estado válido
+          // usuário não autenticado é estado válido
         } finally {
           set({ isLoading: false }, false, "fetch/done");
           // Independentemente de dar erro no backend, limpamos o front e user volta ao seu estodo atual

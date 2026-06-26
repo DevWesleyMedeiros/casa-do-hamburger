@@ -1,5 +1,5 @@
 // componente que serve somente para disparar o useEffect que busca um usuário na api
-// O useEffect que antes ficava dentro do UserProvider agora disparado por aqui. Este componente não vai renderizar nada — só vai disparar a inicialização uma vez.
+// O useEffect que antes ficava dentro do UserProvider agora disparado por aqui, num componente de fetchUser passa para quem for usar na aplicação os valores do user. Este componente não vai renderizar nada — só vai disparar a inicialização uma vez.
 
 import { useEffect } from "react";
 import { useUserStore } from "../stores";

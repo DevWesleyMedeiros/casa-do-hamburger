@@ -7,6 +7,7 @@ export interface ProductsInterface {
   price: number;
   img: string;
   createAt?: Date;
-  setProducts: React.Dispatch<React.SetStateAction<ProductsInterface[]>>;
+  setProducts?: React.Dispatch<React.SetStateAction<ProductsInterface[]>>;
   // setProducts permite eu manipular o array de produtos e atualizá-los
 }
+
