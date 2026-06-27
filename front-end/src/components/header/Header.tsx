@@ -7,6 +7,7 @@ import { ICON_CONFIG } from "../../constant/iconConfig";
 // import { UserContext } from "../../shared/context/UserContext";
 import { Cart } from "../cart/Cart";
 import { useUserStore } from "../../shared/stores";
+import { useCartStore } from "../../shared/stores";
 
 export const Header = () => {
   // desestruturando variável UserContext
@@ -14,6 +15,7 @@ export const Header = () => {
 
   const user = useUserStore((state) => state.user);
   const logout = useUserStore((state) => state.logout);
+  const cartItemsList = useCartStore((state) => state.items);
 
   //variável que inicia location
   const location = useLocation();
@@ -106,7 +108,7 @@ export const Header = () => {
                 onClick={() => handleCartVisibility()}
               />
               <p className="text-brand-dark absolute -top-3 -right-3 flex h-5 w-5 items-center justify-center rounded-md bg-amber-200">
-                1
+                {cartItemsList.length}
               </p>
             </div>
             <div className="item-center flex gap-2">

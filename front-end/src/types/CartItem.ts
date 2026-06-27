@@ -10,4 +10,5 @@ export type CartItemType = {
   productId: string; // id do produto (referenciado por chave estrangeira)
   product: Pick<ProductsInterface, "name" | "price" | "img">;
   // criamos o objeto "product" aninhado! que puxa as propriedades do produto cadastrado pelo user
+  quantity: number;
 };

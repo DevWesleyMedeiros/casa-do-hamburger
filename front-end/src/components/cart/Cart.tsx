@@ -1,8 +1,9 @@
 import { OctagonX } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { ICON_CONFIG } from "../../constant/iconConfig";
 import { getCartItemsList } from "../../shared/services/api/cartItems/getCartItems";
-import { type CartItemType } from "../../types/CartItem";
+import { useCartStore } from "../../shared/stores";
+// import { type CartItemType } from "../../types/CartItem";
 import { Button } from "../button/Button";
 import { CartItem } from "../cartItem/CartItem";
 
@@ -13,8 +14,10 @@ type CartProps = {
 
 // showCart e setShowCart são funções para mostrar e esconder o Cart
 export const Cart = ({ showCart, setShowCart }: CartProps) => {
-  const [cartItems, setCartItems] = useState<CartItemType[]>([]); // plural é melhor para arrays
+  // const [cartItems, setCartItems] = useState<CartItemType[]>([]);
 
+  const cartItems = useCartStore((state) => state.items); // list de CartItems
+  const setCartItems = useCartStore((state) => state.setCartItems); // altera a list de CartItems
   // Fetch limpo usando apenas async/await (sem .then)
   const fetchCartItems = useCallback(async () => {
     try {
@@ -24,15 +27,14 @@ export const Cart = ({ showCart, setShowCart }: CartProps) => {
       if (data) {
         // O queueMicrotask ou um setTimeout de 0ms joga a atualização para a próxima "fila de tarefas" do navegador, evitando o ciclo síncrono ao executar o useEffect.
         // queueMicrotask vai funcionar como um setTimeout gerando uma leve latência no meu componente de forma que o react não interprete a requisição como síncrona
-        queueMicrotask(() => {
-          setCartItems(data);
-        });
+        setCartItems(data);
       }
     } catch (error) {
       console.error("Erro ao buscar itens do carrinho:", error);
     }
-  }, []); // useCallback sem dependências, pois não usa nada externo, somente chama uma função fetch
+  }, [setCartItems]); // useCallback com dependências, pois o setCartItems vem de um store externo,
 
+  //somente chama uma função fetch
   useEffect(() => {
     fetchCartItems();
   }, [fetchCartItems]); // Boa prática: colocar a função no array de dependências
@@ -50,7 +52,7 @@ export const Cart = ({ showCart, setShowCart }: CartProps) => {
       </div>
 
       <div className="mx-3 flex flex-1 flex-col gap-2.5">
-        {/* Renderização da lista limpa e tipada! */}
+        {/* Renderização da lista limpa e tipada! mas agora renderizamos usando os dados que vieram do Store */}
         {cartItems.map((item) => (
           <CartItem
             key={item.id} // Usando o id real do CartItem (conforme Prisma schema)
