@@ -27,7 +27,6 @@ export const Login = () => {
   // consumindo minhas função do meu store via um hook personalida
   const setUser = useUserStore((state) => state.setUser);
 
-  
   const navigate = useNavigate();
 
   const {
@@ -140,6 +139,7 @@ export const Login = () => {
                   {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
                 </button>
               </div>
+
               {errors.password && (
                 <p className="mt-1 text-left text-xs font-bold text-red-500">
                   {errors.password.message}
@@ -191,4 +191,4 @@ export const Login = () => {
       </div>
     </form>
   );
-};;
+};

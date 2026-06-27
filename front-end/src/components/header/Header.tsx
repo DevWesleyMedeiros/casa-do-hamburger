@@ -5,9 +5,8 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { ICON_CONFIG } from "../../constant/iconConfig";
 // import { UserContext } from "../../shared/context/UserContext";
+import { useCartStore, useUserStore } from "../../shared/stores";
 import { Cart } from "../cart/Cart";
-import { useUserStore } from "../../shared/stores";
-import { useCartStore } from "../../shared/stores";
 
 export const Header = () => {
   // desestruturando variável UserContext

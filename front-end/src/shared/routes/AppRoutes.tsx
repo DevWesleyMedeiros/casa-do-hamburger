@@ -1,9 +1,9 @@
 import { Header } from "../../components/header/Header";
-import { PublicRoutes } from "./publicRoutes/PublicRoutes";
 import { Home } from "../../pages/home/Home";
 import { Login } from "../../pages/login/Login";
 import { Pedidos } from "../../pages/pedidos/Pedidos";
 import { Register } from "../../pages/register/Register";
+import { PublicRoutes } from "./publicRoutes/PublicRoutes";
 
 import {
   BrowserRouter,
