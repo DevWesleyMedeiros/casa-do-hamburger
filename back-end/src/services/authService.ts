@@ -107,4 +107,12 @@ export const authService = {
     }
     return productsFound
   },
+  serviceCreateCartItem: async (productId: string, userId: string) => {
+    const cartItems = await userRepository.RepositoryCreateCartItem(productId, userId)
+
+    if (cartItems === null) {
+      throw { status: 404, message: 'cartItems não encontrados ou deletados' }
+    }
+    return cartItems
+  },
 }

@@ -60,4 +60,36 @@ export const userRepository = {
       throw error
     }
   },
+
+  // aumentar a quantidade do produto cadastrado
+  RepositoryCreateCartItem: async (productId: string, userId: string) => {
+    // productId: vem da body da requisição quando eu clicar no ícone do cart
+    // userId virá do requisição que possui um user.id
+
+    // validação para verificar se o productId que vem do frontend é igual ao id do produto que está atrelado a um usuário na minha tabela CartItem. Se for, eu só vou a atualizar o quantity relacionado aquele produto
+
+    // repository com upsert — substitui o findFirst + update/create (fazem duas queries no banco de dados). Com upserts evitam race condition (único where), pois o prisma faz tudo em uma única operação atômica
+    try {
+      return await prisma.cartItem.upsert({
+        where: {
+          userId_productId: { userId, productId },
+          // Prisma gera o nome do compound key unindo os campos com _
+          // Visible em: generated/prisma/index.d.ts → CartItemWhereUniqueInput
+        },
+        update: {
+          quantity: { increment: 1 }, // se já existe → incrementa
+        },
+        create: {
+          product: { connect: { id: productId } },
+          user: { connect: { id: userId } },
+          // quantity começa em 1 pelo @default(1) do schema
+        },
+      })
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
+        return null
+      }
+      throw error
+    }
+  },
 }

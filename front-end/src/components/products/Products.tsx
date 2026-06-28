@@ -16,42 +16,37 @@ export const Products = ({
   description,
   price,
   img,
-  setProducts,
 }: ProductsInterface) => {
-  
-  const user= useUserStore((state) => state.user)
+  const user = useUserStore((state) => state.user);
   // const { user } = useContext(UserContext);
 
   // função que irá deletar um produto pelo id
-  const handleDeleteProdutcById = useCallback(
-    async (id: string) => {
-      if (!id) return;
+  const handleDeleteProdutcById = useCallback(async (id: string) => {
+    if (!id) return;
 
-      const result = await deleteProductById.deleteProduct(id);
+    const result = await deleteProductById.deleteProduct(id);
 
-      if (result instanceof ApiError) {
-        if (result.statusCode === 404) {
-          toast.error("Produto não foi encontrado ou já foi deletado");
-        } else if (result.statusCode === 403) {
-          toast.error("Acesso restrito aos administradores");
-        } else if (result.statusCode === 401) {
-          toast.error("Você precisa estar logado");
-          return;
-        } else {
-          toast.error(result.message);
-        }
+    if (result instanceof ApiError) {
+      if (result.statusCode === 404) {
+        toast.error("Produto não foi encontrado ou já foi deletado");
+      } else if (result.statusCode === 403) {
+        toast.error("Acesso restrito aos administradores");
+      } else if (result.statusCode === 401) {
+        toast.error("Você precisa estar logado");
         return;
+      } else {
+        toast.error(result.message);
       }
-      // se não caiu em nenhuma das excessões, então o produto foi deletado
-      toast.success("Produto deletado com sucesso");
+      return;
+    }
+    // se não caiu em nenhuma das excessões, então o produto foi deletado
+    toast.success("Produto deletado com sucesso");
 
-      // após eu ter deletado um produto, eu preciso atualizar a lista de produto local sem o produto deletado. A lista de produtos é preenchida no Home.tsx
-      setProducts((prev: ProductsInterface[]) =>
-        prev.filter((product) => product.id !== id),
-      );
-    },
-    [setProducts],
-  );
+    // após eu ter deletado um produto, eu preciso atualizar a lista de produto local sem o produto deletado. A lista de produtos é preenchida no Home.tsx
+    // setProducts((prev: ProductsInterface[]) =>
+    //   prev.filter((product) => product.id !== id),
+    // );
+  }, []);
 
   return (
     <div>
@@ -89,7 +84,11 @@ export const Products = ({
             <p className="text-brand-amber text-md mx-3 md:text-lg">
               {brazilinaCurrencyFormat(price)}
             </p>
-            <ShoppingCart size={18} className="mx-0.5 cursor-pointer" />
+            <ShoppingCart
+              size={18}
+              className="mx-0.5 cursor-pointer"
+              onClick={() => alert(id)}
+            />
           </div>
         </div>
       </div>

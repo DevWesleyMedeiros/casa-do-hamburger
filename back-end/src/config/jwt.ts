@@ -5,5 +5,5 @@ export const getJwtSecret = (): Uint8Array => {
   if (!jwtSecretEnv) {
     throw new Error('Variável de ambiente JWT_SECRET ainda não foi configurada')
   }
-  return new TextEncoder().encode(jwtSecretEnv)
+  return new TextEncoder().encode(jwtSecretEnv) // valor do tipo Unit8Array, ou seja, 8 bit separados por pontos
 }
