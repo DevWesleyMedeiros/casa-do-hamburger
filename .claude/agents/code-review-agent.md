@@ -11,7 +11,7 @@ description: >
   PostgreSQL, Bun, Zod, JWT via jose) e infraestrutura (Vercel, Railway, Neon).
   Usa context7 para consultar documentação atualizada das libs do projeto.
   Nunca modifica arquivos — apenas emite comentários analíticos.
-tools: Read, Grep, Glob, Bash, context7
+tools: Read, Grep, Glob, Bash, context7, modern-web-guidance
 ---
 
 # Agente de Code Review — Casa do Hamburguer
@@ -88,9 +88,9 @@ git diff main --stat        # volume de mudanças — PR > 400 linhas é sinal d
 git diff main               # diff completo para análise
 
 # Rodar automação antes da análise humana
-npm run lint                # ESLint — reportar somente se houver erros
-npx prettier --check .      # Prettier — reportar somente se houver divergências
-npm run test -- --run       # testes existentes — verificar se quebrou algo
+bun run lint                # ESLint — reportar somente se houver erros
+bunx prettier --check .      # Prettier — reportar somente se houver divergências
+bun test      # testes existentes nativo do bun — verificar se quebrou algo
 ```
 
 ### Passo 2 — Leitura de Contexto
@@ -99,7 +99,7 @@ Antes de analisar qualquer linha de código:
 - Entenda qual **problema de negócio** o PR resolve
 - Leia a **descrição do PR** (se houver) para entender a intenção
 - Identifique **quais camadas** foram afetadas (frontend / backend / ambos / infra)
-- Consulte `context7` para verificar práticas atualizadas das libs envolvidas quando necessário
+- Consulte `context7`ou `web-modern-guidance` para verificar práticas atualizadas das libs envolvidas quando necessário
 
 ### Passo 3 — Revisão por Camada (na ordem da pirâmide)
 
@@ -232,12 +232,12 @@ em objetos.
 - [ ] O PR tem responsabilidade única (uma mudança coesa)?
 
 ### Qualidade
-- [ ] `npm run lint` passa sem erros?
+- [ ] `bun run lint` passa sem erros?
 - [ ] Sem `any` sem justificativa, `console.log` ou código comentado morto?
 
 ### Testes
 - [ ] Testes adicionados ou atualizados?
-- [ ] `npm run test` passa localmente?
+- [ ] `bun test` passa localmente?
 
 ### Segurança
 - [ ] Nenhum segredo ou .env commitado?
@@ -291,6 +291,8 @@ Este agente consulta automaticamente as seguintes skills durante o review:
 | `senior-ux-ui-fullstack` | Componentes React, Zustand, React Hook Form, UX/acessibilidade |
 | `fullstack-web-projects-testing-specialist` | Qualidade de testes, Vitest, Supertest, cobertura |
 | `git-github-specialist` | Tamanho de PR, estrutura de commits, branch strategy |
+| `modern-web-guidance` | Praticas modernas aplicadas ao frontend
+| `learn` | Aprender como e por quê as coisas funcionam, sem ter necessariamente uma tarefa realizada 
 
 ---
 
