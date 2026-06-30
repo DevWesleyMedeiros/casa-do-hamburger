@@ -108,27 +108,24 @@ export const authController = {
       return res.status(error?.status ?? 500).json({ message: error?.message })
     }
   },
-  controllerCreateCartItem: async (req: Request, res: Response) => {
+  getCartItems: async (req: Request, res: Response) => {
     try {
-      // ← FIX 3: try-catch ausente — adicionado
       const { user } = req // esse user trás meu user logado passado pelo requiredAuth middleware que o popula
-      const { productId } = req.body // simulei no Insomnia uma requisição vinda do meu body (frontend), mas do frontend, virá quando eu adicionar uma função no ícone do carrinho para cada produto
+      const { productId } = req.body // requisição vinda do meu body (frontend), mas do frontend, virá quando eu adicionar uma função no ícone do carrinho para cada produto
 
       if (!productId) {
         return res.status(400).json({ message: 'produto é obrigatório' })
       }
 
-      const cartItemsReq = await authService.serviceCreateCartItem(productId, user.id)
+      const cartItemsReq = await authService.addToCart(productId, user.id)
       // user.id -> vem da requisição, assim que login na aplicação
-      // productId.id -> vem do teste do que eu coloquei no body testando com prisam
+      // productId.id -> vem do front quando eu clicar no ícone do carrinho em cada produto
 
       if (cartItemsReq === null) {
-        return res.status(404).json({ message: 'Produto não encontrado' }) // ← FIX 4: era 'Produto deletado com sucesso'
+        return res.status(404).json({ message: 'Produto não encontrado' })
       }
-
       return res.status(200).json(cartItemsReq)
     } catch (error: any) {
-      // ← captura erros do service
       return res
         .status(error?.status ?? 500)
         .json({ message: error?.message ?? 'Erro no servidor' })

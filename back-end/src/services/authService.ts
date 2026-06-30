@@ -101,14 +101,14 @@ export const authService = {
     // me retorna o produto deletado
   },
   findProductInCartItem: async (userId: string) => {
-    const productsFound = await userRepository.findDbCartItemProduct(userId)
+    const productsFound = await userRepository.findCartItemProduct(userId)
     if (!productsFound) {
       throw { status: 404, message: 'produtos não encontrados ou já foram deletados' }
     }
     return productsFound
   },
-  serviceCreateCartItem: async (productId: string, userId: string) => {
-    const cartItems = await userRepository.RepositoryCreateCartItem(productId, userId)
+  addToCart: async (productId: string, userId: string) => {
+    const cartItems = await userRepository.createCartItem(productId, userId)
 
     if (cartItems === null) {
       throw { status: 404, message: 'cartItems não encontrados ou deletados' }

@@ -46,7 +46,7 @@ export const userRepository = {
   },
 
   // função para buscar os CartItems no meu banco de dados. O parâmetro include foi dado, uma vez que dentro da minha tabela CartItem possui um atributo product e ele é um chave estrangeira que faz referência ao produto cadastrado na tabela Products. Sendo assim, eu consigo pegar as informações desse produto como nome, descrição etc. O mesmo eu poderia fazer com o meu user
-  findDbCartItemProduct: async (userId: string) => {
+  findCartItemProduct: async (userId: string) => {
     try {
       return await prisma.cartItem.findMany({
         where: { userId: userId },
@@ -62,23 +62,24 @@ export const userRepository = {
   },
 
   // aumentar a quantidade do produto cadastrado
-  RepositoryCreateCartItem: async (productId: string, userId: string) => {
+  createCartItem: async (productId: string, userId: string) => {
     // productId: vem da body da requisição quando eu clicar no ícone do cart
     // userId virá do requisição que possui um user.id
 
     // validação para verificar se o productId que vem do frontend é igual ao id do produto que está atrelado a um usuário na minha tabela CartItem. Se for, eu só vou a atualizar o quantity relacionado aquele produto
 
-    // repository com upsert — substitui o findFirst + update/create (fazem duas queries no banco de dados). Com upserts evitam race condition (único where), pois o prisma faz tudo em uma única operação atômica
+    // repository com upsert — substitui o findFirst + update/create (fazem duas queries no banco de dados). Com upserts evitam race condition (outros registros do mesmo poderiam ser criados do mesmo entre eles) (único where), pois o prisma faz tudo em uma única operação atômica
     try {
       return await prisma.cartItem.upsert({
         where: {
           userId_productId: { userId, productId },
-          // Prisma gera o nome do compound key unindo os campos com _
-          // Visible em: generated/prisma/index.d.ts → CartItemWhereUniqueInput
+          // Prisma gera o nome do compound key unindo os campos com _ Visible em: generated/prisma/index.d.ts → CartItemWhereUniqueInput
         },
+        // caso eu o usuário (identificado pelo userId )atual já tenha aquele produto em products (identificado pelo productId desse produto), então eu incremento 1
         update: {
           quantity: { increment: 1 }, // se já existe → incrementa
         },
+        // caso eu não tenha o produto, eu o adiciono na tabela CartItem pagando o id do produto (vem da req com o userId do usuário atual)
         create: {
           product: { connect: { id: productId } },
           user: { connect: { id: userId } },

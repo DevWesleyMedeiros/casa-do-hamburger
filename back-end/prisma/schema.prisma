@@ -33,10 +33,10 @@ model CartItem {
   productId String
   userId String
   quantity Int @default(1)
-  creatAt DateTime @default(now())
+  createdAt DateTime @default(now())
   product Products @relation(fields: [productId], references: [id])
   user User @relation(fields: [userId], references: [id])
   
-  @@unique([userId, productId])
+  @@unique([userId, productId]) // linha responsável pelo upsert
   @@index([userId])
 }
