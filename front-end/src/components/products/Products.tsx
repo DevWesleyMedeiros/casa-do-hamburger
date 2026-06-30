@@ -1,16 +1,15 @@
 import { ShoppingCart } from "lucide-react";
 import { brazilinaCurrencyFormat } from "../../shared/utils/Utils";
 import { type ProductsInterface } from "../../types/Products";
-// import { UserContext } from "../../shared/context/UserContext";
-// import { useContext} from 'react'
-import { useUserStore } from "../../shared/stores";
-import { useCallback} from "react";
+import { useUserStore, useCartStore } from "../../shared/stores";
+import { useCallback } from "react";
 import { deleteProductById } from "../../shared/services/api/delete/DeleteProduct";
 import { toast } from "sonner";
 import { ApiError } from "../../shared/services/api/ApiExceptions";
+import { NewCartItem } from "../../shared/services/api/cartItems/createCartItems";
 
 export const Products = ({
-  id,
+  productId,
   category,
   name,
   description,
@@ -18,9 +17,35 @@ export const Products = ({
   img,
 }: ProductsInterface) => {
   const user = useUserStore((state) => state.user);
-  // const { user } = useContext(UserContext);
+  const addItems = useCartStore((state) => state.addItem);
 
   // função que irá deletar um produto pelo id
+  const handleCreateCartItem = useCallback(
+    async (productId: string) => {
+      // id já disponível no componente, por isso não precisa ser acessado na função de fetch
+      if (!productId) return;
+      try {
+        const response = await NewCartItem.newCartItem({ productId });
+        if (response instanceof ApiError) {
+          if (response.statusCode === 401) {
+            toast.error("Você precisa estar logado");
+          } else if (response.statusCode === 404) {
+            toast.error("Produto não encontrado");
+          } else {
+            toast.error(response.message);
+          }
+          return;
+        }
+        addItems(response);
+        toast.success("Adicionado ao carrinho");
+      } catch (err) {
+        console.error(err);
+        toast.error("Erro ao adicionar ao carrinho");
+      }
+    },
+    [addItems],
+  );
+
   const handleDeleteProdutcById = useCallback(async (id: string) => {
     if (!id) return;
 
@@ -37,6 +62,7 @@ export const Products = ({
       } else {
         toast.error(result.message);
       }
+
       return;
     }
     // se não caiu em nenhuma das excessões, então o produto foi deletado
@@ -66,12 +92,13 @@ export const Products = ({
                 <p className="my-0.5 text-sm font-bold uppercase md:text-lg">
                   {name}
                 </p>
-                <div
+                <button
+                  type="button"
                   className="text-brand-red flex cursor-pointer items-center rounded-md border px-1 text-sm"
-                  onClick={() => handleDeleteProdutcById(id)}
+                  onClick={() => handleDeleteProdutcById(productId)}
                 >
                   Deletar
-                </div>
+                </button>
               </div>
             )}
 
@@ -87,7 +114,7 @@ export const Products = ({
             <ShoppingCart
               size={18}
               className="mx-0.5 cursor-pointer"
-              onClick={() => alert(id)}
+              onClick={() => handleCreateCartItem(productId)}
             />
           </div>
         </div>

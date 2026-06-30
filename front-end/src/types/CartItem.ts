@@ -2,7 +2,7 @@
 
 import { type ProductsInterface } from "./Products";
 
-// Type no lugar de interface para permitir o uso do "&" e do "Pick"
+// Type no lugar de interface para permitir o uso do "&"" e do "Pick"
 export type CartItemType = {
   id: string;
   // id do cartItem

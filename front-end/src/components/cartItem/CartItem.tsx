@@ -12,7 +12,7 @@ type CartItemProps = {
   name: string;
   price: number;
   img: string;
-  quantity?: number;
+  quantity: number;
 };
 export const CartItem = ({
   cartItemId,
@@ -21,8 +21,9 @@ export const CartItem = ({
   name,
   price,
   img,
-  quantity = 1,
+  quantity,
 }: CartItemProps) => {
+  const subtotal = price * quantity;
   return (
     <div className="my-component-card flex items-center justify-between">
       <div className="img">
@@ -34,7 +35,7 @@ export const CartItem = ({
           {name}
         </p>
         <p className="price text-sm text-[#848484]">
-          {brazilinaCurrencyFormat(price)}
+          {brazilinaCurrencyFormat(subtotal)}
         </p>
         <div className="chevrons mt-1 flex h-4.75 w-22.75 items-center gap-2">
           <CircleChevronLeft

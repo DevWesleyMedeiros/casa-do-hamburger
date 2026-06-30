@@ -1,9 +1,7 @@
 import { OctagonX } from "lucide-react";
-import { useCallback, useEffect } from "react";
 import { ICON_CONFIG } from "../../constant/iconConfig";
-import { getCartItemsList } from "../../shared/services/api/cartItems/getCartItems";
 import { useCartStore } from "../../shared/stores";
-// import { type CartItemType } from "../../types/CartItem";
+import { brazilinaCurrencyFormat } from "../../shared/utils/Utils";
 import { Button } from "../button/Button";
 import { CartItem } from "../cartItem/CartItem";
 
@@ -14,30 +12,8 @@ type CartProps = {
 
 // showCart e setShowCart são funções para mostrar e esconder o Cart
 export const Cart = ({ showCart, setShowCart }: CartProps) => {
-  // const [cartItems, setCartItems] = useState<CartItemType[]>([]);
-
   const cartItems = useCartStore((state) => state.items); // list de CartItems
-  const setCartItems = useCartStore((state) => state.setCartItems); // altera a list de CartItems
-  // Fetch limpo usando apenas async/await (sem .then)
-  const fetchCartItems = useCallback(async () => {
-    try {
-      const data = await getCartItemsList.getCartItemsProduct();
-
-      // Se houver data, atualiza o estado
-      if (data) {
-        // O queueMicrotask ou um setTimeout de 0ms joga a atualização para a próxima "fila de tarefas" do navegador, evitando o ciclo síncrono ao executar o useEffect.
-        // queueMicrotask vai funcionar como um setTimeout gerando uma leve latência no meu componente de forma que o react não interprete a requisição como síncrona
-        setCartItems(data);
-      }
-    } catch (error) {
-      console.error("Erro ao buscar itens do carrinho:", error);
-    }
-  }, [setCartItems]); // useCallback com dependências, pois o setCartItems vem de um store externo,
-
-  //somente chama uma função fetch
-  useEffect(() => {
-    fetchCartItems();
-  }, [fetchCartItems]); // Boa prática: colocar a função no array de dependências
+  const totalPrice = useCartStore((state) => state.getTotalPrice());
 
   return (
     <div className="conteiner-cart bg-brand-amber transforme absolute right-0 z-10 flex h-208.25 w-73.75 flex-col transition-transform duration-500 ease-in-out">
@@ -61,9 +37,19 @@ export const Cart = ({ showCart, setShowCart }: CartProps) => {
             name={item.product.name}
             price={item.product.price}
             img={item.product.img}
+            quantity={item.quantity}
           />
         ))}
       </div>
+
+      {/* total calculado de produtos */}
+      <div className="border-brand-dark/20 mx-5 my-3 flex items-center justify-between border-t pt-3">
+        <p className="text-brand-dark font-bold uppercase">Total</p>
+        <p className="text-brand-dark font-bold">
+          {brazilinaCurrencyFormat(totalPrice)}
+        </p>
+      </div>
+
       <Button
         title="Finalizar pedido"
         type="button"

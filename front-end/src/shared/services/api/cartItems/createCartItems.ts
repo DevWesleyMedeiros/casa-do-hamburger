@@ -1,17 +1,19 @@
-// Login.ts (serviço)
+// rota post para consumir o carrinho criado pelo id
 import axios from "axios";
 import { Api } from "../ApiConfig";
-import { type LoginPayloadInterface } from "../../../../types/Payload";
+import { type CartItemType } from "../../../../types/CartItem";
 import { ApiError } from "../ApiExceptions";
 
-// put, delete, post, get ... somente para a rota login
-export const LoginDate = {
-  create: async (payload: LoginPayloadInterface) => {
+interface CreateCartItemPayload {
+  productId: string;
+}
+
+export const NewCartItem = {
+  newCartItem: async (
+    payload: CreateCartItemPayload,
+  ): Promise<CartItemType | ApiError> => {
     try {
-      const { data } = await Api().post(
-        "/auth/login",
-        payload,
-      );
+      const { data } = await Api().post(`/auth/create-cart-item`, payload);
       return data;
     } catch (error) {
       if (axios.isAxiosError(error)) {

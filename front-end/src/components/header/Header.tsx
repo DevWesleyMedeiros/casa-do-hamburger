@@ -1,10 +1,8 @@
 import { Box, LayoutDashboard, LogOut, Plus, ShoppingCart } from "lucide-react";
 import { useCallback, useState } from "react";
-// import { useContext } from 'react'
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { ICON_CONFIG } from "../../constant/iconConfig";
-// import { UserContext } from "../../shared/context/UserContext";
 import { useCartStore, useUserStore } from "../../shared/stores";
 import { Cart } from "../cart/Cart";
 
@@ -15,11 +13,10 @@ export const Header = () => {
   const user = useUserStore((state) => state.user);
   const logout = useUserStore((state) => state.logout);
   const cartItemsList = useCartStore((state) => state.items);
+  const totalItems = useCartStore((state) => state.getTotalItems())
 
   //variável que inicia location
   const location = useLocation();
-  // console.log(location.pathname);
-
   const navigate = useNavigate();
 
   // variável de estado para manipular visibility do meu cart
@@ -107,7 +104,7 @@ export const Header = () => {
                 onClick={() => handleCartVisibility()}
               />
               <p className="text-brand-dark absolute -top-3 -right-3 flex h-5 w-5 items-center justify-center rounded-md bg-amber-200">
-                {cartItemsList.length}
+                {totalItems}
               </p>
             </div>
             <div className="item-center flex gap-2">
@@ -135,4 +132,4 @@ export const Header = () => {
       </div>
     </div>
   );
-};
+};;

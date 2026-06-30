@@ -1,16 +1,19 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { type CartItemType } from "../../types/CartItem";
+import { getCartItemsList } from "../../shared/services/api/cartItems/getCartItems";
 
 // Interface do Store do Carrinho
 interface CartStore {
   items: CartItemType[]; // lista de CartItems selecionados
+  isLoading: boolean;
 
   // ações no carrinho
-  addItem: (product: CartItemType) => void;
-  removeItem: (product: string) => void;
+  addItem: (product: CartItemType) => void; // lista de produtos CartItemType[]
+  removeItem: (product: string) => void; // remove pelo id
   clearCart: () => void;
   setCartItems: (items: CartItemType[]) => void; // função que irá preencher meus CartItems com os CartsItem colocados no carrinho
+  fetchCartItems: () => Promise<CartItemType | void>;
 
   // Estado derivado para contagem total
   getTotalItems: () => number;
@@ -21,6 +24,7 @@ export const useCartStore = create<CartStore>()(
   devtools(
     (set, get) => ({
       items: [],
+      isLoading: true,
 
       setCartItems: (items) => {
         set({ items }, false, "cart/setItems");
@@ -79,6 +83,16 @@ export const useCartStore = create<CartStore>()(
           (total, item) => total + item.product.price * item.quantity,
           0,
         );
+      },
+      fetchCartItems: async () => {
+        try {
+          const data = await getCartItemsList.getCartItemsProduct();
+          if (data) set({ items: data }, false, "fetch/success");
+        } catch {
+          // produto não encontrado
+        } finally {
+          set({ isLoading: false }, false, "fetch/done");
+        }
       },
     }),
     { name: "CartStore" },

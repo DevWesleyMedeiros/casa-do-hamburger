@@ -49,13 +49,14 @@ export const Home = () => {
         {/* chamadas dentro de eventos: () => {} - quando não retorno nada
            chamadas dentro de eventos: só o nome da função significa - quando temos retorno */}
         {FILTER_PRODUCTS.map((item) => (
-          <div
+          <button
             key={item}
             className={getItemSelectedClass(item, category)}
             onClick={() => setCategory(item)} // ← seta o clicado
+            type="button"
           >
             {item}
-          </div>
+          </button>
         ))}
       </div>
 
@@ -63,13 +64,13 @@ export const Home = () => {
       <div className="flex flex-col gap-3 md:gap-3">
         {filteredProductsByCategory.map((product) => (
           <Products
-            id={product.id}
+            productId={product.productId}
             category={product.category}
             name={product.name}
             description={product.description}
             img={product.img}
             price={product.price}
-            key={product.id}
+            key={product.productId}
             setProducts={setProducts}
           />
         ))}

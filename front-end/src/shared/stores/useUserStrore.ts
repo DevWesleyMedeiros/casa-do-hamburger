@@ -60,8 +60,8 @@ export const useUserStore = create<UserStore>()(
 // O que é o false? A assinatura oficial da função set do Zustand recebe três parâmetros: set(estadoNovo, replace?, nomeDaAcao?)
 // O segundo parâmetro é um booleano chamado replace (substituir).
 // Se for false (que já é o comportamento padrão), o Zustand faz um Merge (mescla) do estado atual com o estado novo. Ele só altera o que você mandou alterar.
-// Se for true, o Zustand faz um Replace (substituição). Ele apaga todo o estado global daquela store e coloca apenas o objeto que você passou.
-// Por que precisamos digitar false se ele já é o padrão? "Se false já é o padrão, por que eu preciso escrevê-lo?" Por causa do terceiro parâmetro ("setUser", "logout", etc.). Em JavaScript, os parâmetros seguem uma ordem de posições. Se você quer nomear a sua ação para que ela apareça no Redux DevTools (que é o terceiro parâmetro), você é obrigado a preencher o segundo parâmetro para "pular" para o terceiro.
+// Se for true, o Zustand faz um Replace (substituição). Ele apaga tudo o estado global daquela store e coloca apenas o objeto que você passou.
+// false já é o padrão, mas, Por causa do terceiro parâmetro ("setUser", "logout", etc.). Em JavaScript, os parâmetros seguem uma ordem de posições. Se você quer nomear a sua ação para que ela apareça no Redux DevTools (que é o terceiro parâmetro), você é obrigado a preencher o segundo parâmetro para "pular" para o terceiro.
 
 // ERRADO: O Zustand vai achar que "setUser" é o parâmetro `replace`
 // set({ user }, "setUser");
@@ -69,4 +69,4 @@ export const useUserStore = create<UserStore>()(
 // CORRETO: Preenchemos o 2º com o valor padrão (false) para podermos usar o 3º
 // set({ user }, false, "setUser");
 
-// O que é o set do Zustand? // basicamente é ela que avisa ao react o que foi mudado e deve ser renderizado. Você só usa o set para alterar dados puros (strings, arrays, booleanos, objetos e números), ou seja, aquilo que impacta a Interface do Usuário (UI).
+// O que é o set do Zustand? basicamente é ela que avisa ao react o que foi mudado e deve ser renderizado. Você só usa o set para alterar dados puros (strings, arrays, booleanos, objetos e números), ou seja, aquilo que impacta a Interface do Usuário (UI).
