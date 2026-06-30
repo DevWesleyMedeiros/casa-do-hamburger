@@ -404,24 +404,34 @@ A aplicação estará disponível em `http://localhost:5173`
 
 Algumas imagens do projeto aqui para documentar telas importantes: formulário de login, registro e home.
 
+1 - Formulário de login
 ![Login screenshot](front-end/public/screenshots/logIn-screen.png)
 
+2 - Formulário de registro
 ![Register screenshot](front-end/public/screenshots/signUp-screen.png)
 
+3 - Formulário de registro com gerenciador de senha forte em um popover
 ![Register screenshot](front-end/public/screenshots/sigUp-fomr(popover).png)
 
+4 - Display de um a senha fraca através de um password strenght meter com uma regra aplicada
 ![Register screenshot](front-end/public/screenshots/password-strenght-meter(weak-pass).png)
 
+5 - Display de um a senha média através de um password strenght meter com uma regra aplicada
 ![Register screenshot](front-end/public/screenshots/password-strenght(medium-pass).png)
 
+6 - Display de um a senha forte através de um password strenght meter com uma regra aplicada
 ![Register screenshot](front-end/public/screenshots/password-strenght-meter(strong-pass).png)
 
+7 - Homepage sem estar logado
 ![Home logout screenshot](front-end/public/screenshots/logout-homepage.png)
 
+8 - Homepage logado com role de admin
 ![Home login e admin role screenshot](front-end/public/screenshots/login-homepage.png)
 
+9 - Carrinho de produtos preenchidos com 5 produtos, com soma por unidades e soma total
 ![Home login com admin role e Cart screenshot](front-end/public/screenshots/login-homepage-with-admin-role_cart.png)
 
+10 - Gerenciamento de pedidos somente para admins
 ![Home login com admin role e Cart screenshot](front-end/public/screenshots/cardPedidos.png)
 
 ### Nomeação
