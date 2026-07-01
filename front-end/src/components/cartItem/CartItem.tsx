@@ -7,7 +7,7 @@ import { brazilinaCurrencyFormat } from "../../shared/utils/Utils";
 // types somente para o CardItem, por isso o Props no final
 // CartItems é o child do Cart, por tanto para cada prop do CartItem, que é o componente chamado dentrodo Cart, eu passo os valores que vem da minha API
 type CartItemProps = {
-  cartItemId: string;
+  id: string;
   productId: string;
   name: string;
   price: number;
@@ -15,8 +15,8 @@ type CartItemProps = {
   quantity: number;
 };
 export const CartItem = ({
-  cartItemId,
-  productId,
+  id, // CartItem id
+  productId, // id do produto da tabela Products
   // productId é o id do produto que está no CartItem com referência ao id do produto na tabela Products
   name,
   price,

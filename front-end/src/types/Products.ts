@@ -1,6 +1,6 @@
 // types para interface de produtos
 export interface ProductsInterface {
-  productId: string;
+  id: string;
   category: string;
   name: string;
   description: string;

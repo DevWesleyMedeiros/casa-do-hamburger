@@ -64,13 +64,13 @@ export const Home = () => {
       <div className="flex flex-col gap-3 md:gap-3">
         {filteredProductsByCategory.map((product) => (
           <Products
-            productId={product.productId}
+            id={product.id}
             category={product.category}
             name={product.name}
             description={product.description}
             img={product.img}
             price={product.price}
-            key={product.productId}
+            key={product.id}
             setProducts={setProducts}
           />
         ))}

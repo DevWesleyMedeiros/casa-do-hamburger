@@ -32,7 +32,7 @@ export const Cart = ({ showCart, setShowCart }: CartProps) => {
         {cartItems.map((item) => (
           <CartItem
             key={item.id} // Usando o id real do CartItem (conforme Prisma schema)
-            cartItemId={item.id}
+            id={item.id}
             productId={item.productId}
             name={item.product.name}
             price={item.product.price}

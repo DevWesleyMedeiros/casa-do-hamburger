@@ -1,15 +1,15 @@
 import { ShoppingCart } from "lucide-react";
-import { brazilinaCurrencyFormat } from "../../shared/utils/Utils";
-import { type ProductsInterface } from "../../types/Products";
-import { useUserStore, useCartStore } from "../../shared/stores";
 import { useCallback } from "react";
-import { deleteProductById } from "../../shared/services/api/delete/DeleteProduct";
 import { toast } from "sonner";
 import { ApiError } from "../../shared/services/api/ApiExceptions";
 import { NewCartItem } from "../../shared/services/api/cartItems/createCartItems";
+import { deleteProductById } from "../../shared/services/api/delete/DeleteProduct";
+import { useCartStore, useUserStore } from "../../shared/stores";
+import { brazilinaCurrencyFormat } from "../../shared/utils/Utils";
+import { type ProductsInterface } from "../../types/Products";
 
 export const Products = ({
-  productId,
+  id, // id vindo da tabela Products
   category,
   name,
   description,
@@ -36,6 +36,7 @@ export const Products = ({
           }
           return;
         }
+        // uma vez que os produtos já vem na monstagem do componente, eu os já tenho aqui
         addItems(response);
         toast.success("Adicionado ao carrinho");
       } catch (err) {
@@ -95,7 +96,7 @@ export const Products = ({
                 <button
                   type="button"
                   className="text-brand-red flex cursor-pointer items-center rounded-md border px-1 text-sm"
-                  onClick={() => handleDeleteProdutcById(productId)}
+                  onClick={() => handleDeleteProdutcById(id)}
                 >
                   Deletar
                 </button>
@@ -114,7 +115,7 @@ export const Products = ({
             <ShoppingCart
               size={18}
               className="mx-0.5 cursor-pointer"
-              onClick={() => handleCreateCartItem(productId)}
+              onClick={() => handleCreateCartItem(id)}
             />
           </div>
         </div>
