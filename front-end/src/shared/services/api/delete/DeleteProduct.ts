@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Api } from "../ApiConfig";
+import { api } from "../ApiConfig";
 import { ApiError } from "../ApiExceptions";
 
 // Consumir a rota de delete de um produto
@@ -10,7 +10,9 @@ export const deleteProductById = {
     // retorno aqui é um objeto message: "produto deletado com sucesso" ou uma instância de ApiError
     try {
       // id vem como params
-      const response = await Api().delete(`/auth/products/${id}`);
+      const response = await api().delete(
+        `${import.meta.env.VITE_API_URL}/products/${id}`,
+      );
       // já tenho o date do produto, portanto só o retorno
       return response.data;
     } catch (error) {

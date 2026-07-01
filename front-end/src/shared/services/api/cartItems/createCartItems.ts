@@ -1,7 +1,7 @@
 // rota post para consumir o carrinho criado pelo id
 import axios from "axios";
-import { Api } from "../ApiConfig";
 import { type CartItemType } from "../../../../types/CartItem";
+import { api } from "../ApiConfig";
 import { ApiError } from "../ApiExceptions";
 
 interface CreateCartItemPayload {
@@ -13,7 +13,10 @@ export const NewCartItem = {
     payload: CreateCartItemPayload,
   ): Promise<CartItemType | ApiError> => {
     try {
-      const { data } = await Api().post(`/auth/create-cart-item`, payload);
+      const { data } = await api().post(
+        `${import.meta.env.VITE_API_URL}/create-cart-item`,
+        payload,
+      );
       return data;
     } catch (error) {
       if (axios.isAxiosError(error)) {

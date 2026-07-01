@@ -57,7 +57,7 @@ export const CardPedidos = ({
       </div>
       <div className="mx-auto mt-1 h-0 w-49.75 justify-center border text-[#32343E]"></div>
       <p className="mx-4 my-1 text-right text-lg font-bold text-[#32343E]">
-        R${brazilinaCurrencyFormat(price)}
+        {brazilinaCurrencyFormat(price)}
       </p>
     </div>
   );
