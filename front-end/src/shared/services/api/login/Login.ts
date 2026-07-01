@@ -1,6 +1,6 @@
 // Login.ts (serviço)
 import axios from "axios";
-import { Api } from "../ApiConfig";
+import { api } from "../ApiConfig";
 import { type LoginPayloadInterface } from "../../../../types/Payload";
 import { ApiError } from "../ApiExceptions";
 
@@ -8,8 +8,8 @@ import { ApiError } from "../ApiExceptions";
 export const LoginDate = {
   create: async (payload: LoginPayloadInterface) => {
     try {
-      const { data } = await Api().post(
-        "/auth/login",
+      const { data } = await api().post(
+        `${import.meta.env.VITE_API_URL}/login`,
         payload,
       );
       return data;
