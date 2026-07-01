@@ -1,6 +1,6 @@
 // buscar os dados do usuário na rota de logout
-import { Api } from "../ApiConfig";
+import { api } from "../ApiConfig";
 
 export const userLogOut: () => Promise<void> = async () => {
-  await Api().post("/auth/logout");
+  await api().post(`${import.meta.env.VITE_API_URL}/logout`);
 };

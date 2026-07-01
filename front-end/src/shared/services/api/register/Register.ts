@@ -1,14 +1,14 @@
 import axios from "axios";
-import { Api } from "../ApiConfig";
 import { type RegisterPayloadInterface } from "../../../../types/Payload";
+import { api } from "../ApiConfig";
 import { ApiError } from "../ApiExceptions";
 
 // put, delete, post, get ... somente para a rota register
 export const RegisterDate = {
   create: async (payload: RegisterPayloadInterface) => {
     try {
-      const { data } = await Api().post(
-        "http://localhost:3000/auth/register",
+      const { data } = await api().post(
+        `${import.meta.env.VITE_API_URL}/register`,
         payload,
       );
       return data;
