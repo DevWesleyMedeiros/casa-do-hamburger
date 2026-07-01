@@ -108,7 +108,7 @@ export const authController = {
       return res.status(error?.status ?? 500).json({ message: error?.message })
     }
   },
-  getCartItems: async (req: Request, res: Response) => {
+  createCartItem: async (req: Request, res: Response) => {
     try {
       const { user } = req // esse user trás meu user logado passado pelo requiredAuth middleware que o popula
       const { productId } = req.body // requisição vinda do meu body (frontend), mas do frontend, virá quando eu adicionar uma função no ícone do carrinho para cada produto

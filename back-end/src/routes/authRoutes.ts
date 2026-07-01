@@ -34,6 +34,6 @@ router.delete('/products/:id', requireAuth, requiredAdmin, authController.delete
 
 // rota do tipo get que irá buscar um item de CartItem
 router.get('/get-cart-items', requireAuth, authController.productFindInCartItem)
-router.post('/create-cart-item', requireAuth, authController.getCartItems)
+router.post('/create-cart-item', requireAuth, authController.createCartItem)
 
 export default router

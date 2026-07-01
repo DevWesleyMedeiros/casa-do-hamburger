@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { type CartItemType } from "../../types/CartItem";
 import { getCartItemsList } from "../../shared/services/api/cartItems/getCartItems";
+import { type CartItemType } from "../../types/CartItem";
 
 // Interface do Store do Carrinho
 interface CartStore {
@@ -57,10 +57,10 @@ export const useCartStore = create<CartStore>()(
         );
       },
 
-      removeItem: (productId) => {
+      removeItem: (cartItemId: string) => {
         set(
           (state) => ({
-            items: state.items.filter((item) => item.id !== productId),
+            items: state.items.filter((item) => item.id !== cartItemId),
           }),
           false,
           "cart/removeItem",
