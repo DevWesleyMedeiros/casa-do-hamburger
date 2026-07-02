@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Products } from "../../components/products/Products";
-import { getProductsDate } from "../../shared/services/api/products/Products";
+import { getProductsData } from "../../shared/services/api/products/Products";
 import {
   getItemSelectedClass,
   toUpperCaseDate,
@@ -18,13 +18,13 @@ export const Home = () => {
 
   // filtro de itens
   const [category, setCategory] = useState<FilterProducts>("HAMBURGUER");
-
   // products inicia com array vazio até ser configurado novo valor
   const [products, setProducts] = useState<ProductsInterface[]>([]);
+
   // buscar produtos (GET)
   const productsDate = useCallback(async () => {
     try {
-      await getProductsDate.getProducts().then((data) => {
+      await getProductsData.getProducts().then((data) => {
         if (data) setProducts(data);
       });
     } catch (error: unknown) {

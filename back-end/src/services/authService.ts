@@ -6,20 +6,32 @@ import * as jose from 'jose';
 import { getJwtSecret } from '../config/jwt';
 import { userRepository } from '../repositories/userRepositories'
 
+class AppError extends Error {
+  status: number
+
+  constructor(status: number, message: string) {
+    super(message)
+    this.status = status
+    this.name = 'AppError' // nome da classa ao dar o error
+    // seta a cadeia de protótipos para AppError
+    Object.setPrototypeOf(this, AppError.prototype)
+  }
+}
+
 export const authService = {
   // pegando usuário cadastrado no banco de dados (POST)
   login: async (email: string, password: string) => {
     const user = await userRepository.findByEmail(email)
 
     if (!user) {
-      throw { status: 404, message: 'Usuário não encontrado' }
+      throw new AppError(404, 'Usuário não encontrado')
     }
 
     // comparando a senha dada no front com a usuário no banco de dados
     const passwordMatch = await compare(password, user.password)
 
     if (!passwordMatch) {
-      throw { status: 401, message: 'Senha incorreta' }
+      throw new AppError(401, 'Senha incorreta')
     }
 
     // CORREÇÃO DE SEGURANÇA: Filtrar os dados do usuário para NÃO incluir a senha no payload
@@ -59,9 +71,10 @@ export const authService = {
         cep: payload['cep'],
         admin: payload['admin'],
       }
-    } catch (error) {
-      // lança uma excesão se o token adulterado, expirado ou adulterado
-      throw { status: 401, message: 'Token inválido' }
+    } catch (error: any) {
+      // defino o erro do tipo erro para acionar a classe AppError
+      throw new AppError(error.status || 401, error.message || 'Token inválido ou expirado')
+      // 401 se o erro de status não existir
     }
   },
 
@@ -70,7 +83,7 @@ export const authService = {
     const existing = await userRepository.findByEmail(email)
 
     if (existing) {
-      throw { status: 409, message: 'Email já cadastrado' }
+      throw new AppError(409, 'Email já cadastrado')
     }
 
     const salt = genSaltSync(10)
@@ -87,7 +100,7 @@ export const authService = {
 
     // arrays vazios [] são valores truthy do javascript, portanto uma validação de negação unicamentem, aqui não funcionaria
     if (productsDate.length === 0) {
-      throw { status: 404, message: 'Nenhum produto cadastrado no sistema' }
+      throw new AppError(404, 'Nenhum produto cadastrado no sistema')
     }
     return productsDate
   },
@@ -95,7 +108,7 @@ export const authService = {
     const deleted = await userRepository.findProductAndDelete(id)
 
     if (!deleted) {
-      throw { status: 404, message: 'produto não encontrado ou já foi deletado' }
+      throw new AppError(404, 'produto não encontrado ou já foi deletado')
     }
     return deleted
     // me retorna o produto deletado
@@ -103,7 +116,7 @@ export const authService = {
   findProductInCartItem: async (userId: string) => {
     const productsFound = await userRepository.findCartItemProduct(userId)
     if (!productsFound) {
-      throw { status: 404, message: 'produtos não encontrados ou já foram deletados' }
+      throw new AppError(404, 'produtos não encontrados ou já foram deletados')
     }
     return productsFound
   },
@@ -111,8 +124,19 @@ export const authService = {
     const cartItems = await userRepository.createCartItem(productId, userId)
 
     if (cartItems === null) {
-      throw { status: 404, message: 'cartItems não encontrados ou deletados' }
+      throw new AppError(404, 'cartItems não encontrados ou deletados')
     }
     return cartItems
+  },
+  deleteCartItemById: async (cartItemId: string, userId: string) => {
+    const deleted = await userRepository.deleteCartItemById(cartItemId, userId)
+
+    if (!deleted) {
+      throw new AppError(
+        404,
+        'Item do carrinho não encontrado ou já foi deletado ou não pertence ao usuário',
+      )
+    }
+    return deleted
   },
 }

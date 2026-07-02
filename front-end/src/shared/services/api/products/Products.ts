@@ -3,7 +3,7 @@
 import { type ProductsInterface } from "../../../../types/Products";
 import { api } from "../ApiConfig";
 
-export const getProductsDate = {
+export const getProductsData = {
   getProducts: async (): Promise<ProductsInterface[] | null> => {
     try {
       const response = await api().get(

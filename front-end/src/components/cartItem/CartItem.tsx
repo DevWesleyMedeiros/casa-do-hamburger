@@ -1,7 +1,12 @@
 // item do carrinho - CartItem -, componente que vai dentro do Cart
 
 import { CircleChevronLeft, CircleChevronRight, Trash2 } from "lucide-react";
+import { useCallback } from "react";
+import { toast } from "sonner";
 import { ICON_CONFIG } from "../../constant/iconConfig";
+import { ApiError } from "../../shared/services/api/ApiExceptions";
+import { deleteCartItem } from "../../shared/services/api/delete/DeleteCartItemById";
+import { useCartStore } from "../../shared/stores";
 import { brazilinaCurrencyFormat } from "../../shared/utils/Utils";
 
 // types somente para o CardItem, por isso o Props no final
@@ -16,14 +21,44 @@ type CartItemProps = {
 };
 export const CartItem = ({
   id, // CartItem id
-  productId, // id do produto da tabela Products
-  // productId é o id do produto que está no CartItem com referência ao id do produto na tabela Products
+  productId, // productId é o id do produto que está no CartItem com referência ao id do produto na tabela Products
   name,
   price,
   img,
   quantity,
 }: CartItemProps) => {
+  const removeCartItem = useCartStore((state) => state.removeItem);
   const subtotal = price * quantity;
+
+  // deletar cartItem pelo id
+  const handleDeleteCartItemById = useCallback(
+    async (id: string) => {
+      if (!id) {
+        toast.error("CartItem não foi encontrado ou já foi deletado");
+        return;
+      }
+      const response = await deleteCartItem.deleteCartItemById(id);
+
+      if (response instanceof ApiError) {
+        if (response.statusCode === 404) {
+          toast.error("CartItem não foi encontrado ou já foi deletado");
+        } else if (response.statusCode === 403) {
+          toast.error("Acesso restrito aos administradores");
+        } else if (response.statusCode === 401) {
+          toast.error("Você precisa estar logado");
+          return;
+        } else {
+          toast.error(response.message);
+        }
+
+        return;
+      }
+      toast.success("CartItem deletado com sucesso");
+      removeCartItem(id); // vem do cartStore e remove item pelo cartItem e atualiza
+    },
+    [removeCartItem],
+  );
+
   return (
     <div className="my-component-card flex items-center justify-between">
       <div className="img">
@@ -41,16 +76,22 @@ export const CartItem = ({
           <CircleChevronLeft
             color="white"
             className="bg-brand-red cursor-pointer rounded-md"
+            onClick={() => alert("somei")}
           />
           <p className="text-brand-dark mx-1.5 text-sm font-bold">{quantity}</p>
           <CircleChevronRight
             color="white"
             className="bg-brand-red cursor-pointer rounded-md"
+            onClick={() => alert("diminui")}
           />
         </div>
       </div>
       <div className="inset-0 cursor-pointer">
-        <Trash2 size={ICON_CONFIG.mxSize} onClick={() => alert(productId)} />
+        <Trash2
+          size={ICON_CONFIG.mxSize}
+          onClick={() => handleDeleteCartItemById(id)}
+        />
+        {/* id do CartItem para deleção do produto */}
       </div>
     </div>
   );

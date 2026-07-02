@@ -81,7 +81,7 @@ export const authController = {
   deleteProduct: async (req: Request, res: Response) => {
     try {
       const { id } = req.params
-      // id vem exatamente de onde eu passo :id na rota no frontend num objeto junto de outra propriedades no req.parama, porém aqui eu só preciso dele para deleção
+      // id vem exatamente de onde eu passo :id na rota no frontend num objeto junto de outra propriedades no req.params, porém aqui eu só preciso dele para deleção
 
       //O método Array.isArray() verifica se um determinado valor ou objeto é um array (ou vetor). Ele retorna true se o valor for um array e false caso contrário
       if (!id || Array.isArray(id)) {
@@ -125,6 +125,26 @@ export const authController = {
         return res.status(404).json({ message: 'Produto não encontrado' })
       }
       return res.status(200).json(cartItemsReq)
+    } catch (error: any) {
+      return res
+        .status(error?.status ?? 500)
+        .json({ message: error?.message ?? 'Erro no servidor' })
+    }
+  },
+  deleteCartItemById: async (req: Request, res: Response) => {
+    try {
+      const { cartItemId } = req.params // vão retornar sempre strings
+      // req.query retornar sempre objetos
+      const userId = req.user?.id as string // vem do requireAuth, pois preciso saber se quem delete é realmente daquele usuário logado
+
+      // valido o cartItemId que vem do req.params
+      if (!cartItemId || Array.isArray(cartItemId)) {
+        return res.status(400).json({ message: 'ID inválido' })
+      }
+
+      await authService.deleteCartItemById(cartItemId, userId)
+
+      return res.status(200).json({ message: 'Item do carrinho deletado com sucesso' })
     } catch (error: any) {
       return res
         .status(error?.status ?? 500)
