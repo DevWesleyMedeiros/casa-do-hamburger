@@ -27,7 +27,7 @@ export const Cart = ({ showCart, setShowCart }: CartProps) => {
         />
       </div>
 
-      <div className="mx-3 flex flex-1 flex-col gap-2.5">
+      <div className="mx-3 flex h-screen flex-1 scrollbar-thin flex-col gap-2.5 overflow-y-auto">
         {/* Renderização da lista limpa e tipada! mas agora renderizamos usando os dados que vieram do Store */}
         {cartItems.map((item) => (
           <CartItem

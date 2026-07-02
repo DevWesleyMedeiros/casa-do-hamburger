@@ -31,6 +31,8 @@ router.get('/products', authController.getProducts)
 // :id isso é só o "molde" do parâmetro. Na rota é só a sintaxe de declaração do Express — ele diz "aqui vai um parâmetro dinâmico chamado id". Quando faz a requisição de verdade, não inclui os dois pontos:
 // acesso minha rota products normal, porém muda o método e devo passar um id
 router.delete('/products/:id', requireAuth, requiredAdmin, authController.deleteProduct)
+router.delete('/cart-item/:cartItemId', requireAuth, authController.deleteCartItemById)
+// Isso é o padrão chamado de autorização no nível de recurso. Garanto aqui na query que o dono é o solicitante, sem precisar de lógica extra de verificação.
 
 // rota do tipo get que irá buscar um item de CartItem
 router.get('/get-cart-items', requireAuth, authController.productFindInCartItem)

@@ -36,6 +36,7 @@ export const useCartStore = create<CartStore>()(
             // Verifica se o item já existe no carrinho
             const existingItem = state.items.find(
               (item) => item.id === product.id,
+              // compara o id do item iterado com o id do produto passado
             );
 
             if (existingItem) {
@@ -72,11 +73,13 @@ export const useCartStore = create<CartStore>()(
       },
 
       // Funções utilitárias (Getters) para usar no Header (ícone) e no Checkout
+      // vai mostrar o número no carrinho
       getTotalItems: () => {
         const { items } = get(); // get() acessa o estado atual sem precisar de hook
         return items.reduce((total, item) => total + item.quantity, 0);
       },
 
+      // vai mostrar o total de preços
       getTotalPrice: () => {
         const { items } = get();
         return items.reduce(
@@ -84,6 +87,7 @@ export const useCartStore = create<CartStore>()(
           0,
         );
       },
+      // busca os CartItem atuais na montagem do componente
       fetchCartItems: async () => {
         try {
           const data = await getCartItemsList.getCartItemsProduct();
