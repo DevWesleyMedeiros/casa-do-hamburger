@@ -7,7 +7,7 @@ import { Toaster } from "sonner";
 function App() {
   return (
     <>
-      <Toaster position="top-center" richColors duration={4000} />
+      <Toaster position="top-center" richColors duration={2000} />
       {/* <UserProvider></UserProvider> */}
       {/* AppRoutes = children criado no UserProvider. Por isso ele é usuado <UserProvider></UserProvider> */}
 

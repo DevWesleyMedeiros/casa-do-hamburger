@@ -93,4 +93,16 @@ export const userRepository = {
       throw error
     }
   },
+  deleteCartItemById: async (cartItemId: string, userId: string) => {
+    try {
+      return await prisma.cartItem.delete({
+        where: { id: cartItemId, userId },
+      })
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+        return null
+      }
+      throw error
+    }
+  },
 }

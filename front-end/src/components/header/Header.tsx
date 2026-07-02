@@ -12,8 +12,7 @@ export const Header = () => {
 
   const user = useUserStore((state) => state.user);
   const logout = useUserStore((state) => state.logout);
-  const cartItemsList = useCartStore((state) => state.items);
-  const totalItems = useCartStore((state) => state.getTotalItems())
+  const totalItems = useCartStore((state) => state.getTotalItems());
 
   //variável que inicia location
   const location = useLocation();

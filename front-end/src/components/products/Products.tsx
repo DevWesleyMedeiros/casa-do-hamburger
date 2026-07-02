@@ -47,6 +47,7 @@ export const Products = ({
     [addItems],
   );
 
+  // deletar produto pelo id
   const handleDeleteProdutcById = useCallback(async (id: string) => {
     if (!id) return;
 
