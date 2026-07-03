@@ -3,6 +3,7 @@
 import type { NextFunction, Request, Response } from 'express'
 import * as jose from 'jose'
 import { getJwtSecret } from '../config/jwt'
+import { AppError } from '../errors/AppError'
 
 // função que requiredAuth que será usada como middleware para o decodificar token do usuário
 export const requireAuth = async (
@@ -21,7 +22,7 @@ export const requireAuth = async (
   try {
     const { payload } = await jose.jwtVerify(token, getJwtSecret())
     // payload = token decodificado contendo todas as propriedades do usuário logado
-
+    // regra que decodifica o token vindo do cookie do frontend com o payload abaixo (GET)
     // 4. injeta os dados do usuário na requisição para o controller usar
     // req['user'] = user - nome da propriedade crida da interface (um objeto) de tipos do Request
     // populando o user com as propriedades de user
@@ -35,8 +36,16 @@ export const requireAuth = async (
 
     next() // libera o req['user'] para o controller
     return
-  } catch (error) {
-    // jose lança automaticamente se expirado ou adulterado
-    return res.status(401).json({ message: 'Token inválido ou expirado' })
+  } catch (error: unknown) {
+    // jose lança automaticamente se expirado ou adulterado. Jose.errors.JOSEError é a classe base de todos os erros do jose — funciona como um catch-all para qualquer problema de verificação JWT sem precisar listar cada subclasse individualmente.
+    if (error instanceof jose.errors.JWTExpired) {
+      const errors = new AppError(401, 'Token expirado')
+      return res.status(401).json({ status: errors.status, message: errors.message })
+    }
+    if (error instanceof jose.errors.JWEInvalid) {
+      const errors = new AppError(401, 'Token inválido')
+      return res.status(401).json({ status: errors.status, message: errors.message })
+    }
+    // mais erros do token aqui personalizado com a classe AppError ou Jose.errors.JOSEError
   }
 }

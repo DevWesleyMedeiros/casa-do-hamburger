@@ -55,7 +55,7 @@ export const authController = {
   // O cookie da requisição fica disponível graças ao middleware 'cookie-parser'.
   // o cookie já foi decodificado com a função requiredAuth. Aqui eu só retorno
   userAuth: async (req: Request, res: Response) => {
-    const user = req.user
+    const user = req.user // vem do requireAuth, que decodifica o token e popula req.user com as informações do usuário logado
     res.status(200).json({ user })
   },
 
