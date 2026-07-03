@@ -3,8 +3,8 @@
 // como se fosse um estoquista: conhece cada ingrediente, vai ao banco de dados e busca o que precisa
 // Queries no banco via Prisma. Só conhece o PRISMA
 
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client'
-import { Prisma } from '../../generated/prisma/client'
+
+import { handlePrismaError } from '../utils/handlePrismaError'
 import { prisma } from '../db'
 
 // procura no banco de dados um usuário pelo email, utilizando o método findFirst do Prisma Client. Se encontrar um usuário com o email fornecido, ele retorna os dados desse usuário; caso contrário, retorna null.
@@ -37,11 +37,8 @@ export const userRepository = {
         where: { id: id },
       })
     } catch (error) {
-      // P2025 = "Record to delete does not exist" — código oficial do Prisma
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        return null // ← converte a exceção do Prisma em um retorno previsível. A partir da daí, eu já posso manipular um retorno com status personalizado caso id não encontrado, no arquivo authServices
-      }
-      throw error // qualquer outro erro (conexão, etc.) continua subindo normalmente
+      return handlePrismaError(error)
+      // return aqui garante que meu catch error acaba nesse lançamento
     }
   },
 
@@ -54,10 +51,7 @@ export const userRepository = {
         // product: true,
       })
     } catch (error) {
-      if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
-        return null
-      }
-      throw error
+      return handlePrismaError(error)
     }
   },
 
@@ -87,10 +81,8 @@ export const userRepository = {
         },
       })
     } catch (error) {
-      if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
-        return null
-      }
-      throw error
+      return handlePrismaError(error)
+      // handlePrismaError são do tipo never, ou seja, nunca retorna, mas lançam algo. Nesse caso, excessões
     }
   },
   deleteCartItemById: async (cartItemId: string, userId: string) => {
@@ -99,10 +91,7 @@ export const userRepository = {
         where: { id: cartItemId, userId },
       })
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        return null
-      }
-      throw error
+      return handlePrismaError(error)
     }
   },
 }

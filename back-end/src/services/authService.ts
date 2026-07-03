@@ -5,18 +5,7 @@ import { compare, genSaltSync, hashSync } from 'bcrypt-ts';
 import * as jose from 'jose';
 import { getJwtSecret } from '../config/jwt';
 import { userRepository } from '../repositories/userRepositories'
-
-class AppError extends Error {
-  status: number
-
-  constructor(status: number, message: string) {
-    super(message)
-    this.status = status
-    this.name = 'AppError' // nome da classa ao dar o error
-    // seta a cadeia de protótipos para AppError
-    Object.setPrototypeOf(this, AppError.prototype)
-  }
-}
+import { AppError } from '../errors/AppError'
 
 export const authService = {
   // pegando usuário cadastrado no banco de dados (POST)
@@ -60,24 +49,6 @@ export const authService = {
     }
   },
 
-  // regra que decodifica o token vindo do cookie do frontend com o payload abaixo (GET)
-  getMe: async (token: string) => {
-    try {
-      const { payload } = await jose.jwtVerify(token, getJwtSecret())
-      return {
-        id: payload['id'],
-        name: payload['name'],
-        email: payload['email'],
-        cep: payload['cep'],
-        admin: payload['admin'],
-      }
-    } catch (error: any) {
-      // defino o erro do tipo erro para acionar a classe AppError
-      throw new AppError(error.status || 401, error.message || 'Token inválido ou expirado')
-      // 401 se o erro de status não existir
-    }
-  },
-
   // registrar usuário no banco de dados (POST)
   register: async (name: string, email: string, password: string, cep: string) => {
     const existing = await userRepository.findByEmail(email)
@@ -106,37 +77,19 @@ export const authService = {
   },
   deleteProduct: async (id: string) => {
     const deleted = await userRepository.findProductAndDelete(id)
-
-    if (!deleted) {
-      throw new AppError(404, 'produto não encontrado ou já foi deletado')
-    }
     return deleted
     // me retorna o produto deletado
   },
   findProductInCartItem: async (userId: string) => {
     const productsFound = await userRepository.findCartItemProduct(userId)
-    if (!productsFound) {
-      throw new AppError(404, 'produtos não encontrados ou já foram deletados')
-    }
     return productsFound
   },
   addToCart: async (productId: string, userId: string) => {
     const cartItems = await userRepository.createCartItem(productId, userId)
-
-    if (cartItems === null) {
-      throw new AppError(404, 'cartItems não encontrados ou deletados')
-    }
     return cartItems
   },
   deleteCartItemById: async (cartItemId: string, userId: string) => {
     const deleted = await userRepository.deleteCartItemById(cartItemId, userId)
-
-    if (!deleted) {
-      throw new AppError(
-        404,
-        'Item do carrinho não encontrado ou já foi deletado ou não pertence ao usuário',
-      )
-    }
     return deleted
   },
 }
