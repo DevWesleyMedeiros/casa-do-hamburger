@@ -138,7 +138,8 @@ export const useCartStore = create<CartStore>()(
       fetchCartItems: async () => {
         try {
           const data = await getCartItemsList.getCartItemsProduct();
-          if (Array.isArray(data) && !(data instanceof Error)) set({ items: data }, false, "fetch/success");
+          if (Array.isArray(data) && !(data instanceof Error))
+            set({ items: data }, false, "fetch/success");
         } catch {
           // produtos não encontrados
         } finally {
