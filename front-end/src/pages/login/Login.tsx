@@ -10,11 +10,11 @@ import { toast } from "sonner";
 import { Button } from "../../components/button/Button";
 import { Input } from "../../components/input/Input";
 import { ICON_CONFIG } from "../../constant/iconConfig";
-// import { UserContext } from "../../shared/context/UserContext";
 import { loginSchema, type loginInput } from "../../shared/schemas/authSchemas";
 import { ApiError } from "../../shared/services/api/ApiExceptions";
 import { LoginDate } from "../../shared/services/api/login/Login";
-import { useUserStore } from "../../shared/stores";
+import { useUserStore } from "../../shared/stores/useUserStrore";
+import { useCartStore } from "../../shared/stores/useCartStore";
 
 export const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -26,7 +26,7 @@ export const Login = () => {
   // const { setUser } = useContext(UserContext);
   // consumindo minhas função do meu store via um hook personalida
   const setUser = useUserStore((state) => state.setUser);
-
+  const fetchCartItemList = useCartStore((state) => state.fetchCartItems);
   const navigate = useNavigate();
 
   const {
@@ -70,6 +70,7 @@ export const Login = () => {
           admin: result.user.admin,
         });
         reset();
+        fetchCartItemList();
         navigate("/home");
       } catch {
         setBackendError("Ocorreu um erro inesperado. Tente novamente.");
@@ -77,7 +78,7 @@ export const Login = () => {
         setIsLoading(false); // ← sempre reseta, independente do resultado
       }
     },
-    [navigate, setUser, reset],
+    [navigate, setUser, reset, fetchCartItemList],
   );
 
   const togglePasswordVisibility = useCallback(() => {
