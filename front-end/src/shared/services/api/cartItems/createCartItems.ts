@@ -14,7 +14,7 @@ export const NewCartItem = {
   ): Promise<CartItemType | ApiError> => {
     try {
       const { data } = await api().post(
-        `${import.meta.env.VITE_API_URL}/create-cart-item`,
+        "/auth/create-cart-item",
         payload,
       );
       return data;
@@ -23,9 +23,9 @@ export const NewCartItem = {
         const message =
           error.response?.data?.message ?? "Erro desconhecido ao fazer login";
         const statusCode = error.response?.status ?? 0;
-        return new ApiError(message, statusCode);
+        return new ApiError(statusCode, message);
       }
-      return new ApiError("Erro de conexão com o servidor", 0);
+      return new ApiError(0, "Erro de conexão com o servidor");
     }
   },
 };

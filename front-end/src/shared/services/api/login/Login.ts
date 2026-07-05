@@ -8,8 +8,9 @@ import { ApiError } from "../ApiExceptions";
 export const LoginDate = {
   create: async (payload: LoginPayloadInterface) => {
     try {
+      // POST para /auth/login (caminho relativo)
       const { data } = await api().post(
-        `${import.meta.env.VITE_API_URL}/login`,
+        "/auth/login",
         payload,
       );
       return data;
@@ -18,9 +19,9 @@ export const LoginDate = {
         const message =
           error.response?.data?.message ?? "Erro desconhecido ao fazer login";
         const statusCode = error.response?.status ?? 0;
-        return new ApiError(message, statusCode);
+        return new ApiError(statusCode, message);
       }
-      return new ApiError("Erro de conexão com o servidor", 0);
+      return new ApiError(0, "Erro de conexão com o servidor");
     }
   },
 };

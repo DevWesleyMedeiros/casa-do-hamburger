@@ -27,6 +27,8 @@ export const CartItem = ({
   img,
   quantity,
 }: CartItemProps) => {
+  const incrementQuantity = useCartStore((state) => state.incrementItem);
+  const decrementQuantity = useCartStore((state) => state.decrementItem);
   const removeCartItem = useCartStore((state) => state.removeItem);
   const subtotal = price * quantity;
 
@@ -59,6 +61,14 @@ export const CartItem = ({
     [removeCartItem],
   );
 
+  // Se quantity chegar a 1 e o usuário decrementar, vira deleção
+  const handleDecrementQuantity = useCallback(async () => {
+    if (quantity === 1) {
+      return await handleDeleteCartItemById(id);
+    }
+    await decrementQuantity(id);
+  }, [quantity, id, handleDeleteCartItemById, decrementQuantity]);
+
   return (
     <div className="my-component-card flex items-center justify-between">
       <div className="img">
@@ -76,13 +86,13 @@ export const CartItem = ({
           <CircleChevronLeft
             color="white"
             className="bg-brand-red cursor-pointer rounded-md"
-            onClick={() => alert("somei")}
+            onClick={handleDecrementQuantity}
           />
           <p className="text-brand-dark mx-1.5 text-sm font-bold">{quantity}</p>
           <CircleChevronRight
             color="white"
             className="bg-brand-red cursor-pointer rounded-md"
-            onClick={() => alert("diminui")}
+            onClick={() => incrementQuantity(id)}
           />
         </div>
       </div>
