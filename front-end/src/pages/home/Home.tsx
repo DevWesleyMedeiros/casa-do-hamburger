@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Products } from "../../components/products/Products";
+import { ApiError } from "../../shared/services/api/ApiExceptions";
 import { getProductsData } from "../../shared/services/api/products/Products";
 import {
   getItemSelectedClass,
@@ -25,10 +26,12 @@ export const Home = () => {
   const productsDate = useCallback(async () => {
     try {
       await getProductsData.getProducts().then((data) => {
-        if (data) setProducts(data);
+        if (data && !(data instanceof Error)) setProducts(data);
       });
     } catch (error: unknown) {
-      console.log(`Erro: ${error}`);
+      if (error instanceof Error) {
+        return new ApiError(404, "products não encontrado");
+      }
     }
   }, []);
 
