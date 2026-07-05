@@ -13,6 +13,7 @@ export const Header = () => {
   const user = useUserStore((state) => state.user);
   const logout = useUserStore((state) => state.logout);
   const totalItems = useCartStore((state) => state.getTotalItems());
+  const clearCart = useCartStore((state) => state.clearCart);
 
   //variável que inicia location
   const location = useLocation();
@@ -34,9 +35,13 @@ export const Header = () => {
     await new Promise((resolve) => setTimeout(resolve, 4000));
 
     toast.success("Usuário deslogado");
+
+    // limpa o carrinho da memória do navegadar para o próximo user
+    clearCart();
+
     await logout();
     navigate("/login");
-  }, [logout, navigate]);
+  }, [logout, navigate, clearCart]);
 
   // função que implementa um active no ícone de acordo com a pathname do location
   const setNavItemActiveClass = (pathname: string): string => {
