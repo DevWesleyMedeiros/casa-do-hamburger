@@ -1,5 +1,3 @@
-// O requireAuth já verifica o token e popula req.user (quer dizer passar para o user todas as propriedades dele com id, name, email ... ) antes do controller rodar. Decodifica o token e traz as informações do usuário logado
-
 import type { NextFunction, Request, Response } from 'express'
 import * as jose from 'jose'
 import { getJwtSecret } from '../config/jwt'

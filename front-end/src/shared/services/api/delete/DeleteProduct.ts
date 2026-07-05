@@ -11,7 +11,7 @@ export const deleteProductById = {
     try {
       // id vem como params
       const response = await api().delete(
-        `${import.meta.env.VITE_API_URL}/products/${id}`,
+        `/auth/products/${id}`,
       );
       // já tenho o date do produto, portanto só o retorno
       return response.data;
@@ -21,10 +21,10 @@ export const deleteProductById = {
         // garantir que o editor sabe que 'erro' tem a propriedade 'response'
         const message = error.response?.data?.message ?? "Erro desconhecido";
         const statusCode = error.response?.status ?? 0;
-        return new ApiError(message, statusCode);
+        return new ApiError(statusCode, message);
       }
       // damais erros que eventualmente podem acontecer: sintaxe, variáveis inexistentes etc.
-      return new ApiError("Erro inesperado", 0);
+      return new ApiError(0, "Erro inesperado");
     }
   },
 };

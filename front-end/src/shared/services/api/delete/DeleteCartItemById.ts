@@ -9,16 +9,16 @@ export const deleteCartItem = {
   ): Promise<{ message: string } | ApiError> => {
     try {
       const response = await api().delete(
-        `${import.meta.env.VITE_API_URL}/cart-item/${cartItemId}`,
+        `/auth/cart-item/${cartItemId}`,
       );
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const message = error.response?.data?.message ?? "Erro desconhecido";
         const statusCode = error.response?.status ?? 0;
-        return new ApiError(message, statusCode);
+        return new ApiError(statusCode, message);
       }
-      return new ApiError("Erro inesperado", 0);
+      return new ApiError(0, "Erro inesperado");
     }
   },
 };

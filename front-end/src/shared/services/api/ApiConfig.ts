@@ -1,13 +1,19 @@
 // arquivo de configuração do axios
 import axios from "axios";
 
+// Criar BASEURL: apenas http://localhost:3000 (sem /auth)
+// As rotas devem incluir /auth na chamada
+const getBaseURL = () => {
+  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000/";
+  
+  // Remove /auth se estiver no final
+  return apiUrl.replace(/\/auth$/, "");
+};
+
 export const api = () => {
   return axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
-    // headers: {
-    //   "Content-Type": "application/json",
-    // },
-    // não é necessário eu configurar o body aqui, pois o axios já faz isso automaticamente quando passo um objeto como segundo argumento em uma requisição POST ou PUT, por exemplo. O axios converte esse objeto para JSON e define o header "Content-Type" como "application/json" automaticamente.
+    baseURL: getBaseURL(),
+    // O axios envia automaticamente Content-Type: application/json
     withCredentials: true, // para enviar cookies junto com as requisições
   });
 };

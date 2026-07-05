@@ -2,5 +2,5 @@
 import { api } from "../ApiConfig";
 
 export const userLogOut: () => Promise<void> = async () => {
-  await api().post(`${import.meta.env.VITE_API_URL}/logout`);
+  await api().post("/auth/logout");
 };

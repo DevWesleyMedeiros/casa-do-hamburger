@@ -1,21 +1,23 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { getCartItemsList } from "../../shared/services/api/cartItems/getCartItems";
+import { toast } from "sonner";
+import { updateCartItemQuantity } from "../../shared/services/api/update/updateCartItemService";
 import { type CartItemType } from "../../types/CartItem";
 
 // Interface do Store do Carrinho
 interface CartStore {
-  items: CartItemType[]; // lista de CartItems selecionados
+  items: CartItemType[]; // lista de CartItems
   isLoading: boolean;
 
-  // ações no carrinho
-  addItem: (product: CartItemType) => void; // lista de produtos CartItemType[]
-  removeItem: (product: string) => void; // remove pelo id
+  addItem: (product: CartItemType) => void;
+  removeItem: (cartItemId: string) => void;
   clearCart: () => void;
-  setCartItems: (items: CartItemType[]) => void; // função que irá preencher meus CartItems com os CartsItem colocados no carrinho
-  fetchCartItems: () => Promise<CartItemType | void>;
-
-  // Estado derivado para contagem total
+  setCartItems: (items: CartItemType[]) => void;
+  updateCartItemQuantity: (cartItemId: string, quantity: number) => void;
+  fetchCartItems: () => Promise<void>;
+  incrementItem: (cartItemId: string) => Promise<void>;
+  decrementItem: (cartItemId: string) => Promise<void>;
   getTotalItems: () => number;
   getTotalPrice: () => number;
 }
@@ -29,18 +31,14 @@ export const useCartStore = create<CartStore>()(
       setCartItems: (items) => {
         set({ items }, false, "cart/setItems");
       },
-
       addItem: (product) => {
         set(
           (state) => {
-            // Verifica se o item já existe no carrinho
             const existingItem = state.items.find(
               (item) => item.id === product.id,
-              // compara o id do item iterado com o id do produto passado
             );
 
             if (existingItem) {
-              // Se existe, apenas aumenta a quantidade (Evita itens duplicados na lista)
               return {
                 items: state.items.map((item) =>
                   item.id === product.id
@@ -50,7 +48,6 @@ export const useCartStore = create<CartStore>()(
               };
             }
 
-            // Se não existe, adiciona com quantidade 1 (ou a quantidade passada)
             return { items: [...state.items, product] };
           },
           false,
@@ -68,18 +65,68 @@ export const useCartStore = create<CartStore>()(
         );
       },
 
+      updateCartItemQuantity: (cartItemId, quantity) => {
+        set(
+          (state) => ({
+            items: state.items.map((item) =>
+              item.id === cartItemId ? { ...item, quantity } : item,
+            ),
+          }),
+          false,
+          "cart/updateItemQuantity",
+        );
+      },
+
+      incrementItem: async (cartItemId) => {
+        const currentItem = get().items.find((item) => item.id === cartItemId);
+        if (!currentItem) return;
+
+        const newQuantity = currentItem.quantity + 1;
+
+        // Atualiza UI imediatamente (otimista)
+        get().updateCartItemQuantity(cartItemId, newQuantity);
+
+        try {
+          // Persiste no banco em background
+          await updateCartItemQuantity.update(cartItemId, newQuantity);
+        } catch {
+          // 3. Rollback se falhar
+          get().updateCartItemQuantity(cartItemId, currentItem.quantity);
+          toast.error("Erro ao atualizar quantidade");
+        }
+      },
+
+      decrementItem: async (cartItemId) => {
+        const currentItem = get().items.find((item) => item.id === cartItemId);
+        if (!currentItem) return;
+
+        // quantity === 1: decremento vira deleção — o componente cuida disso
+        if (currentItem.quantity <= 1) return;
+
+        const newQuantity = currentItem.quantity - 1;
+
+        // Atualiza UI imediatamente (otimista)
+        get().updateCartItemQuantity(cartItemId, newQuantity);
+
+        try {
+          // 2. Persiste no banco em background
+          await updateCartItemQuantity.update(cartItemId, newQuantity);
+        } catch {
+          // 3. Rollback se falhar
+          get().updateCartItemQuantity(cartItemId, currentItem.quantity);
+          toast.error("Erro ao atualizar quantidade");
+        }
+      },
+
       clearCart: () => {
         set({ items: [] }, false, "cart/clearCart");
       },
 
-      // Funções utilitárias (Getters) para usar no Header (ícone) e no Checkout
-      // vai mostrar o número no carrinho
       getTotalItems: () => {
-        const { items } = get(); // get() acessa o estado atual sem precisar de hook
+        const { items } = get();
         return items.reduce((total, item) => total + item.quantity, 0);
       },
 
-      // vai mostrar o total de preços
       getTotalPrice: () => {
         const { items } = get();
         return items.reduce(
@@ -87,13 +134,13 @@ export const useCartStore = create<CartStore>()(
           0,
         );
       },
-      // busca os CartItem atuais na montagem do componente
+
       fetchCartItems: async () => {
         try {
           const data = await getCartItemsList.getCartItemsProduct();
-          if (data) set({ items: data }, false, "fetch/success");
+          if (Array.isArray(data) && !(data instanceof Error)) set({ items: data }, false, "fetch/success");
         } catch {
-          // produto não encontrado
+          // produtos não encontrados
         } finally {
           set({ isLoading: false }, false, "fetch/done");
         }

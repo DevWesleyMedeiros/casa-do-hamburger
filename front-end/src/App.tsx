@@ -1,13 +1,13 @@
-import "./App.css";
-import { AppRoutes } from "./shared/routes/AppRoutes";
-import { FetchUser } from "./shared/components/FetchUser";
-import { FetchCartItems } from "./shared/components/FetchCartItem";
 import { Toaster } from "sonner";
+import "./App.css";
+import { FetchCartItems } from "./shared/components/FetchCartItem";
+import { FetchUser } from "./shared/components/FetchUser";
+import { AppRoutes } from "./shared/routes/AppRoutes";
 
 function App() {
   return (
     <>
-      <Toaster position="top-center" richColors duration={2000} />
+      <Toaster position="top-center" richColors duration={3000} />
       {/* <UserProvider></UserProvider> */}
       {/* AppRoutes = children criado no UserProvider. Por isso ele é usuado <UserProvider></UserProvider> */}
 
