@@ -7,8 +7,8 @@ export const PublicRoutes = ({ children }: { children: ReactNode }) => {
   const user = useUserStore((state) => state.user);
   const isLoading = useUserStore((state) => state.isLoading);
 
-  //
   if (isLoading) return null;
+  // setar um sppiner enquando a requisão não é completa
 
   // se já está logado, redireciona para home ao invés de login — não deixa ver o login
   if (user) return <Navigate to="/home" replace />;
