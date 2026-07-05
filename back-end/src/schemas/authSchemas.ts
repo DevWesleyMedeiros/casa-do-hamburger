@@ -15,7 +15,7 @@ export const registerSchema = z.object({
     .string()
     .min(8, 'Senha deve ter no mínimo 8 caracteres')
     .regex(/[A-Z]/, 'Deve conter pelo menos uma letra maiúscula')
-    .regex(/[0-9]/, 'Deve conter pelo menos um número')
+    .regex(/d/, 'Deve conter pelo menos um número')
     .regex(/[^a-zA-Z0-9]/, 'Deve conter pelo menos um caractere especial'),
 
   // confirm password é um validate de UX e não backend

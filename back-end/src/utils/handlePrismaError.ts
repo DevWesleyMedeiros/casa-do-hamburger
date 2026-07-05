@@ -5,7 +5,7 @@ import { Prisma } from '../../generated/prisma/client'
 import { AppError } from "../errors/AppError"
 
 const ERROR_PRISMA_MAP: Record<string, { status: number; message: string }> = {
-  // Record<string = chave qualquer texto com código de erro do tipo PrismaClient ["P2025"]>
+  // Record<string = chave qualquer texto com código de erro do tipo PrismaClient; ex.: ["P2025"]>
   // Valor { status; message }: Obriga cada entrada a ter um número de status HTTP e uma mensagem de texto.
   P2025: { status: 404, message: 'Registro não encontrado' },
   P2002: { status: 409, message: 'Registro já existe' },
