@@ -43,13 +43,16 @@ export const useUserStore = create<UserStore>()(
       fetchUser: async () => {
         try {
           const data = await getAuth.getMe();
-          if (data) set({ user: data }, false, "fetch/success");
+          // Verifica se o retorno é um usuário válido (não é ApiError)
+          if (data && !(data instanceof Error)) {
+            set({ user: data }, false, "fetch/success");
+          }
         } catch {
           // usuário não autenticado é estado válido
         } finally {
           set({ isLoading: false }, false, "fetch/done");
-          // Independentemente de dar erro no backend, limpamos o front e user volta ao seu estodo atual
-          // isLoading: false or true para gerenciar o clico de vida da chamada inicial da API
+          // Independentemente de dar erro no backend, limpamos o front e user volta ao seu estado atual
+          // isLoading: false or true para gerenciar o ciclo de vida da chamada inicial da API
         }
       },
     }),
