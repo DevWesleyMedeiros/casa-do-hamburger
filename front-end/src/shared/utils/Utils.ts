@@ -43,13 +43,13 @@ export const toUpperCaseDate = (arrayDate: string[]): string[] => {
 export const displayStrongPassword = (password: string) => {
   let score = 0;
 
-  // 1. Ganha ponto se tiver 9 ou mais caracteres
+  // Ganha ponto se tiver 9 ou mais caracteres
   if (password.length >= 9) score++;
 
-  // 2. Ganha ponto se contiver pelo menos uma letra maiúscula
+  // Ganha ponto se contiver pelo menos uma letra minúscula
   if (/[a-z]/.test(password)) score++;
 
-  // 3. Ganha ponto se contiver letras minúsculas OU números OU especiais
+  // Ganha ponto se contiver letras maiúculas OU números OU especiais
   // Usamos [ ... ] sem o ^ e $ para verificar se esses elementos existem na string
   if (
     /[A-Z0-9]/.test(password) &&
