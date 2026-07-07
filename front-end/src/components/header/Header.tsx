@@ -1,49 +1,46 @@
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Box, LayoutDashboard, LogOut, Plus, ShoppingCart } from "lucide-react";
 import { useCallback, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { ICON_CONFIG } from "../../constant/iconConfig";
-import { useCartStore, useUserStore } from "../../shared/stores";
+import { queryKeys } from "../../constant/queryKeys";
+import { getCartItemsList } from "../../shared/services/api/cartItems/getCartItems";
+import { useUserStore } from "../../shared/stores";
 import { Cart } from "../cart/Cart";
 
 export const Header = () => {
-  // desestruturando variável UserContext
-  // const { user, logout } = useContext(UserContext);
-
   const user = useUserStore((state) => state.user);
   const logout = useUserStore((state) => state.logout);
-  const totalItems = useCartStore((state) => state.getTotalItems());
-  const clearCart = useCartStore((state) => state.clearCart);
 
-  //variável que inicia location
   const location = useLocation();
   const navigate = useNavigate();
 
-  // variável de estado para manipular visibility do meu cart
-  // true = showcart; false hiddencart
+  const queryClient = useQueryClient();
+
+  const { data: totalItems = 0 } = useQuery({
+    queryKey: queryKeys.cartItems,
+    queryFn: () => getCartItemsList.getCartItemsProduct(),
+    select: (cartItem) =>
+      cartItem.reduce((sum, item) => sum + item.quantity, 0),
+  });
+
   const [showCart, setShowCart] = useState<boolean>(false);
-  // função que irá esconder ou mostrar cart invertendo seu valor lógico
   const handleCartVisibility = useCallback(() => {
     setShowCart((prev) => !prev);
   }, []);
 
-  // função de logout
   const handleLogout = useCallback(async () => {
     toast("saindo...");
 
-    // use o await para travar o setTimeout. Do contrário, o que vier depois será executado sobre ele
     await new Promise((resolve) => setTimeout(resolve, 4000));
-
     toast.success("Usuário deslogado");
-
-    // limpa o carrinho da memória do navegadar para o próximo user
-    clearCart();
-
     await logout();
-    navigate("/login");
-  }, [logout, navigate, clearCart]);
 
-  // função que implementa um active no ícone de acordo com a pathname do location
+    queryClient.removeQueries({ queryKey: queryKeys.cartItems });
+    navigate("/login");
+  }, [logout, navigate, queryClient]);
+
   const setNavItemActiveClass = (pathname: string): string => {
     const baseClass =
       "flex h-[8.75] w-[8.75] items-center justify-center rounded-md p-1.5";
@@ -66,10 +63,7 @@ export const Header = () => {
 
         {user ? (
           <div className="flex items-center gap-6 text-white">
-            {/* vai começar não renderizando nada, pois, qualquer user cadastrado no Banco de Dados é admin false; user.admin = true mostre o que está entre parêntese; user.admin = false não mostre o que está entre parênteses */}
-
             {user.admin && (
-              // md:flex - tamanhas maiores de 768px (md), mostre o conteúdo. Menor que isso, hidden
               <div className="hidden gap-2 text-[#F2DAAC] md:flex">
                 <Link to="/home">
                   <div className={setNavItemActiveClass("/home")}>
@@ -136,4 +130,4 @@ export const Header = () => {
       </div>
     </div>
   );
-};;
+};

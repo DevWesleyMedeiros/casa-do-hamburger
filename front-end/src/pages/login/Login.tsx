@@ -14,19 +14,12 @@ import { loginSchema, type loginInput } from "../../shared/schemas/authSchemas";
 import { ApiError } from "../../shared/services/api/ApiExceptions";
 import { LoginDate } from "../../shared/services/api/login/Login";
 import { useUserStore } from "../../shared/stores/useUserStrore";
-import { useCartStore } from "../../shared/stores/useCartStore";
 
 export const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [backendError, setBackendError] = useState<string | null>(null);
-  // erros de campo (email inválido, senha vazia) ficam em formState.errors
-  // erros do servidor (usuário não encontrado, senha incorreta) ficam aqui
-
-  // const { setUser } = useContext(UserContext);
-  // consumindo minhas função do meu store via um hook personalida
   const setUser = useUserStore((state) => state.setUser);
-  const fetchCartItemList = useCartStore((state) => state.fetchCartItems);
   const navigate = useNavigate();
 
   const {
@@ -70,7 +63,6 @@ export const Login = () => {
           admin: result.user.admin,
         });
         reset();
-        fetchCartItemList();
         navigate("/home");
       } catch {
         setBackendError("Ocorreu um erro inesperado. Tente novamente.");
@@ -78,7 +70,7 @@ export const Login = () => {
         setIsLoading(false); // ← sempre reseta, independente do resultado
       }
     },
-    [navigate, setUser, reset, fetchCartItemList],
+    [navigate, setUser, reset],
   );
 
   const togglePasswordVisibility = useCallback(() => {

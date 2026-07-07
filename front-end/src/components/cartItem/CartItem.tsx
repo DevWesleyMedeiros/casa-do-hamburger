@@ -1,16 +1,15 @@
 // item do carrinho - CartItem -, componente que vai dentro do Cart
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CircleChevronLeft, CircleChevronRight, Trash2 } from "lucide-react";
 import { useCallback } from "react";
 import { toast } from "sonner";
 import { ICON_CONFIG } from "../../constant/iconConfig";
-import { ApiError } from "../../shared/services/api/ApiExceptions";
+import { queryKeys } from "../../constant/queryKeys";
 import { deleteCartItem } from "../../shared/services/api/delete/DeleteCartItemById";
-import { useCartStore } from "../../shared/stores";
+import { updateCartItemQuantity } from "../../shared/services/api/update/updateCartItemService";
 import { brazilinaCurrencyFormat } from "../../shared/utils/Utils";
 
-// types somente para o CardItem, por isso o Props no final
-// CartItems é o child do Cart, por tanto para cada prop do CartItem, que é o componente chamado dentrodo Cart, eu passo os valores que vem da minha API
 type CartItemProps = {
   id: string;
   productId: string;
@@ -20,54 +19,97 @@ type CartItemProps = {
   quantity: number;
 };
 export const CartItem = ({
-  id, // CartItem id
-  productId, // productId é o id do produto que está no CartItem com referência ao id do produto na tabela Products
+  id,
+  productId,
   name,
   price,
   img,
   quantity,
 }: CartItemProps) => {
-  const incrementQuantity = useCartStore((state) => state.incrementItem);
-  const decrementQuantity = useCartStore((state) => state.decrementItem);
-  const removeCartItem = useCartStore((state) => state.removeItem);
-  const subtotal = price * quantity;
+  const queryClient = useQueryClient();
 
-  // deletar cartItem pelo id
-  const handleDeleteCartItemById = useCallback(
-    async (id: string) => {
-      if (!id) {
-        toast.error("CartItem não foi encontrado ou já foi deletado");
-        return;
-      }
-      const response = await deleteCartItem.deleteCartItemById(id);
+  // atualizar o cache localmente
+  const updateCacheQuantity = (cartItemId: string, newQty: number) => {
+    queryClient.setQueryData<CartItemProps[]>(queryKeys.cartItems, (old = []) =>
+      old.map((item) =>
+        item.id === cartItemId ? { ...item, quantity: newQty } : item,
+      ),
+    );
+  };
 
-      if (response instanceof ApiError) {
-        if (response.statusCode === 404) {
-          toast.error("CartItem não foi encontrado ou já foi deletado");
-        } else if (response.statusCode === 403) {
-          toast.error("Acesso restrito aos administradores");
-        } else if (response.statusCode === 401) {
-          toast.error("Você precisa estar logado");
-          return;
-        } else {
-          toast.error(response.message);
-        }
-
-        return;
-      }
-      toast.success("CartItem deletado com sucesso");
-      removeCartItem(id); // vem do cartStore e remove item pelo cartItem e atualiza
+  const { mutate: increment } = useMutation({
+    // Mutação: Dispara a chamada assíncrona (POST, PUT, DELETE) em segundo plano
+    mutationFn: () => updateCartItemQuantity.update(id, quantity + 1),
+    onMutate: () => {
+      const snapshot = queryClient.getQueryData<CartItemProps[]>(
+        queryKeys.cartItems,
+      );
+      // optmistic update:
+      updateCacheQuantity(id, quantity + 1);
+      return { snapshot };
     },
-    [removeCartItem],
-  );
+    onError: (_err, _vars, context) => {
+      // Rollback se a API falhar
+      queryClient.setQueryData(queryKeys.cartItems, context?.snapshot);
+      toast.error("Erro ao atualizar quantidade");
+    },
+    // sincroniza definitivamente a interface com o estado real do servidor.
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.cartItems });
+    },
+  });
 
-  // Se quantity chegar a 1 e o usuário decrementar, vira deleção
-  const handleDecrementQuantity = useCallback(async () => {
-    if (quantity === 1) {
-      return await handleDeleteCartItemById(id);
-    }
-    await decrementQuantity(id);
-  }, [quantity, id, handleDeleteCartItemById, decrementQuantity]);
+  // função mutate para decrementar
+  const { mutate: decrement } = useMutation({
+    mutationFn: () => updateCartItemQuantity.update(id, quantity - 1),
+    onMutate: () => {
+      const snapshot = queryClient.getQueryData<CartItemProps[]>(
+        queryKeys.cartItems,
+      );
+      updateCacheQuantity(id, quantity - 1);
+      return { snapshot };
+    },
+    onError: (_err, _vars, context) => {
+      queryClient.setQueryData(queryKeys.cartItems, context?.snapshot);
+      toast.error("Erro ao atualizar quantidade");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.cartItems });
+    },
+  });
+
+  // função mutate para deletar CartItem pelo Id
+  const { mutate: deleteItem } = useMutation({
+    mutationFn: () => deleteCartItem.deleteCartItemById(id),
+    onMutate: () => {
+      const snapshot = queryClient.getQueryData<CartItemProps[]>(
+        queryKeys.cartItems,
+      );
+      queryClient.setQueryData<CartItemProps[]>(
+        queryKeys.cartItems,
+        (old = []) => {
+          old.filter((item) => item.id !== id);
+        },
+      );
+      return { snapshot };
+    },
+    onError: (_err, _vars, context) => {
+      queryClient.setQueryData(queryKeys.cartItems, context?.snapshot);
+      toast.error("Erro ao remover item");
+    },
+    onSuccess: () => toast.success("Item removido"),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.cartItems });
+    },
+  });
+
+  // deletar quando CartItem for menor de 1
+  const handleDecrementOrDelete = useCallback(() => {
+    if (quantity === 1) return deleteItem();
+    decrement();
+  }, [quantity, decrement, deleteItem]);
+
+  const subtotal = price * quantity;
 
   return (
     <div className="my-component-card flex items-center justify-between">
@@ -86,22 +128,18 @@ export const CartItem = ({
           <CircleChevronLeft
             color="white"
             className="bg-brand-red cursor-pointer rounded-md"
-            onClick={handleDecrementQuantity}
+            onClick={handleDecrementOrDelete}
           />
           <p className="text-brand-dark mx-1.5 text-sm font-bold">{quantity}</p>
           <CircleChevronRight
             color="white"
             className="bg-brand-red cursor-pointer rounded-md"
-            onClick={() => incrementQuantity(id)}
+            onClick={() => increment()}
           />
         </div>
       </div>
       <div className="inset-0 cursor-pointer">
-        <Trash2
-          size={ICON_CONFIG.mxSize}
-          onClick={() => handleDeleteCartItemById(id)}
-        />
-        {/* id do CartItem para deleção do produto */}
+        <Trash2 size={ICON_CONFIG.mxSize} onClick={() => deleteItem()} />
       </div>
     </div>
   );
