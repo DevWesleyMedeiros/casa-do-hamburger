@@ -1,18 +1,33 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { BrowserRouter } from "react-router-dom";
 import { Toaster } from "sonner";
 import "./App.css";
 import { FetchUser } from "./shared/components/FetchUser";
 import { AppRoutes } from "./shared/routes/AppRoutes";
-import { BrowserRouter } from "react-router-dom";
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5,
+      retry: 1,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: true,
+    },
+  },
+});
 function App() {
   return (
-    <BrowserRouter>
-      <Toaster position="top-center" richColors duration={3000} />
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Toaster position="top-center" richColors duration={3000} />
 
-      {/* Disparamos a função UMA ÚNICA VEZ quando a aplicação é montada */}
-      <FetchUser />
-      <AppRoutes></AppRoutes>
-    </BrowserRouter>
+        <FetchUser />
+        <AppRoutes></AppRoutes>
+      </BrowserRouter>
+
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   );
 }
 export default App;

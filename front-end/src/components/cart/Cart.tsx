@@ -1,19 +1,28 @@
 import { OctagonX } from "lucide-react";
 import { ICON_CONFIG } from "../../constant/iconConfig";
-import { useCartStore } from "../../shared/stores";
 import { brazilinaCurrencyFormat } from "../../shared/utils/Utils";
 import { Button } from "../button/Button";
 import { CartItem } from "../cartItem/CartItem";
+import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "../../constant/queryKeys";
+import { getCartItemsList } from "../../shared/services/api/cartItems/getCartItems";
 
 type CartProps = {
   setShowCart: React.Dispatch<React.SetStateAction<boolean>>;
   showCart: boolean;
 };
 
-// showCart e setShowCart são funções para mostrar e esconder o Cart
 export const Cart = ({ showCart, setShowCart }: CartProps) => {
-  const cartItems = useCartStore((state) => state.items); // list de CartItems
-  const totalPrice = useCartStore((state) => state.getTotalPrice());
+  const { data: cartItems = [], isLoading } = useQuery({
+    queryKey: queryKeys.cartItems,
+    queryFn: () => getCartItemsList.getCartItemsProduct(),
+    staleTime: 0,
+  });
+
+  const totalPrice = cartItems.reduce(
+    (total, item) => total + item.product.price * item.quantity,
+    0,
+  );
 
   return (
     <div className="conteiner-cart bg-brand-amber transforme absolute right-0 z-10 flex h-208.25 w-73.75 flex-col transition-transform duration-500 ease-in-out">
@@ -23,23 +32,27 @@ export const Cart = ({ showCart, setShowCart }: CartProps) => {
           size={ICON_CONFIG.mxSize}
           className="cursor-pointer"
           onClick={() => setShowCart(!showCart)}
-          // setShowCart definida no header vem com uma prop do tipo dispatch e me permite alterar o valor da janela Cart
         />
       </div>
 
-      <div className="mx-3 flex h-screen flex-1 scrollbar-thin flex-col gap-2.5 overflow-y-auto">
-        {/* Renderização da lista limpa e tipada! mas agora renderizamos usando os dados que vieram do Store */}
-        {cartItems.map((item) => (
-          <CartItem
-            key={item.id} // Usando o id real do CartItem (conforme Prisma schema)
-            id={item.id}
-            productId={item.productId}
-            name={item.product.name}
-            price={item.product.price}
-            img={item.product.img}
-            quantity={item.quantity}
-          />
-        ))}
+      <div className="mx-3 flex flex-1 flex-col gap-2.5">
+        {isLoading ? (
+          <p className="text-brand-dark animate-pulse text-center text-sm">
+            Carregando...
+          </p>
+        ) : (
+          cartItems.map((item) => (
+            <CartItem
+              key={item.id}
+              id={item.id}
+              productId={item.productId}
+              name={item.product.name}
+              price={item.product.price}
+              img={item.product.img}
+              quantity={item.quantity}
+            />
+          ))
+        )}
       </div>
 
       {/* total calculado de produtos */}
