@@ -21,7 +21,7 @@ export const LoginDate = {
         const statusCode = error.response?.status ?? 0;
         return new ApiError(statusCode, message);
       }
-      return new ApiError(0, "Erro de conexão com o servidor");
+      return new ApiError(500, "Erro de conexão com o servidor");
     }
   },
 };
