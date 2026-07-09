@@ -47,7 +47,7 @@ export const Home = () => {
   });
 
   return (
-    <div className="mx-auto flex w-full flex-col gap-2 px-3 text-white md:w-184.25 md:px-0">
+    <div className="mx-auto flex h-screen w-full flex-col gap-2 px-3 text-white md:w-184.25 md:px-0">
       <div className="my-2 flex gap-2 md:my-3">
         {FILTER_PRODUCTS.map((item) => (
           <button
