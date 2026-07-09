@@ -3,8 +3,8 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { BrowserRouter } from "react-router-dom";
 import { Toaster } from "sonner";
 import "./App.css";
-import { FetchUser } from "./shared/components/FetchUser";
 import { AppRoutes } from "./shared/routes/AppRoutes";
+import { AuthGate } from "./shared/components/AuthGate";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -13,6 +13,7 @@ const queryClient = new QueryClient({
       retry: 1,
       refetchOnWindowFocus: false,
       refetchOnReconnect: true,
+      refetchOnMount: false,
     },
   },
 });
@@ -21,9 +22,9 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Toaster position="top-center" richColors duration={3000} />
-
-        <FetchUser />
-        <AppRoutes></AppRoutes>
+        <AuthGate>
+          <AppRoutes></AppRoutes>
+        </AuthGate>
       </BrowserRouter>
 
       <ReactQueryDevtools initialIsOpen={false} />

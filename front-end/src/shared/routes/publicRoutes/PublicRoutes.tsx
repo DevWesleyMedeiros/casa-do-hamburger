@@ -1,14 +1,10 @@
 import type { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
-import { useUserStore } from "../../stores";
+import { useMe } from "../../../hook/useMe";
 
 export const PublicRoutes = ({ children }: { children: ReactNode }) => {
-  // O componente SÓ vai re-renderizar se o `user` ou `isLoading` mudarem.
-  const user = useUserStore((state) => state.user);
-  const isLoading = useUserStore((state) => state.isLoading);
-
-  if (isLoading) return null;
-  // setar um sppiner enquando a requisão não é completa
+  // O componente SÓ vai re-renderizar se o `user`
+  const { data: user } = useMe();
 
   // se já está logado, redireciona para home ao invés de login — não deixa ver o login
   if (user) return <Navigate to="/home" replace />;

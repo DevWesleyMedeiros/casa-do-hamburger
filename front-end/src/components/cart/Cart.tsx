@@ -1,11 +1,12 @@
+import { useQuery } from "@tanstack/react-query";
 import { OctagonX } from "lucide-react";
 import { ICON_CONFIG } from "../../constant/iconConfig";
+import { queryKeys } from "../../constant/queryKeys";
+import { useMe } from "../../hook/useMe";
+import { getCartItemsList } from "../../shared/services/api/cartItems/getCartItems";
 import { brazilinaCurrencyFormat } from "../../shared/utils/Utils";
 import { Button } from "../button/Button";
 import { CartItem } from "../cartItem/CartItem";
-import { useQuery } from "@tanstack/react-query";
-import { queryKeys } from "../../constant/queryKeys";
-import { getCartItemsList } from "../../shared/services/api/cartItems/getCartItems";
 
 type CartProps = {
   setShowCart: React.Dispatch<React.SetStateAction<boolean>>;
@@ -13,10 +14,13 @@ type CartProps = {
 };
 
 export const Cart = ({ showCart, setShowCart }: CartProps) => {
+  const { data: user } = useMe();
   const { data: cartItems = [], isLoading } = useQuery({
     queryKey: queryKeys.cartItems,
     queryFn: () => getCartItemsList.getCartItemsProduct(),
-    staleTime: 0,
+    enabled: Boolean(user),
+    retry: false,
+    staleTime: 30_000,
   });
 
   const totalPrice = cartItems.reduce(
@@ -68,6 +72,7 @@ export const Cart = ({ showCart, setShowCart }: CartProps) => {
         type="button"
         colorVariation="bgRedVariation"
       ></Button>
+      {/* criar um spinner ao invés de um skeleton para ações pontuais */}
     </div>
   );
 };

@@ -18,14 +18,7 @@ type CartItemProps = {
   img: string;
   quantity: number;
 };
-export const CartItem = ({
-  id,
-  productId,
-  name,
-  price,
-  img,
-  quantity,
-}: CartItemProps) => {
+export const CartItem = ({ id, name, price, img, quantity }: CartItemProps) => {
   const queryClient = useQueryClient();
 
   // atualizar o cache localmente

@@ -5,24 +5,25 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { ICON_CONFIG } from "../../constant/iconConfig";
 import { queryKeys } from "../../constant/queryKeys";
+import { useMe } from "../../hook/useMe";
 import { getCartItemsList } from "../../shared/services/api/cartItems/getCartItems";
-import { useUserStore } from "../../shared/stores";
+import { userLogOut } from "../../shared/services/api/logout/Logout";
 import { Cart } from "../cart/Cart";
 
 export const Header = () => {
-  const user = useUserStore((state) => state.user);
-  const logout = useUserStore((state) => state.logout);
-
+  const { data: user } = useMe();
   const location = useLocation();
   const navigate = useNavigate();
-
   const queryClient = useQueryClient();
 
+  // buscando CartItems
   const { data: totalItems = 0 } = useQuery({
     queryKey: queryKeys.cartItems,
     queryFn: () => getCartItemsList.getCartItemsProduct(),
     select: (cartItem) =>
       cartItem.reduce((sum, item) => sum + item.quantity, 0),
+    enabled: Boolean(user), // só busca carrinho se tiver usuário logado
+    retry: false,
   });
 
   const [showCart, setShowCart] = useState<boolean>(false);
@@ -30,16 +31,21 @@ export const Header = () => {
     setShowCart((prev) => !prev);
   }, []);
 
+  // Quando deslogar o usuário
   const handleLogout = useCallback(async () => {
     toast("saindo...");
-
+    try {
+      // quando eu deslogar, remova o usuário e a lista de CartItems (identificados pelas queryKeys)
+      await userLogOut();
+      queryClient.removeQueries({ queryKey: queryKeys.me });
+      queryClient.removeQueries({ queryKey: queryKeys.cartItems });
+    } catch {
+      toast.error("Erro ao sair. Tente novamente.");
+    }
     await new Promise((resolve) => setTimeout(resolve, 4000));
     toast.success("Usuário deslogado");
-    await logout();
-
-    queryClient.removeQueries({ queryKey: queryKeys.cartItems });
     navigate("/login");
-  }, [logout, navigate, queryClient]);
+  }, [navigate, queryClient]);
 
   const setNavItemActiveClass = (pathname: string): string => {
     const baseClass =

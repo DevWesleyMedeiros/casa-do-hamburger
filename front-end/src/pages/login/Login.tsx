@@ -1,11 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
 import { useCallback, useState } from "react";
-// import { useContext } from 'react'
 import { useForm } from "react-hook-form";
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom";
-
 import { toast } from "sonner";
 import { Button } from "../../components/button/Button";
 import { Input } from "../../components/input/Input";
@@ -13,14 +11,15 @@ import { ICON_CONFIG } from "../../constant/iconConfig";
 import { loginSchema, type loginInput } from "../../shared/schemas/authSchemas";
 import { ApiError } from "../../shared/services/api/ApiExceptions";
 import { LoginDate } from "../../shared/services/api/login/Login";
-import { useUserStore } from "../../shared/stores/useUserStrore";
+import { queryKeys } from "../../constant/queryKeys";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [backendError, setBackendError] = useState<string | null>(null);
-  const setUser = useUserStore((state) => state.setUser);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const {
     register,
@@ -39,7 +38,7 @@ export const Login = () => {
       try {
         const result = await LoginDate.create({
           email: data.email, // já vem com .trim() do schema
-          password: data.password,
+          password: data.password, // já vem com .trim() do schema
         });
 
         if (result instanceof ApiError) {
@@ -51,17 +50,13 @@ export const Login = () => {
           else setBackendError(result.message);
           return;
         }
-
-        // criar um efeito de espera de 4 segundos
-        toast("Logando ...");
-        await new Promise((resolve) => setTimeout(resolve, 4000));
-
         // sucesso
-        setUser({
-          name: result.user.name,
-          email: result.user.email,
-          admin: result.user.admin,
-        });
+        toast("Login realizado");
+
+        // Escreve direto no cache da query "me" — evita um GET extra em /auth/me
+        // e garante que Header/AuthGate reajam imediatamente ao novo estado.
+        //usada para atualizar ou criar dados diretamente no cache local.
+        queryClient.setQueryData(queryKeys.me, result.user);
         reset();
         navigate("/home");
       } catch {
@@ -70,7 +65,7 @@ export const Login = () => {
         setIsLoading(false); // ← sempre reseta, independente do resultado
       }
     },
-    [navigate, setUser, reset],
+    [navigate, reset, queryClient],
   );
 
   const togglePasswordVisibility = useCallback(() => {

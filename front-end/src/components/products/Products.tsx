@@ -5,20 +5,19 @@ import { toast } from "sonner";
 import { queryKeys } from "../../constant/queryKeys";
 import { ApiError } from "../../shared/services/api/ApiExceptions";
 import { NewCartItem } from "../../shared/services/api/cartItems/createCartItems";
-import { useUserStore } from "../../shared/stores/useUserStrore";
+import { useMe } from "../../hook/useMe";
 import { deleteProductById } from "../../shared/services/api/delete/DeleteProduct";
 import { brazilinaCurrencyFormat } from "../../shared/utils/Utils";
 import { type ProductsInterface } from "../../types/Products";
 
 export const Products = ({
   id, // id vindo da tabela Products
-  category,
   name,
   description,
   price,
   img,
 }: ProductsInterface) => {
-  const user = useUserStore((state) => state.user);
+  const { data: user } = useMe();
   const queryClient = useQueryClient();
 
   // função que irá deletar um produto pelo id
