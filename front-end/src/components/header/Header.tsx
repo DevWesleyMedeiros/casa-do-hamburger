@@ -9,7 +9,9 @@ import { useMe } from "../../hook/useMe";
 import { getCartItemsList } from "../../shared/services/api/cartItems/getCartItems";
 import { userLogOut } from "../../shared/services/api/logout/Logout";
 import { useCartUIStore } from "../../shared/stores";
+import { useNewProductUIModalStore } from "../../shared/stores/useNewProductUIModal";
 import { Cart } from "../cart/Cart";
+import { NewProductModal } from "../newProductModal/NewProductModal";
 
 export const Header = () => {
   const { data: user } = useMe();
@@ -19,7 +21,8 @@ export const Header = () => {
   const handleToggleCartVisibility = useCartUIStore(
     (state) => state.toggleCart,
   );
-  const isOpenCart = useCartUIStore((state) => state.isCartOpen);
+  const isOpenModal = useNewProductUIModalStore((state) => state.isModalOpen);
+  const openModal = useNewProductUIModalStore((state) => state.openModal);
 
   // buscando CartItems
   const { data: totalItems = 0 } = useQuery({
@@ -100,10 +103,12 @@ export const Header = () => {
                     size={ICON_CONFIG.mxSize}
                     strokeWidth={ICON_CONFIG.strokWidth}
                     className="cursor-pointer"
+                    onClick={() => openModal()}
                   />
                 </div>
               </div>
             )}
+            {isOpenModal && <NewProductModal></NewProductModal>}
 
             <div className="relative cursor-pointer">
               <ShoppingCart
