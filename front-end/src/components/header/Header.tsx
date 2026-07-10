@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Box, LayoutDashboard, LogOut, Plus, ShoppingCart } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { ICON_CONFIG } from "../../constant/iconConfig";
@@ -8,6 +8,7 @@ import { queryKeys } from "../../constant/queryKeys";
 import { useMe } from "../../hook/useMe";
 import { getCartItemsList } from "../../shared/services/api/cartItems/getCartItems";
 import { userLogOut } from "../../shared/services/api/logout/Logout";
+import { useCartUIStore } from "../../shared/stores";
 import { Cart } from "../cart/Cart";
 
 export const Header = () => {
@@ -15,6 +16,10 @@ export const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const handleToggleCartVisibility = useCartUIStore(
+    (state) => state.toggleCart,
+  );
+  const isOpenCart = useCartUIStore((state) => state.isCartOpen);
 
   // buscando CartItems
   const { data: totalItems = 0 } = useQuery({
@@ -25,11 +30,6 @@ export const Header = () => {
     enabled: Boolean(user), // só busca carrinho se tiver usuário logado
     retry: false,
   });
-
-  const [showCart, setShowCart] = useState<boolean>(false);
-  const handleCartVisibility = useCallback(() => {
-    setShowCart((prev) => !prev);
-  }, []);
 
   // Quando deslogar o usuário
   const handleLogout = useCallback(async () => {
@@ -58,7 +58,11 @@ export const Header = () => {
   return (
     <div className="bg-brand-dark">
       {/* render janela lateral do cart */}
-      {showCart && <Cart setShowCart={setShowCart} showCart={showCart}></Cart>}
+      <div className="bg-brand-dark">
+        <Cart />
+        {/* Sheet controla visibilidade internamente via `open` prop */}
+        {/* resto do header continua igual */}
+      </div>
       <div className="mx-auto flex w-full items-center justify-between p-3 md:w-184.25 md:p-0">
         <Link to="/">
           <img
@@ -105,7 +109,7 @@ export const Header = () => {
               <ShoppingCart
                 size={ICON_CONFIG.mxSize}
                 strokeWidth={ICON_CONFIG.strokWidth}
-                onClick={() => handleCartVisibility()}
+                onClick={handleToggleCartVisibility}
               />
               <p className="text-brand-dark absolute -top-3 -right-3 flex h-5 w-5 items-center justify-center rounded-md bg-amber-200">
                 {totalItems}
