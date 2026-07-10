@@ -1,438 +1,262 @@
-# 🍔 Casa do Hamburguer - Projeto Fullstack
+# 🍔 Casa do Hamburguer
 
-> Um projeto fullstack completo que simula um sistema de gerenciamento de hamburgueria com autenticação, catálogo de produtos, carrinho de compras e rastreamento de pedidos. **Desenvolvido como boilerplate educacional com foco em aprendizado prático de tecnologias web modernas.**
-
----
-
-## 📋 Sobre o Projeto
-
-**Casa do Hamburguer** é uma aplicação fullstack desenvolvida para consolidar conhecimentos em desenvolvimento web moderno, servindo como base (boilerplate) para projetos futuros. O projeto cobre toda a stack moderna de desenvolvimento, desde a camada de apresentação até a camada de persistência de dados.
-
-### 🎯 Objetivos
-
-- ✅ Criar um ambiente de aprendizado prático com tecnologias da indústria
-- ✅ Implementar um boilerplate reutilizável para projetos futuros
-- ✅ Consolidar boas práticas de arquitetura fullstack
-- ✅ Demonstrar conhecimento em padrões de design e segurança web
-
-### 📊 Status
-
-🚧 **Projeto em Desenvolvimento** - Novas funcionalidades e melhorias estão sendo adicionadas continuamente
+> Projeto fullstack de uma hamburgueria com autenticação, catálogo de produtos, carrinho de compras e páginas de pedidos. A aplicação foi evoluída para um fluxo mais realista de e-commerce, com validação de formulários, estado assíncrono e integração entre frontend e backend.
 
 ---
 
-## 🎨 Funcionalidades
+## 📌 Sobre o projeto
 
-### 👤 Autenticação & Autorização
+O Casa do Hamburguer é uma aplicação fullstack desenvolvida para praticar e consolidar conceitos de desenvolvimento web moderno. O projeto cobre desde a interface até a camada de persistência, com foco em autenticação, consumo de API, validação de dados e organização por camadas.
 
-- ✅ Registro de novos usuários com validação de dados
-- ✅ Login com geração de JWT tokens
-- ✅ Logout com limpeza de cookies
-- ✅ Proteção de rotas e endpoints com middleware de autenticação
-- ✅ Sistema de permissões com role de administrador
+### Status atual
 
-### 🍟 Catálogo de Produtos
-
-- ✅ Listagem de todos os produtos com filtros
-- ✅ Filtro por categoria de produtos
-- ✅ Busca e classificação de produtos
-- ✅ Sistema de administração de produtos (CRUD)
-- ✅ Adição/Exclusão de produtos no banco de dados
-
-### 🛒 Carrinho de Compras
-
-- ✅ Adição/Remoção de produtos ao carrinho
-- ✅ Atualização de quantidades
-- ✅ Cálculo automático de totais
-- ✅ Persistência de carrinho em estado global
-- ✅ Limpeza do carrinho após checkout
-
-### 📦 Gerenciamento de Pedidos
-
-- ✅ Visualização de histórico de pedidos
-- ✅ Cards informativos com status dos pedidos
-- ✅ Rastreamento de informações de entrega
-- ✅ Interface responsiva para consulta de pedidos
+✅ Frontend e backend integrados
+✅ Autenticação baseada em cookie + JWT
+✅ Catálogo de produtos com filtros por categoria
+✅ Carrinho de compras com listagem, remoção e alteração de quantidade
+✅ Páginas de login, cadastro e pedidos
+✅ Estrutura backend organizada com controllers, services e repositories
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## ✨ Funcionalidades implementadas
 
-### 🎯 Frontend
+### 🔐 Autenticação e autorização
 
-```
-├── React 18+              # Framework UI
-├── TypeScript             # Tipagem estática
-├── Vite                   # Build tool & dev server
-├── Tailwind CSS           # Styling utilitário
-├── Zustand               # Gerenciamento de estado global
-├── React Hook Form       # Gerenciamento de formulários
-├── Zod                   # Validação de dados & schemas
-├── Axios                 # Cliente HTTP
-└── React Router          # Roteamento
-```
+- Cadastro de usuários com validação de dados via Zod
+- Login com autenticação JWT e armazenamento em cookie httpOnly
+- Logout com limpeza do cookie de sessão
+- Middleware de autenticação para rotas protegidas
+- Proteção de rotas de administrador para operações sensíveis
+- Gate de autenticação no frontend para controlar acesso às páginas
 
-### 🔧 Backend
+### 🍔 Catálogo de produtos
 
-```
-├── Node.js               # Runtime JavaScript
-├── Express               # Framework HTTP
-├── Bun                   # Package manager & tooling
-├── Prisma                # ORM TypeScript
-├── PostgreSQL            # Banco de dados
-├── JWT (jose)            # Autenticação com tokens
-├── Bcrypt                # Hash de senhas
-├── Zod                   # Validação de schemas
-└── TypeScript            # Tipagem estática
-```
+- Listagem de produtos vindos do backend
+- Filtro por categoria (Hamburguer, Bebidas e Porções)
+- Interface de cards com nome, descrição, imagem e preço
+- Endpoint de listagem de produtos consumido no frontend via React Query
 
----
+### 🛒 Carrinho de compras
 
-## 📚 Aprendizados & Conceitos Implementados
+- Lista de itens do carrinho carregada pelo backend
+- Adição, remoção e atualização de quantidade de itens
+- Cálculo automático do valor total
+- Drawer lateral para visualização do carrinho
 
-### 🎨 Frontend - Aprendizados
+### 📦 Pedidos
 
-#### Nível: Iniciante
-
-- Componentes funcionais com React Hooks
-- Props e composição de componentes
-- Renderização condicional e listas
-
-#### Nível: Intermediário
-
-- **Tailwind CSS** 🎨
-  - Responsive design com breakpoints
-  - Sistema de utility classes
-  - Customização de temas e variáveis
-  - Dark mode (padrão)
-
-- **Zustand** 🎭
-  - Gerenciamento de estado global simplificado
-  - Hooks customizados para estado
-  - Imutabilidade e otimizações
-  - Persistência de dados em localStorage
-
-- **React Hook Form + Zod** 📝
-  - Formulários reativos e performáticos
-  - Validação de dados em tempo real
-  - Tratamento de erros granular
-  - Integração cliente-servidor
-
-#### Nível: Avançado
-
-- TypeScript avançado com tipos complexos
-- Consumo de APIs REST com tratamento de erros
-- Context API e Provider patterns
-- Otimizações de performance (memoization, code splitting)
-- Arquitetura de componentes escalável
-
-### 🔧 Backend - Aprendizados
-
-#### Nível: Iniciante
-
-- Criar servidores HTTP com Express
-- Routing e middlewares
-- Variáveis de ambiente
-
-#### Nível: Intermediário
-
-- **Prisma ORM** 📦
-  - Definição de schemas com Prisma Schema Language
-  - Geração de Migrations
-  - CRUD operations tipadas
-  - Relações entre modelos
-
-- **JWT & Autenticação** 🔐
-  - Geração e validação de tokens JWT
-  - Refresh tokens
-  - Proteção de endpoints
-  - Gestão segura de credenciais
-
-- **Zod Validation** ✔️
-  - Validação de request bodies
-  - Coerção de tipos
-  - Mensagens de erro customizadas
-  - Schemas compostos
-
-#### Nível: Avançado
-
-- Hash seguro de senhas com bcrypt
-- Tratamento de erros estruturado com classes customizadas
-- Middlewares customizados
-- Arquitetura em camadas (Controllers, Services, Repositories)
-- Padrões RESTful
-- Segurança (CORS, proteção de rotas, validação de dados)
+- Página de pedidos com filtros visuais por status
+- Estrutura preparada para evoluir para dados reais vindos da API
 
 ---
 
-## 🏗️ Arquitetura do Projeto
+## 🛠️ Tecnologias utilizadas
 
-### Estrutura Frontend
+### Frontend
 
-```
+- React 19
+- TypeScript
+- Vite 8
+- Tailwind CSS 4
+- React Router DOM 7
+- React Hook Form
+- Zod
+- React Query + Devtools
+- Zustand
+- Axios
+- Sonner
+- lucide-react e react-icons
+
+### Backend
+
+- Node.js
+- Express 5
+- TypeScript
+- tsx
+- Prisma ORM
+- PostgreSQL
+- jose para autenticação JWT
+- bcrypt-ts para hash de senhas
+- cookie-parser, cors e dotenv
+- Zod para validação
+
+---
+
+## 🧱 Arquitetura e estrutura
+
+### Frontend da aplicação
+
+```text
 src/
-├── components/          # Componentes reutilizáveis
-│   ├── button/         # Botões customizados
-│   ├── header/         # Cabeçalho da aplicação
-│   ├── products/       # Listagem de produtos
-│   ├── cart/           # Carrinho de compras
-│   ├── cartItem/       # Item do carrinho
-│   ├── cardPedidos/    # Card de pedidos
-│   └── input/          # Inputs reutilizáveis
-├── pages/              # Páginas da aplicação
-│   ├── home/           # Página inicial
-│   ├── login/          # Página de login
-│   ├── register/       # Página de registro
-│   └── pedidos/        # Página de pedidos
-├── shared/             # Código compartilhado
-│   ├── components/     # Componentes globais
-│   ├── context/        # React Context
-│   ├── routes/         # Configuração de rotas
-│   ├── schemas/        # Schemas Zod
-│   ├── services/       # Serviços HTTP
-│   ├── stores/         # Zustand stores
-│   └── utils/          # Utilitários
-├── styles/             # Estilos globais
-│   ├── global.css
-│   ├── variables.css
-│   └── themes/         # Temas (light/dark)
-├── types/              # TypeScript types globais
-├── App.tsx             # Componente raiz
-└── main.tsx            # Ponto de entrada
+├── components/
+├── pages/
+├── shared/
+│   ├── components/
+│   ├── routes/
+│   ├── schemas/
+│   ├── services/
+│   └── stores/
+├── hook/
+├── styles/
+└── types/
 ```
 
-### Estrutura Backend
+### Backend da API
 
-```
+```text
 src/
-├── controllers/        # Lógica de requisições
-│   └── authControllers.ts
-├── services/           # Lógica de negócio
-│   └── authService.ts
-├── repositories/       # Acesso a dados (Prisma)
-│   └── userRepositories.ts
-├── routes/             # Definição de rotas
-│   └── authRoutes.ts
-├── middlewares/        # Middlewares Express
-│   ├── authMiddlewares.ts
-│   ├── validateBody.ts
-│   ├── clearAuthCookie.ts
-│   ├── requiredAdmin.ts
-│   └── errorHandler.ts
-├── schemas/            # Schemas Zod para validação
-│   └── authSchemas.ts
-├── config/             # Configurações
-│   └── jwt.ts
-├── shared/             # Código compartilhado
-│   └── AppError.ts     # Classe de erro customizada
-├── db.ts               # Configuração do Prisma
-└── server.ts           # Ponto de entrada do servidor
+├── controllers/
+├── middlewares/
+├── repositories/
+├── routes/
+├── schemas/
+├── services/
+├── config/
+└── errors/
 ```
 
-### Padrão de Arquitetura
+### Padrões adotados
 
-- **MVC com Repositories**: Controllers → Services → Repositories → Prisma
-- **Separação de responsabilidades**: Cada camada tem uma função específica
-- **Tratamento de erros centralizado**: Middleware global de erros
-- **Validação em múltiplas camadas**: Zod + TypeScript
+- Organização em camadas no backend: controllers → services → repositories
+- Validação de dados no frontend e no backend
+- Uso de React Query para estados assíncronos e cache de dados
+- Uso de Zustand para estado local de UI, como controle do carrinho
+- Tratamento de erros centralizado no backend
+
+### Arquitetura em camadas
+
+A aplicação foi estruturada para separar claramente responsabilidades entre apresentação, regras de negócio e persistência de dados:
+
+```mermaid
+flowchart LR
+  U[Usuário] --> FE[Frontend React + Vite]
+  FE --> API[Backend Express + TypeScript]
+  API --> DB[(PostgreSQL + Prisma)]
+  API --> AUTH[(JWT + Cookie httpOnly)]
+```
+
+### Fluxo principal do usuário
+
+1. O usuário acessa a aplicação e é direcionado para login ou cadastro.
+2. Após autenticar-se, o sistema valida o token e libera o acesso às páginas protegidas.
+3. O usuário navega pelo catálogo, filtra produtos por categoria e escolhe itens.
+4. Os itens selecionados são adicionados ao carrinho e calculados em tempo real.
+5. O fluxo de pedidos é preparado para evoluir com dados reais e regras de negócio mais completas.
 
 ---
 
-## 🚀 Como Iniciar
+## ▶️ Como executar
 
 ### Pré-requisitos
 
 - Node.js 18+
-- npm, pnpm, yarn ou bun
-- PostgreSQL 14+
+- Bun ou npm
+- PostgreSQL rodando localmente
 
-### Instalação
-
-#### 1. Clone o repositório
+### 1. Clonar o repositório
 
 ```bash
 git clone <url-do-repositorio>
 cd casa-do-hamburger
 ```
 
-#### 2. Frontend Setap
-
-```bash
-cd front-end
-npm install
-# ou
-bun install
-```
-
-#### 3. Backend Setup
+### 2. Backend
 
 ```bash
 cd back-end
-npm install
-# ou
 bun install
+# ou: npm install
 ```
 
-#### 3. Configurar variáveis de ambiente
-
-Crie um arquivo `.env` na pasta `back-end`:
+Crie um arquivo `.env` com as variáveis abaixo:
 
 ```env
 DATABASE_URL="postgresql://user:password@localhost:5432/casa-do-hamburger"
-JWT_SECRET="sua-chave-secreta-super-segura"
+JWT_SECRET="sua-chave-secreta"
 PORT=3001
 NODE_ENV="development"
 ```
 
-#### 4. Migrations do banco de dados
+Execute as migrations e inicie o servidor:
 
 ```bash
-npx prisma migrate dev
-```
-
-#### 5. Iniciar o backend
-
-```bash
-npm run dev
-# ou
+bunx prisma generate
+bunx prisma migrate dev
 bun run dev
 ```
 
-#### 6. Iniciar o frontend
+### 3. Frontend
 
 ```bash
-npm run dev
-# ou
+cd ../front-end
+bun install
+# ou: npm install
 bun run dev
 ```
 
-A aplicação estará disponível em `http://localhost:5173`
+A aplicação frontend fica disponível em `http://localhost:5173`.
 
 ---
 
-## 📖 Fluxo de Desenvolvimento
+## 🔒 Segurança e boas práticas
+
+- Hash de senhas com bcrypt
+- Tokens JWT assinados e enviados via cookie
+- Validação de entrada com Zod
+- Middleware de autenticação e autorização
+- Separação de responsabilidades entre camadas
+- Uso de variáveis de ambiente para dados sensíveis
+
+---
+
+## 🚧 Próximos passos
+
+- Implementar testes automatizados no frontend e backend
+- Expandir o fluxo de pedidos com integração real ao banco
+- Melhorar a experiência de admin com gestão completa de produtos
+- Adicionar mais feedbacks de UX e tratamento de estados de erro
+- Evoluir o deploy para ambiente de produção
+
+---
+
+## 📝 Convenções de desenvolvimento
+
+- `feat:` para novas funcionalidades
+- `fix:` para correções
+- `docs:` para documentação
+- `refactor:` para refatorações
+- `style:` para ajustes visuais ou de formatação
+- `test:` para testes
+
+---
+
+## 📸 Galeria de telas
+
+Abaixo estão algumas telas representativas da experiência atual da aplicação, organizadas por contexto de uso.
 
 ### Autenticação
 
-1. Usuário se registra → Dados validados com Zod
-2. Senha é hashada com bcrypt
-3. Usuário faz login → JWT gerado e armazenado em cookie
-4. Token é incluído em requisições subsequentes
-5. Middleware valida o token em rotas protegidas
+| Tela | Visual |
+| --- | --- |
+| Login | ![Tela de login](front-end/public/screenshots/logIn-screen.png) |
+| Cadastro | ![Tela de cadastro](front-end/public/screenshots/signUp-screen.png) |
+| Validação de senha | ![Senha forte](front-end/public/screenshots/password-strenght-meter(strong-pass).png) |
 
-### Carrinho & Checkout
+### Catálogo e experiência principal
 
-1. Produtos são filtrados e exibidos
-2. Usuário adiciona produtos ao carrinho (Zustand)
-3. Estado do carrinho é sincronizado com o servidor
-4. Checkout gera um pedido no banco de dados
-5. Carrinho é limpo após sucesso
+| Tela | Visual |
+| --- | --- |
+| Home sem autenticação | ![Home pública](front-end/public/screenshots/logout-homepage.png) |
+| Home com usuário autenticado | ![Home autenticada](front-end/public/screenshots/login-homepage.png) |
+| Carrinho em uso | ![Carrinho com itens](front-end/public/screenshots/login-homepage-with-admin-role_cart.png) |
 
-### Gerenciamento de Produtos (Admin)
+### Pedidos e administração
 
-1. Apenas usuários com role `admin` podem acessar
-2. CRUD completo de produtos
-3. Validação com Zod antes de persistir
-4. Categoria de produto é gerenciada
-
----
-
-## 🔒 Segurança Implementada
-
-- ✅ Hash de senhas com bcrypt
-- ✅ JWT tokens com expiração
-- ✅ Validação de dados com Zod
-- ✅ Proteção de rotas autenticadas
-- ✅ Middleware CORS configurado
-- ✅ Tratamento seguro de erros (sem exposição de detalhes internos)
-- ✅ Cookies httpOnly para tokens
-- ✅ Autorização baseada em roles (admin)
-
----
-
-## 📦 Dependências Principais
-
-### Frontend
-
-- `react` - Interface de usuário
-- `typescript` - Tipagem
-- `zustand` - Estado global
-- `react-hook-form` - Formulários
-- `zod` - Validação
-- `axios` - HTTP client
-- `tailwindcss` - Styling
-
-### Backend
-
-- `express` - Framework HTTP
-- `prisma` - ORM
-- `postgresql` - Banco de dados
-- `jose` - JWT
-- `zod` - Validação
-- `bcryptjs` - Hash de senhas
-
----
-
-## 🎓 Próximos Passos & Melhorias Planejadas
-
-- [ ] Implementação de testes unitários e E2E
-- [ ] Melhorias no UX/UI com animações e no responsivo
-- [ ] Sistema de avaliações e comentários
-- [ ] Notificações em tempo real com WebSocket
-- [ ] Dashboard administrativo completo
-- [ ] Melhorias em performance e SEO
-- [ ] Implementação de login com o Google auth e Firebase
-- [ ] Deploy em produção (Vercel + Railway)
-- [ ] Documentação da API com Swagger
-
----
-
-## 📝 Padrões & Convenções
-
-### Commits
-
-- `feat:` Novas funcionalidades
-- `fix:` Correções de bugs
-- `docs:` Documentação
-- `style:` Formatação de código
-- `refactor:` Refatoração
-- `test:` Testes
-
----
-
-## 📸 Screenshots das principais telas do projeto
-
-Algumas imagens do projeto aqui para documentar telas importantes: formulário de login, registro e home.
-
-1 - Formulário de login
-![Login screenshot](front-end/public/screenshots/logIn-screen.png)
-
-2 - Formulário de registro
-![Register screenshot](front-end/public/screenshots/signUp-screen.png)
-
-3 - Formulário de registro com gerenciador de senha forte em um popover
-![Register screenshot](front-end/public/screenshots/sigUp-fomr(popover).png)
-
-4 - Display de um a senha fraca através de um password strenght meter com uma regra aplicada
-![Register screenshot](front-end/public/screenshots/password-strenght-meter(weak-pass).png)
-
-5 - Display de um a senha média através de um password strenght meter com uma regra aplicada
-![Register screenshot](front-end/public/screenshots/password-strenght(medium-pass).png)
-
-6 - Display de um a senha forte através de um password strenght meter com uma regra aplicada
-![Register screenshot](front-end/public/screenshots/password-strenght-meter(strong-pass).png)
-
-7 - Homepage sem estar logado
-![Home logout screenshot](front-end/public/screenshots/logout-homepage.png)
-
-8 - Homepage logado com role de admin
-![Home login e admin role screenshot](front-end/public/screenshots/login-homepage.png)
-
-9 - Carrinho de produtos preenchidos com 5 produtos, com soma por unidades e soma total
-![Home login com admin role e Cart screenshot](front-end/public/screenshots/login-homepage-with-admin-role_cart.png)
-
-10 - Gerenciamento de pedidos somente para admins
-![Home login com admin role e Cart screenshot](front-end/public/screenshots/cardPedidos.png)
+| Tela | Visual |
+| --- | --- |
+| Gestão de pedidos | ![Pedidos](front-end/public/screenshots/cardPedidos.png) |
+| Sugestão de senha forte | ![Popover de senha](front-end/public/screenshots/sigUp-fomr(popover).png) |
 
 ### Nomeação
 
@@ -477,4 +301,4 @@ Desenvolvido como projeto de aprendizado fullstack | 2026
 
 ---
 
-**Obrigado por visitar! Se este projeto foi útil, considere deixar uma ⭐**
+Obrigado por visitar! Se este projeto foi útil, considere deixar uma ⭐
