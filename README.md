@@ -250,6 +250,8 @@ Abaixo estão algumas telas representativas da experiência atual da aplicação
 | Home sem autenticação | ![Home pública](front-end/public/screenshots/logout-homepage.png) |
 | Home com usuário autenticado | ![Home autenticada](front-end/public/screenshots/login-homepage.png) |
 | Carrinho em uso | ![Carrinho com itens](front-end/public/screenshots/login-homepage-with-admin-role_cart.png) |
+| Janela de adcionar produto | ![Adiciona Produtos](front-end/public/screenshots/add-product-modal.png) |
+| Tratamento de erros na janela de adicionar produtos | ![Validações inputs](front-end/public/screenshots/add-product-modal(with_validation).png) |
 
 ### Pedidos e administração
 
