@@ -1,47 +1,55 @@
 // src/components/NewProductModal.tsx
-import { useEffect, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  type NewProductFormData,
-  newProductSchema,
-} from "../../shared/schemas/authProductsSchema";
 import { OctagonX, Upload } from "lucide-react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useForm } from "react-hook-form";
 import { ICON_CONFIG } from "../../constant/iconConfig";
+import { useCreateProduct } from "../../hook/useCreateProducts";
+import {
+  newProductSchema,
+  type NewProductFormData,
+} from "../../shared/schemas/authProductsSchema";
 import { useNewProductUIModalStore } from "../../shared/stores/useNewProductUIModal";
 import { Button } from "../button/Button";
 
-// Ajuste as categorias reais do seu domínio de Products aqui
 const CATEGORIES = [
-  { value: "burger", label: "Hambúrguer" },
-  { value: "drink", label: "Bebida" },
-  { value: "side", label: "Porções" },
+  { value: "HAMBURGUER", label: "Hamburguer" },
+  { value: "BEBIDAS", label: "Bebidas" },
+  { value: "PORÇÕES", label: "Porções" },
 ];
 
-const MAX_IMAGE_SIZE_MB = 5;
-const ACCEPTED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
+const MAX_IMAGE_SIZE_MB = 5; // size
+const ACCEPTED_IMAGE_TYPES = new Set<string>([
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+]); // mimetypes
 
 export const NewProductModal = () => {
   const closeModal = useNewProductUIModalStore((state) => state.closeModal);
+  const { mutateAsync, isPending } = useCreateProduct();
+  // isPending -> trocar pelo isSubmitting do RHF, pois o isPending reflete o estado real da aplicação
 
-  // estados de UI local (usar o useReducer)
+  // estados de UI local
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  // A interface File fornece informações sobre arquivos e permite que o JavaScript em uma página da web acesse o conteúdo deles.
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<NewProductFormData>({
     resolver: zodResolver(newProductSchema),
   });
 
   // Fecha com Esc e trava o scroll do body enquanto a modal está aberta
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeModal();
+    const handleKeyDown = (e: globalThis.KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      closeModal();
     };
 
     document.addEventListener("keydown", handleKeyDown);
@@ -57,7 +65,7 @@ export const NewProductModal = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+    if (!ACCEPTED_IMAGE_TYPES.has(file.type)) {
       setImageError("Formato inválido. Use PNG, JPG ou WEBP.");
       return;
     }
@@ -77,7 +85,7 @@ export const NewProductModal = () => {
       return;
     }
 
-    // Backend deve revalidar tudo (tipo, tamanho, magic bytes) — nunca confiar só no client
+    // Necessário no Front e no Backend que deve revalidar tudo (tipo, tamanho, magic bytes) — nunca confiar só no client
     const formData = new FormData();
     formData.append("name", data.name);
     formData.append("description", data.description);
@@ -85,9 +93,14 @@ export const NewProductModal = () => {
     formData.append("price", data.price.replace(",", "."));
     formData.append("image", imageFile);
 
-    // TODO: plugar aqui seu useMutation (TanStack Query) de criação de produto
-    // await createProductMutation.mutateAsync(formData);
-    // Ex.: onSuccess -> queryClient.invalidateQueries({ queryKey: ['products'] }); closeModal();
+    await mutateAsync({
+      name: data.name,
+      description: data.description,
+      category: data.category,
+      price: data.price.replace(",", "."),
+      image: imageFile,
+    });
+    closeModal();
   };
 
   return (
@@ -95,13 +108,6 @@ export const NewProductModal = () => {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
       onClick={closeModal}
       role="presentation"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " " || e.key === "Escape") {
-          e.preventDefault();
-          closeModal();
-        }
-      }}
     >
       <div
         className="relative flex w-full max-w-sm flex-col items-center rounded-lg bg-[#24201A] p-6 shadow-xl sm:max-w-xl sm:p-8"
@@ -147,7 +153,7 @@ export const NewProductModal = () => {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept={ACCEPTED_IMAGE_TYPES.join(",")}
+                accept={[...ACCEPTED_IMAGE_TYPES].join(",")}
                 onChange={handleImageChange}
                 className="hidden"
               />
@@ -244,7 +250,7 @@ export const NewProductModal = () => {
           </div>
 
           <Button
-            title={isSubmitting ? "Adicionando..." : "Adicionar Produto"}
+            title={isPending ? "Adicionando..." : "Adicionar Produto"}
             colorVariation="bgRedVariation"
             type="submit"
           />

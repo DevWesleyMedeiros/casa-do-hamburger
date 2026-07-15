@@ -1,3 +1,4 @@
+// rota que faz a extração da propriedade admin do usuário logado vem pelos cookies req.user
 import type { NextFunction, Request, Response } from 'express'
 
 export const requiredAdmin = (req: Request, res: Response, next: NextFunction): Response | void => {

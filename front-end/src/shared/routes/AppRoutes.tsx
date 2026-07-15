@@ -9,10 +9,10 @@ import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 
 const Layout: React.FC = () => {
   return (
-    <div className="flex w-screen flex-col bg-black">
+    <div className="flex flex-col bg-black">
       <Header></Header>
       <Outlet />
-      {/* Outlet - conteúdo; Se abrirmos o componente header e acessarmos as rotas de home e pedidos. elas serão renderizadas e o header fica fixo  */}
+      {/* Outlet - conteúdo; Se abrirmos o componente header e acessarmos as rotas de home e pedidos. elas serão renderizadas e o header fica fixo . Tudo que tiver dentro do Layout será um outlet*/}
     </div>
   );
 };

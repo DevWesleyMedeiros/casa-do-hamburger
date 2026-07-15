@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express'
-import type { AppError } from '../errors/AppError'
-import { authService } from '../services/authService'
+import type { AppError } from '../errors/AppError.js'
+import { authService } from '../services/authService.js'
 
 export const authController = {
   login: async (req: Request, res: Response) => {

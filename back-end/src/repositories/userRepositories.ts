@@ -1,5 +1,5 @@
-import { prisma } from '../db'
-import { handlePrismaError } from '../utils/handlePrismaError'
+import { prisma } from '../db.js'
+import { handlePrismaError } from '../utils/handlePrismaError.js'
 
 export const userRepository = {
   findByEmail: async (email: string) => {
@@ -13,7 +13,12 @@ export const userRepository = {
   },
 
   findManyProducts: async () => {
-    return await prisma.products.findMany()
+    const products = await prisma.products.findMany({ include: { images: true } })
+    // map images relation to an array of urls for API consumers
+    return products.map((p) => ({
+      ...p,
+      images: p.images.map((i) => i.url),
+    }))
   },
   findProductAndDelete: async (id: string) => {
     try {

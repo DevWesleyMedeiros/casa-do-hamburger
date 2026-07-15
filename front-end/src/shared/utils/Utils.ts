@@ -14,9 +14,9 @@ export const getItemSelectedClass = (
 // format brazilian currency
 export const brazilinaCurrencyFormat = (currencyValue: number): string => {
   if (Number.isNaN(currencyValue)) {
-    throw new Error("Valor não é moeda");
+    throw new TypeError("Valor não é moeda");
   }
-  const intToFloatValue = currencyValue / 100;
+  const intToFloatValue = currencyValue / 10000;
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL",
