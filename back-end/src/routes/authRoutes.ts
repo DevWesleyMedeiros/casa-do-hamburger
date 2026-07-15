@@ -1,11 +1,14 @@
 import { Router } from 'express'
-import { authController } from '../controllers/authControllers'
-import { requireAuth } from '../middlewares/authMiddlewares'
-import { clearAuthCookie } from '../middlewares/clearAuthCookie'
-import { requiredAdmin } from '../middlewares/requiredAdmin'
-import { validateBody } from '../middlewares/validateBody'
-import { loginSchema, registerSchema } from '../schemas/authSchemas'
-import { cartItemSchema } from '../schemas/cartItemSchema'
+import { authController } from '../controllers/authControllers.js'
+import { productsController } from '../controllers/products.controller.js'
+import { requireAuth } from '../middlewares/authMiddlewares.js'
+import { clearAuthCookie } from '../middlewares/clearAuthCookie.js'
+import { requiredAdmin } from '../middlewares/requiredAdmin.js'
+import { validateBody } from '../middlewares/validateBody.js'
+import { loginSchema, registerSchema } from '../schemas/authSchemas.js'
+import { createProductsSchema } from '../schemas/products.schemas.js'
+import { cartItemSchema } from '../schemas/cartItemSchema.js'
+import { uploadProductImage, validateImageMagicBytes } from '../middlewares/upload.js'
 
 const router = Router()
 
@@ -23,6 +26,15 @@ router.patch(
   requireAuth,
   validateBody(cartItemSchema),
   authController.updateCartItemQuantity,
+)
+router.post(
+  '/products',
+  requireAuth,
+  requiredAdmin,
+  uploadProductImage,
+  validateImageMagicBytes,
+  validateBody(createProductsSchema),
+  productsController.create,
 )
 
 export default router

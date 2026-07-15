@@ -1,8 +1,8 @@
 import { compare, genSaltSync, hashSync } from 'bcrypt-ts'
 import * as jose from 'jose'
-import { getJwtSecret } from '../config/jwt'
-import { userRepository } from '../repositories/userRepositories'
-import { AppError } from '../errors/AppError'
+import { getJwtSecret } from '../config/jwt.js'
+import { userRepository } from '../repositories/userRepositories.js'
+import { AppError } from '../errors/AppError.js'
 
 export const authService = {
   login: async (email: string, password: string) => {

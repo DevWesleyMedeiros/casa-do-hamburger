@@ -15,7 +15,7 @@ export const Products = ({
   name,
   description,
   price,
-  img,
+  images,
 }: ProductsInterface) => {
   const { data: user } = useMe();
   const queryClient = useQueryClient();
@@ -81,15 +81,13 @@ export const Products = ({
     <div>
       <div className="container-products relative flex gap-2">
         <img
-          src={`./${img}`}
-          alt="imagem burguer duplo da casa"
+          src={images?.[0] ?? ""}
+          alt={name ?? "imagem do produto"}
           className="h-20.75 w-25 shrink-0 object-cover md:h-41.5 md:w-50"
         />
 
         <div className="flex w-full flex-col justify-between">
           <div>
-            {/* conteianer título / nome do produto e button del product*/}
-            {/* ? (optional chain) - indica que, ou tenho um usuário, ou ele é null (estado inicial do user) */}
             <div className="flex justify-between">
               <p className="my-0.5 text-sm font-bold uppercase md:text-lg">
                 {name}

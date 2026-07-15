@@ -22,10 +22,24 @@ model Products {
   name        String
   description String
   price       Int
-  category String
-  img         String
+  category    String
   createAt    DateTime @default(now())
-  cartItem CartItem[]
+  images      ProductsImage[]
+  cartItem    CartItem[] 
+}
+
+model ProductsImage {
+  id String @id @default(cuid())
+  url String
+  key String
+  mimeType String
+  size Int
+  isPrimary Boolean @default(true)
+  productId String
+  product Products @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([productId])
 }
 
 model CartItem {
@@ -37,6 +51,6 @@ model CartItem {
   product Products @relation(fields: [productId], references: [id])
   user User @relation(fields: [userId], references: [id])
   
-  @@unique([userId, productId]) // linha responsável pelo upsert
+  @@unique([userId, productId])
   @@index([userId])
 }
