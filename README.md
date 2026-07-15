@@ -13,6 +13,7 @@ O Casa do Hamburguer é uma aplicação fullstack desenvolvida para praticar e c
 ✅ Frontend e backend integrados
 ✅ Autenticação baseada em cookie + JWT
 ✅ Catálogo de produtos com filtros por categoria
+✅ Criação de produtos com upload de imagens via Cloudinary
 ✅ Carrinho de compras com listagem, remoção e alteração de quantidade
 ✅ Páginas de login, cadastro e pedidos
 ✅ Estrutura backend organizada com controllers, services e repositories
@@ -36,6 +37,10 @@ O Casa do Hamburguer é uma aplicação fullstack desenvolvida para praticar e c
 - Filtro por categoria (Hamburguer, Bebidas e Porções)
 - Interface de cards com nome, descrição, imagem e preço
 - Endpoint de listagem de produtos consumido no frontend via React Query
+- Criação de novos produtos com upload de imagens (suportando múltiplas imagens via frontend)
+- Integração com Cloudinary para armazenamento e serviço de imagens via stream
+- Validação robusta de upload de arquivos (magic bytes, mimetype e tamanho máximo)
+- Nova entidade ProductsImage (key, url, mimetype, size) para organizar imagens individualmente
 
 ### 🛒 Carrinho de compras
 
@@ -66,6 +71,7 @@ O Casa do Hamburguer é uma aplicação fullstack desenvolvida para praticar e c
 - Zustand
 - Axios
 - Sonner
+- Chadcn-ui
 - lucide-react e react-icons
 
 ### Backend
@@ -80,6 +86,10 @@ O Casa do Hamburguer é uma aplicação fullstack desenvolvida para praticar e c
 - bcrypt-ts para hash de senhas
 - cookie-parser, cors e dotenv
 - Zod para validação
+- Multer para processar requisições HTTP do tipo multipart/form-data
+- file-type para analisar os magic numbers (bytes iniciais do arquivo)
+- Cloudinary SDK para armazenamento e serviço de imagens
+- Middleware de upload de arquivos com validação de magic bytes, mimetype e tamanho
 
 ---
 
@@ -121,7 +131,7 @@ src/
 - Organização em camadas no backend: controllers → services → repositories
 - Validação de dados no frontend e no backend
 - Uso de React Query para estados assíncronos e cache de dados
-- Uso de Zustand para estado local de UI, como controle do carrinho
+- Uso de Zustand para estado global de UI, como controle do carrinho
 - Tratamento de erros centralizado no backend
 
 ### Arquitetura em camadas
@@ -176,6 +186,11 @@ DATABASE_URL="postgresql://user:password@localhost:5432/casa-do-hamburger"
 JWT_SECRET="sua-chave-secreta"
 PORT=3001
 NODE_ENV="development"
+
+# Cloudinary (Upload de imagens)
+CLOUDINARY_CLOUD_NAME="seu-cloud-name"
+CLOUDINARY_API_KEY="sua-api-key"
+CLOUDINARY_API_SECRET="seu-api-secret"
 ```
 
 Execute as migrations e inicie o servidor:
@@ -237,28 +252,28 @@ Abaixo estão algumas telas representativas da experiência atual da aplicação
 
 ### Autenticação
 
-| Tela | Visual |
-| --- | --- |
-| Login | ![Tela de login](front-end/public/screenshots/logIn-screen.png) |
-| Cadastro | ![Tela de cadastro](front-end/public/screenshots/signUp-screen.png) |
-| Validação de senha | ![Senha forte](front-end/public/screenshots/password-strenght-meter(strong-pass).png) |
+| Tela               | Visual                                                                                  |
+| ------------------ | --------------------------------------------------------------------------------------- |
+| Login              | ![Tela de login](front-end/public/screenshots/logIn-screen.png)                         |
+| Cadastro           | ![Tela de cadastro](front-end/public/screenshots/signUp-screen.png)                     |
+| Validação de senha | ![Senha forte](<front-end/public/screenshots/password-strenght-meter(strong-pass).png>) |
 
 ### Catálogo e experiência principal
 
-| Tela | Visual |
-| --- | --- |
-| Home sem autenticação | ![Home pública](front-end/public/screenshots/logout-homepage.png) |
-| Home com usuário autenticado | ![Home autenticada](front-end/public/screenshots/login-homepage.png) |
-| Carrinho em uso | ![Carrinho com itens](front-end/public/screenshots/login-homepage-with-admin-role_cart.png) |
-| Janela de adcionar produto | ![Adiciona Produtos](front-end/public/screenshots/add-product-modal.png) |
-| Tratamento de erros na janela de adicionar produtos | ![Validações inputs](front-end/public/screenshots/add-product-modal(with_validation).png) |
+| Tela                                                | Visual                                                                                      |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Home sem autenticação                               | ![Home pública](front-end/public/screenshots/logout-homepage.png)                           |
+| Home com usuário autenticado                        | ![Home autenticada](front-end/public/screenshots/login-homepage.png)                        |
+| Carrinho em uso                                     | ![Carrinho com itens](front-end/public/screenshots/login-homepage-with-admin-role_cart.png) |
+| Janela de adcionar produto                          | ![Adiciona Produtos](front-end/public/screenshots/add-product-modal.png)                    |
+| Tratamento de erros na janela de adicionar produtos | ![Validações inputs](<front-end/public/screenshots/add-product-modal(with_validation).png>) |
 
 ### Pedidos e administração
 
-| Tela | Visual |
-| --- | --- |
-| Gestão de pedidos | ![Pedidos](front-end/public/screenshots/cardPedidos.png) |
-| Sugestão de senha forte | ![Popover de senha](front-end/public/screenshots/sigUp-fomr(popover).png) |
+| Tela                    | Visual                                                                      |
+| ----------------------- | --------------------------------------------------------------------------- |
+| Gestão de pedidos       | ![Pedidos](front-end/public/screenshots/cardPedidos.png)                    |
+| Sugestão de senha forte | ![Popover de senha](<front-end/public/screenshots/sigUp-fomr(popover).png>) |
 
 ### Nomeação
 
