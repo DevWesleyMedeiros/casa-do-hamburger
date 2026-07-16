@@ -53,7 +53,7 @@ export const Cart = () => {
                 productId={item.productId}
                 name={item.product.name}
                 price={item.product.price}
-                img={item.product.img}
+                images={item.product.images ?? null}
                 quantity={item.quantity}
               />
             ))

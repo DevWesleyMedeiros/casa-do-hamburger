@@ -1,7 +1,7 @@
 // src/components/NewProductModal.tsx
 import { zodResolver } from "@hookform/resolvers/zod";
 import { OctagonX, Upload } from "lucide-react";
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { ICON_CONFIG } from "../../constant/iconConfig";
 import { useCreateProduct } from "../../hook/useCreateProducts";

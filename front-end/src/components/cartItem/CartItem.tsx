@@ -15,10 +15,16 @@ type CartItemProps = {
   productId: string;
   name: string;
   price: number;
-  img: string;
+  images: string[];
   quantity: number;
 };
-export const CartItem = ({ id, name, price, img, quantity }: CartItemProps) => {
+export const CartItem = ({
+  id,
+  name,
+  price,
+  images,
+  quantity,
+}: CartItemProps) => {
   const queryClient = useQueryClient();
 
   // atualizar o cache localmente
@@ -107,7 +113,7 @@ export const CartItem = ({ id, name, price, img, quantity }: CartItemProps) => {
   return (
     <div className="my-component-card flex items-center justify-between">
       <div className="img">
-        <img src={`./${img}`} alt={name || "imagem do item"} />
+        <img src={`./${images?.[0] ?? null}`} alt={name || "imagem do item"} />
       </div>
       {/* flex-1 seta o conteiner item-cart para main e joga o botão para baixo */}
       <div className="texto mx-2 flex flex-1 flex-col gap-0.5 py-1.5">
