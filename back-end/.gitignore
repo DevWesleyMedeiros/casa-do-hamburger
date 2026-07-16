@@ -15,7 +15,6 @@ logs
 _.log
 report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 migration_lock.toml
-bun.lock
 
 # dotenv environment variable files
 .env
