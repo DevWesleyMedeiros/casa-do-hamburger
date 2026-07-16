@@ -80,7 +80,7 @@ export const Login = () => {
       <div className="justify-left flex flex-col items-center gap-2 rounded-xl border-[0.5px] border-white/13 p-7">
         <Link to="/home">
           <img
-            src="./logo-casa-do-hamburguer.png"
+            src="./assetsImages/logo-casa-do-hamburguer.png"
             alt="logo da hamburgeria"
             className="mb-4"
           />

@@ -12,7 +12,7 @@ export const createProductsSchema = z.object({
   price: z.coerce
     .number({ error: 'Preço inválido' })
     .positive('Preço dever ser positivo')
-    .transform((value) => Math.round(value * 100)),
+    .transform((value) => Math.round(value * 10000)),
 })
 
 export type CreateProductInput = z.infer<typeof createProductsSchema>

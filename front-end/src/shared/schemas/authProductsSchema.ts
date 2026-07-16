@@ -15,7 +15,10 @@ export const newProductSchema = z.object({
   category: z.string().min(1, "Selecione uma categoria"),
   price: z
     .string()
-    .regex(/^\d+([.,]\d{1,2})?$/, "Informe um preço válido (ex: 29.90)"),
+    .regex(
+      /^\d+([.,]\d{1,2})?$/,
+      "Informe um preço decimal (ex: 29.90) ou interiro (ex.: 2990)",
+    ),
 });
 
 export type NewProductFormData = z.infer<typeof newProductSchema>;

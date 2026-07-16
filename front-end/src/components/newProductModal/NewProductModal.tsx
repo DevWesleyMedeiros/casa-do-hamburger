@@ -236,7 +236,7 @@ export const NewProductModal = () => {
                   id="price"
                   type="text"
                   inputMode="decimal"
-                  placeholder="Preço"
+                  placeholder="Valor inteiro sem vírgulas"
                   className="h-9 w-full rounded-md border border-[#9D9D94]/40 bg-transparent px-3 text-sm text-[#9D9D94] outline-none focus:border-[#C41E00]"
                   {...register("price")}
                 />
