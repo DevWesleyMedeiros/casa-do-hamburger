@@ -1,6 +1,8 @@
 import type { Request, Response } from 'express'
 import type { AppError } from '../errors/AppError.js'
 import { authService } from '../services/authService.js'
+import { toProductDTO } from '../dtos/product.dto.js'
+import { toCartItemDTO } from '../dtos/cartItem.dto.js'
 
 export const authController = {
   login: async (req: Request, res: Response) => {
@@ -55,7 +57,7 @@ export const authController = {
   getProducts: async (_req: Request, res: Response) => {
     try {
       const products = await authService.products()
-      res.status(200).json(products)
+      res.status(200).json(products.map(toProductDTO))
     } catch (error: unknown) {
       if (error instanceof Error) {
         const err = error as AppError
@@ -84,10 +86,10 @@ export const authController = {
     try {
       const user = req.user?.id as string
       if (!user) {
-        return res.status(404).json({ message: 'Usuário não econtrado' })
+        return res.status(404).json({ message: 'Usuário não encontrado' })
       }
-      const getProductsFound = await authService.findProductInCartItem(user)
-      return res.status(200).json(getProductsFound)
+      const cartItems = await authService.findProductInCartItem(user)
+      return res.status(200).json(cartItems.map(toCartItemDTO))
     } catch (error: unknown) {
       if (error instanceof Error) {
         const err = error as AppError
@@ -103,11 +105,11 @@ export const authController = {
       if (!productId) {
         return res.status(400).json({ message: 'produto é obrigatório' })
       }
-      const cartItemsReq = await authService.addToCart(productId, user)
-      if (cartItemsReq === null) {
+      const cartItem = await authService.addToCart(productId, user)
+      if (cartItem === null) {
         return res.status(404).json({ message: 'Produto não encontrado' })
       }
-      return res.status(200).json(cartItemsReq)
+      return res.status(200).json(toCartItemDTO(cartItem)) // ✅ singular, não array
     } catch (error: unknown) {
       if (error instanceof Error) {
         const err = error as AppError
@@ -116,7 +118,6 @@ export const authController = {
     }
     return res.status(500).json({ message: 'Erro no servidor' })
   },
-
   deleteCartItemById: async (req: Request, res: Response) => {
     try {
       const { cartItemId } = req.params
@@ -145,8 +146,8 @@ export const authController = {
       if (!cartItemId || Array.isArray(cartItemId)) {
         return res.status(400).json({ message: 'ID inválido' })
       }
-      const update = await authService.updateCartItemQuantity(cartItemId, userId, quantity)
-      return res.status(200).json({ update })
+      const updated = await authService.updateCartItemQuantity(cartItemId, userId, quantity)
+      return res.status(200).json(toCartItemDTO(updated))
     } catch (error: unknown) {
       if (error instanceof Error) {
         const err = error as AppError

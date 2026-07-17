@@ -9,6 +9,7 @@ import { useMe } from "../../hook/useMe";
 import { deleteProductById } from "../../shared/services/api/delete/DeleteProduct";
 import { brazilinaCurrencyFormat } from "../../shared/utils/Utils";
 import { type ProductsInterface } from "../../types/Products";
+import { getProductImageUrl } from "../../shared/utils/getProductImageUrl";
 
 export const Products = ({
   id, // id vindo da tabela Products
@@ -81,7 +82,7 @@ export const Products = ({
     <div>
       <div className="container-products relative flex gap-2">
         <img
-          src={images?.[0] ?? ""}
+          src={getProductImageUrl(images, "card")}
           alt={name ?? "imagem do produto"}
           className="h-20.75 w-25 shrink-0 object-cover md:h-41.5 md:w-50"
         />

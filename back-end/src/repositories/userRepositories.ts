@@ -13,12 +13,7 @@ export const userRepository = {
   },
 
   findManyProducts: async () => {
-    const products = await prisma.products.findMany({ include: { images: true } })
-    // map images relation to an array of urls for API consumers
-    return products.map((p) => ({
-      ...p,
-      images: p.images.map((i) => i.url),
-    }))
+    return await prisma.products.findMany({ include: { images: true } })
   },
   findProductAndDelete: async (id: string) => {
     try {
@@ -33,8 +28,8 @@ export const userRepository = {
   findCartItemProduct: async (userId: string) => {
     try {
       return await prisma.cartItem.findMany({
-        where: { userId: userId },
-        include: { user: true, product: true },
+        where: { userId },
+        include: { product: { include: { images: true } } },
       })
     } catch (error) {
       return handlePrismaError(error)
@@ -55,7 +50,7 @@ export const userRepository = {
           product: { connect: { id: productId } },
           user: { connect: { id: userId } },
         },
-        include: { product: true },
+        include: { product: { include: { images: true } } },
       })
     } catch (error) {
       return handlePrismaError(error)
@@ -65,7 +60,6 @@ export const userRepository = {
     try {
       return await prisma.cartItem.delete({
         where: { id: cartItemId, userId },
-        include: { product: true },
       })
     } catch (error) {
       return handlePrismaError(error)
@@ -76,7 +70,7 @@ export const userRepository = {
       return await prisma.cartItem.update({
         where: { id: cartItemId, userId },
         data: { quantity },
-        include: { product: true },
+        include: { product: { include: { images: true } } },
       })
     } catch (error) {
       return handlePrismaError(error)
