@@ -9,6 +9,7 @@ import { queryKeys } from "../../constant/queryKeys";
 import { deleteCartItem } from "../../shared/services/api/delete/DeleteCartItemById";
 import { updateCartItemQuantity } from "../../shared/services/api/update/updateCartItemService";
 import { brazilinaCurrencyFormat } from "../../shared/utils/Utils";
+import { getProductImageUrl } from "../../shared/utils/getProductImageUrl";
 
 type CartItemProps = {
   id: string;
@@ -113,7 +114,10 @@ export const CartItem = ({
   return (
     <div className="my-component-card flex items-center justify-between">
       <div className="img">
-        <img src={`./${images?.[0] ?? null}`} alt={name || "imagem do item"} />
+        <img
+          src={getProductImageUrl(images, "thumbnail")}
+          alt={name || "imagem do item"}
+        />
       </div>
       {/* flex-1 seta o conteiner item-cart para main e joga o botão para baixo */}
       <div className="texto mx-2 flex flex-1 flex-col gap-0.5 py-1.5">

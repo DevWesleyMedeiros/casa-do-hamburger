@@ -1,3 +1,5 @@
+import type { ProductImage } from "./ProductImage";
+
 // types para interface de produtos
 export interface ProductsInterface {
   id: string;
@@ -5,9 +7,6 @@ export interface ProductsInterface {
   name: string;
   description: string;
   price: number;
-  images: string[];
+  images: ProductImage[];
   createAt?: Date;
-  // setProducts?: React.Dispatch<React.SetStateAction<ProductsInterface[]>>;
-  // setProducts permite eu manipular o array de produtos e atualizá-los
-  // Com TanStack Query, não passa setState entre componentes — o cache é os mutatios serão os responda.
 }

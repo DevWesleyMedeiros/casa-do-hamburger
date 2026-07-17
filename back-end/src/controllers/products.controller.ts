@@ -6,9 +6,9 @@ export const productsController = {
   async create(req: Request, res: Response, next: NextFunction) {
     try {
       const product = await productService.createProduct(req.body, req.file)
-      return res.status(201).json(toProductDTO({ ...product, images: product.images }))
+      return res.status(201).json(toProductDTO(product))
     } catch (error) {
-      return next(error) // AppError / handlePrismaError cuidam do resto
+      return next(error) // AppError / handlePrismaError cuidam do restante
     }
   },
 }
