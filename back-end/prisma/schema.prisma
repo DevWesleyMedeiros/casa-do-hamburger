@@ -15,6 +15,7 @@ model User {
   password String
   admin    Boolean @default(false)
   cartItem CartItem[]
+  orders Order[]
 }
 
 model Products {
@@ -25,7 +26,8 @@ model Products {
   category    String
   createAt    DateTime @default(now())
   images      ProductsImage[]
-  cartItem    CartItem[] 
+  cartItem    CartItem[]
+  orderItems OrderItem[]
 }
 
 model ProductsImage {
@@ -53,4 +55,39 @@ model CartItem {
   
   @@unique([userId, productId])
   @@index([userId])
+}
+
+model Order{
+  id String @id @default(uuid())
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  status OrderStatus @default(PENDING)
+  total Int
+  items OrderItem[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([userId])
+}
+
+enum OrderStatus {
+  PENDING     // Pendente
+  PICKED_UP   // Retirado
+  CANCELLED   // Cancelado
+}
+
+model OrderItem{
+  id          String    @id @default(uuid())
+  orderId     String
+  order       Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productId   String?   // opcional: permite manter o item mesmo se o produto for apagado
+  product     Products? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  productName String    // snapshot — nome do produto no momento da compra
+  unitPrice   Int        // snapshot — preço unitário no momento da compra (centavos)
+  quantity    Int
+  subtotal    Int        // unitPrice * quantity, guardado (não recalculado on-the-fly)
+
+  @@index([orderId])
 }
