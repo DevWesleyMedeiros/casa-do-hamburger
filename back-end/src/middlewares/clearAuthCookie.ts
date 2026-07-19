@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from 'express'
-// funçõa requiredAuth vai verficar se existem os cookies e este middleware clearAuthCookie vai ser o responsál pelo retorno res do cookies limpos
+// funçõa requiredAuth vai verficar se existem os cookies e este middleware clearAuthCookie vai ser o responsável pelo retorno res do cookies limpos
 
 export const clearAuthCookie = async (
   _req: Request,
