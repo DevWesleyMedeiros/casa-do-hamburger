@@ -24,7 +24,7 @@ export const registerSchema = z
       .min(9, "mínimo 9 caractéres")
       .regex(/[A-Z]/, "deve conter uma letre maiúscula")
       .regex(/[a-z]/, "deve conter uma letra minúscula")
-      .regex(/[0-9]/, "deve conter um valor numérico")
+      .regex(/\d/, "deve conter um valor numérico")
       .regex(/[^a-zA-Z0-9]/, "deve conter um caractér especial")
       .trim(),
 
@@ -65,7 +65,6 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Senha é obrigatória").trim(),
   // aqui não colocamos regra de força de senha, pois já temos ela ao registrar
 });
-
 
 export type registerInput = z.infer<typeof registerSchema>;
 // meu registerInput é literalmente um interface RegisterInput =

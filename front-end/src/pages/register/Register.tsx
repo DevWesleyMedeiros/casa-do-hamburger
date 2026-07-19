@@ -19,6 +19,8 @@ import {
 import { RegisterDate } from "../../shared/services/api/register/Register";
 import { passwordGenerator } from "../../shared/utils/PasswordGenerator";
 import { displayStrongPassword } from "../../shared/utils/Utils";
+import { ApiError } from "../../shared/services/api/ApiExceptions";
+import axios from "axios";
 
 export const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -30,7 +32,7 @@ export const Register = () => {
 
   // estados que controlaram o popover effect
   const [showPopover, setShowPopover] = useState<boolean>(false);
-  const [suggestedPassword, setSugestedPassword] = useState<string>("");
+  const [suggestedPassword, setSuggestedPassword] = useState<string>("");
 
   // useForm conectado ao Zod via zodResolver
   // register → conecta cada input ao useForm (como se fosse o value e setValue de um input)
@@ -61,13 +63,13 @@ export const Register = () => {
 
   // abre uma janela popover com uma sugestão de senha
   const handleSugestedPassword = useCallback(() => {
-    setSugestedPassword(passwordGenerator());
+    setSuggestedPassword(passwordGenerator());
     setShowPopover((prev) => !prev);
   }, []);
 
   // gera outra senha sem fechar o popover
   const handleRegeneratePassword = useCallback(() => {
-    setSugestedPassword(passwordGenerator());
+    setSuggestedPassword(passwordGenerator());
     toast("Nova senha gerada");
   }, []);
 
@@ -95,48 +97,39 @@ export const Register = () => {
 
   const strength = displayStrongPassword(passwordValue);
 
-  // enviando meus dados para o backend
-  // onSubmit só é chamado se todos os campos passarem na validação do Zod
-  // data já vem tipado como RegisterInput — sem precisar ler campo por campo
   const onSubmit: SubmitHandler<registerInput> = useCallback(
     async (data) => {
-      setIsLoading((prev) => !prev);
+      setIsLoading(true); // não se usa toogle para valores booleanos absolutos
+      // toggle para controlar um estado booleano que deveria ser explícito. Isso é um code smell clássico: se por qualquer motivo a função rodar fora da ordem esperada (double-click no botão antes do disabled surtir efeito, StrictMode remontando em dev, etc.), o estado pode "destravar" incorretamente. A prática correta é sempre setar o valor absoluto:
 
       try {
-        const result = await RegisterDate.create({
+        await RegisterDate.create({
           name: data.name,
           email: data.email,
           password: data.password,
           cep: data.cep,
-          // confirmPassword não vai para o back pois se trata de uma validação de sugurança no front
         });
 
-        // manipular os erros vindo do backend com as toast
-        if (result?.status === 409) {
-          toast.error("Email já cadastrado");
-          return;
-        }
-        if (result?.status === 400) {
-          toast.error("Todas as informações são obrigatórias");
-          return;
-        }
-        if (result?.status === 500) {
-          toast.error("Erro interno. Tente novamente mais tarde.");
-          return;
-        }
-
-        // passou as validações, os dados foram cadastrados - 200
-        toast("Criando usuário...");
-
-        await new Promise((resolve) => setTimeout(resolve, 4000));
-
-        reset(); // função do useFrom que vai limpar os input de uma só vez
-        toast.success("Usuário criado com sucesso!");
+        // Se chegou até aqui, a Promise resolveu = backend respondeu 2xx.
+        // Não existe mais motivo para checar result?.status manualmente.
+        reset();
+        toast.success("Usuário criado com sucesso");
         navigate("/login");
-      } catch {
-        toast.error("Ocorreu um erro inesperado. Tente novamente.");
+      } catch (error) {
+        const finalError =
+          error instanceof ApiError
+            ? error
+            : new ApiError(500, "Erro inesperado");
+
+        if (finalError.statusCode === 409) {
+          toast.error("Email já cadastrado");
+        } else if (finalError.statusCode === 400) {
+          toast.error("Todas as informações são obrigatórias");
+        } else {
+          toast.error(finalError.message);
+        }
       } finally {
-        setIsLoading((prev) => !prev);
+        setIsLoading(false);
       }
     },
     [navigate, reset],

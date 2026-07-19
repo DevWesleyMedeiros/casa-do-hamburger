@@ -13,10 +13,13 @@ export const registerSchema = z.object({
 
   password: z
     .string()
-    .min(8, 'Senha deve ter no mínimo 8 caracteres')
+    .min(1, 'Senha obrigatória')
+    .min(9, 'Senha deve ter no mínimo 9 caracteres')
     .regex(/[A-Z]/, 'Deve conter pelo menos uma letra maiúscula')
-    .regex(/d/, 'Deve conter pelo menos um número')
-    .regex(/[^a-zA-Z0-9]/, 'Deve conter pelo menos um caractere especial'),
+    .regex(/[a-z]/, 'deve conter uma letra minúscula')
+    .regex(/\d/, 'Deve conter pelo menos um número')
+    .regex(/[^a-zA-Z0-9]/, 'Deve conter pelo menos um caractere especial')
+    .trim(),
 
   // confirm password é um validate de UX e não backend
   cep: z
