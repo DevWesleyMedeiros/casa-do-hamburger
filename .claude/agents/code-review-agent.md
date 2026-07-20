@@ -79,6 +79,30 @@ Revise **sempre nessa ordem** — nunca inverta:
 
 ## Workflow de Review
 
+## Verificação de Regras de Negócio (casa-do-hamburguer)
+
+Sempre que uma revisão de código for solicitada para o projeto Casa do Hambúrguer, além dos
+critérios técnicos padrão desta skill, o revisor deve:
+
+1. Ler `docs/architecture/REGRAS_DE_NEGOCIO.md` (na raiz do repositório) antes de opinar sobre o PR/diff.
+2. Identificar quais RF/RN/RNF do documento o trecho revisado toca (ex.: um PATCH em rota de
+   carrinho → RN-CART-02, RN-CART-05, RN-CART-06).
+3. Verificar se a implementação é **fiel** à regra descrita — não apenas "está limpo", mas
+   "está certo com o que foi decidido".
+4. Sinalizar explicitamente se o código:
+   - implementa um comportamento **não documentado** no `.md` (pode ser regra nova não registrada, ou desvio indevido do que foi decidido);
+   - contradiz uma regra já marcada como 🟢 (implementada) — tratar como regressão, prioridade alta;
+   - fecha um item que hoje está 🟡/🔵 — sinalizar que o selo do `.md` precisa ser atualizado.
+5. Conferir aderência ao checklist de PR abaixo antes de aprovar:
+\```markdown
+## Checklist do PR — Casa do Hambúrguer
+- [ ] Referencia o(s) RF/RN/RNF impactado(s) na descrição do PR (ex.: RF-30, RN-CART-06)
+- [ ] REGRAS_DE_NEGOCIO.md foi atualizado (selo trocado 🟡/🔵 → 🟢, ou nova regra registrada)
+- [ ] Se mudou uma decisão arquitetural relevante, foi criado um ADR em /docs/architecture/adr/
+- [ ] Testes (unit e/ou integração) cobrindo a regra de negócio adicionados/atualizados
+- [ ] Nenhuma regra 🟢 existente foi quebrada
+\```
+
 ### Passo 1 — Levantamento das Mudanças
 
 ```bash
