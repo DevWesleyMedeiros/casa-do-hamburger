@@ -99,7 +99,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | RF-09 | O sistema deve permitir recuperação de senha via e-mail (fluxo "esqueci minha senha") | 🔵 |
 | RF-10 | O sistema deve permitir edição de dados de perfil (nome, e-mail, avatar) | 🔵 |
 | RF-11 | O sistema deve suportar renovação de token via refresh token (rotação de sessão) | 🔵 |
-| RF-12 | O sistema deve registrar tentativas de login falhas para fins de rate limiting | 🟡 |
+| RF-12 | O sistema deve registrar tentativas de login falhas para fins de rate limiting sem persistência auditável | 🟡 |
 
 ### 3.2 Módulo de Catálogo de Produtos
 
@@ -162,7 +162,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 
 ### 3.6 Módulo de Pagamento 🆕
 
-> Módulo novo nesta versão — não existia na v1.0.0. Nasce das respostas às perguntas 2 da Seção 12 original.
+> Módulo novo nesta versão — não existia na v1.0.0. Nasce das respostas à perguntas 2 da Seção 12 original.
 
 | ID | Requisito | Status |
 |---|---|---|
@@ -666,7 +666,7 @@ sequenceDiagram
 | Pagamento | Simulação de checkout (sem gateway real obrigatório para o MVP) |
 | Infra | CI/CD funcional (Vercel + Railway + Neon), migrations versionadas |
 
-> 🟢 O MVP fserá efechadoquando as lacunas mais importantes estiverem  **finalizadas:a criação de pedido de ponta a ponta (RF-32/33/34/35, hoje 🟡)** e **validar a máquina de estados no service (RF-38)**.
+> 🟢 O MVP será fechado quando as lacunas mais importantes estiverem  **finalizadas:a criação de pedido de ponta a ponta (RF-32/33/34/35, hoje 🟡)** e **validar a máquina de estados no service (RF-38)**.
 
 ### 10.2 Roadmap Pós-MVP
 
@@ -724,8 +724,7 @@ graph LR
 
 ## 12. Registro de Decisões Confirmadas (histórico)
 
-> Esta seção substitui a antiga "Pontos em Aberto" da v1.0.0 — todas as perguntas foram
-> respondidas pelo mantenedor em 20/07/2026 e já incorporadas nas seções correspondentes.
+> Esta seção substitui a antiga "Pontos em Aberto" da v1.0.0 — todas as perguntas foram respondidas pelo mantenedor em 20/07/2026 e já incorporadas nas seções correspondentes.
 > Mantida aqui como **registro histórico de decisão**, no espírito de um ADR resumido.
 
 | # | Pergunta original | Decisão | Onde foi aplicada |
