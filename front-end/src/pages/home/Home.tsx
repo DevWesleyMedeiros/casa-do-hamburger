@@ -7,6 +7,7 @@ import {
   getItemSelectedClass,
   toUpperCaseDate,
 } from "../../shared/utils/Utils";
+import { NonBackendResources } from "../../components/NonBackendResources";
 
 const FILTER_PRODUCTS = toUpperCaseDate([
   "Hamburguer",
@@ -20,10 +21,14 @@ export const Home = () => {
     data: products = [],
     isLoading,
     isError,
+    // isPlaceholderData,
   } = useQuery({
     queryKey: queryKeys.products,
     queryFn: () => getProductsData.getProducts(),
     staleTime: 1000 * 5 * 60,
+    // placeholderData:
+    // Impede a execução da query até que a página esteja pronta
+    retry: 1,
   });
 
   if (isLoading) {
@@ -34,12 +39,9 @@ export const Home = () => {
     );
   }
 
+  // Erro de rede/servidor (ex: backend ainda não deployado) → fallback 404 dedicado
   if (isError) {
-    return (
-      <p className="p-6 text-center text-red-400">
-        Erro ao carregar produtos. Tente novamente.
-      </p>
-    );
+    return <NonBackendResources />;
   }
 
   const filteredProductsByCategory = products.filter((product) => {
@@ -63,19 +65,22 @@ export const Home = () => {
 
       <p className="text-brand-amber mb-2 font-bold uppercase">{category}</p>
       <div className="flex flex-col gap-3 md:gap-3">
-        {filteredProductsByCategory.map((product) => (
-          <Products
-            id={product.id}
-            category={product.category}
-            name={product.name}
-            description={product.description}
-            images={product.images}
-            price={product.price}
-            key={product.id}
-          />
-        ))}
-        {filteredProductsByCategory.length === 0 && (
-          <p>Não existem produtos nessa categoria</p>
+        {filteredProductsByCategory.length > 0 ? (
+          filteredProductsByCategory.map((product) => (
+            <Products
+              id={product.id}
+              category={product.category}
+              name={product.name}
+              description={product.description}
+              images={product.images}
+              price={product.price}
+              key={product.id}
+            />
+          ))
+        ) : (
+          <p className="text-brand-amber/70 text-center">
+            Nenhum produto disponível nesta categoria no momento.
+          </p>
         )}
       </div>
     </div>
