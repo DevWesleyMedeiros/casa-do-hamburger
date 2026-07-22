@@ -20,7 +20,6 @@ import { RegisterDate } from "../../shared/services/api/register/Register";
 import { passwordGenerator } from "../../shared/utils/PasswordGenerator";
 import { displayStrongPassword } from "../../shared/utils/Utils";
 import { ApiError } from "../../shared/services/api/ApiExceptions";
-import axios from "axios";
 
 export const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
