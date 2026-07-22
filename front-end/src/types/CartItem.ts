@@ -1,16 +1,15 @@
 // tipos somente para CartItem
 
 import { type ProductsInterface } from "./Products";
+import { type ProductImage } from "./ProductImage";
 
-// Type no lugar de interface para permitir o uso do "&"" e do "Pick"
 export type CartItemType = {
   id: string;
-  // id do cartItem
-  userId: string; // id do usuário (referenciado por chave estrangeira)
-  productId: string; // id do produto (referenciado por chave estrangeira)
+  userId: string;
+  productId: string;
   product: Pick<ProductsInterface, "name"> &
     Pick<ProductsInterface, "price"> & {
-      images: string[];
+      images: ProductImage[];
     };
   // criamos o objeto "product" aninhado! que puxa as propriedades do produto cadastrado pelo user
   quantity: number;

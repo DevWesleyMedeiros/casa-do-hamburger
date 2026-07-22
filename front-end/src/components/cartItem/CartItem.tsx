@@ -10,13 +10,14 @@ import { deleteCartItem } from "../../shared/services/api/delete/DeleteCartItemB
 import { updateCartItemQuantity } from "../../shared/services/api/update/updateCartItemService";
 import { brazilinaCurrencyFormat } from "../../shared/utils/Utils";
 import { getProductImageUrl } from "../../shared/utils/getProductImageUrl";
+import { type ProductImage } from "../../types/ProductImage";
 
 type CartItemProps = {
   id: string;
   productId: string;
   name: string;
   price: number;
-  images: string[];
+  images: ProductImage[];
   quantity: number;
 };
 export const CartItem = ({
