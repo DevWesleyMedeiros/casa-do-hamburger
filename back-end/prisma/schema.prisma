@@ -91,3 +91,12 @@ model OrderItem{
 
   @@index([orderId])
 }
+
+generator Client {
+  provider = "prisma-client-js"
+}
+generator erd {
+  provider = "prisma-erd-generator"
+  output = "../docs/architecture/ERD.md"
+  theme    = "forest"   // ou "default", "dark", "neutral"
+}
