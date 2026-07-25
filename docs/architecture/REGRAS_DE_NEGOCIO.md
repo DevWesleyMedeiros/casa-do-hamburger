@@ -3,8 +3,8 @@
 > **Tipo de documento:** Especificação de Requisitos + Regras de Negócio (BRD/SRS)
 > **Projeto:** Casa do Hambúrguer — Sistema de Pedidos para Hamburgueria (E-commerce de Food Service)
 > **Natureza:** Boilerplate reutilizável para aplicações de e-commerce/pedidos
-> **Versão:** 1.1.0
-> **Status:** Documento vivo — Seção 12 (pontos em aberto da v1.0.0) resolvida e incorporada
+> **Versão:** 1.2.0
+> **Status:** Documento vivo — Proposta de Login via Google OAuth 2.0 incorporada (Seções 3.1, 4, 5, 6.1, 6.2, 7, 9)
 
 ---
 
@@ -29,6 +29,7 @@ Selos de status:
 |---|---|---|
 | 1.0.0 | 19/07/2026 | Documento inicial, gerado por engenharia reversa de requisitos |
 | 1.1.0 | 20/07/2026 | Seção 12 (pontos em aberto) respondida pelo mantenedor; adicionado Módulo de Pagamento (3.6/6.9); adicionadas roles futuras `ATTEND`/`DELIVER`; adicionadas Seção 14 (Estratégia de Testes) e Seção 15 (Governança e Gatilhos de Code Review) |
+| 1.2.0 | 25/07/2026 | Proposta (🔵) de login via **Google OAuth 2.0** como alternativa ao login local: RF-51 a RF-55 (3.1), RNF-23 a RNF-25 (4), US-11 (5), RN-AUTH-08 a RN-AUTH-12 (6.1), RN-CRYPT-05 (6.2); ERD atualizado com `provider`/`providerId`/`emailVerified` e `passwordHash` opcional (7); novo diagrama de sequência 9.3; ver **ADR-0003** (a ser criada, registro da decisão arquitetural) |
 
 ---
 
@@ -100,6 +101,11 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | RF-10 | O sistema deve permitir edição de dados de perfil (nome, e-mail, avatar) | 🔵 |
 | RF-11 | O sistema deve suportar renovação de token via refresh token (rotação de sessão) | 🔵 |
 | RF-12 | O sistema deve registrar tentativas de login falhas para fins de rate limiting sem persistência auditável | 🟡 |
+| RF-51 🆕 | O sistema deve permitir login/cadastro via **Google OAuth 2.0** ("Entrar com Google") como alternativa ao login local por e-mail/senha | 🔵 |
+| RF-52 🆕 | O backend deve verificar o `id_token` retornado pelo Google (assinatura, `aud`, `iss`, `exp`) antes de criar qualquer sessão — nunca confiar em dados de identidade enviados diretamente pelo frontend | 🔵 |
+| RF-53 🆕 | Contas criadas via Google devem ser persistidas com `provider=GOOGLE` e `password` nulo; contas locais mantêm `provider=LOCAL` | 🔵 |
+| RF-54 🆕 | Se já existir conta local com o mesmo e-mail do login Google **e** o Google reportar `email_verified=true`, o sistema deve vincular automaticamente as contas em vez de criar um cadastro duplicado | 🔵 |
+| RF-55 🆕 | Independente do provider usado na autenticação (local ou Google), a emissão da sessão (cookie `httpOnly` com JWT) deve seguir exatamente o mesmo mecanismo já usado hoje (RF-04) | 🔵 |
 
 ### 3.2 Módulo de Catálogo de Produtos
 
@@ -200,6 +206,9 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | RNF-20 | Testabilidade | Cobertura de testes automatizados para regras de negócio críticas (carrinho, pedido, autenticação) — ver Seção 14 | 🔵 |
 | RNF-21 | Portabilidade | Nenhuma URL hardcoded — todo endpoint via variável de ambiente | 🟢 |
 | RNF-22 | Multi-tenancy | Sistema é single-tenant por design — não há isolamento de dados por loja | 🟢 |
+| RNF-23 🆕 | Segurança | Fluxo de login via Google deve usar **Authorization Code Flow + PKCE**; o fluxo implícito (deprecado) não deve ser usado | 🔵 |
+| RNF-24 🆕 | Segurança | O `CLIENT_SECRET` do Google nunca deve ser exposto ao frontend — a troca do `code` por `id_token` ocorre exclusivamente no backend | 🔵 |
+| RNF-25 🆕 | Segurança | O fluxo OAuth deve usar o parâmetro `state` na etapa de redirecionamento para mitigar CSRF | 🔵 |
 
 ---
 
@@ -321,6 +330,25 @@ E posso alterar um pedido de "READY" para "DELIVERED"
 E NÃO posso alterar para nenhum outro status
 ```
 
+### US-11 — Login via Google 🔵 🆕
+**Como** visitante, **eu quero** entrar com minha conta Google, **para que** eu não precise criar nem lembrar de mais uma senha.
+
+```gherkin
+Dado que estou na tela de login
+Quando clico em "Entrar com Google" e autorizo o acesso
+Então o backend verifica o id_token retornado pelo Google (assinatura, aud, iss, exp)
+E, se for a primeira vez, uma conta é criada com provider=GOOGLE e password nulo
+E recebo o mesmo cookie httpOnly de sessão emitido no login local (RF-04/RF-55)
+E sou redirecionado para a área autenticada
+
+Dado que já existe uma conta local com o mesmo e-mail
+Quando faço login via Google e o Google reporta email_verified=true
+Então minha conta local é vinculada automaticamente ao provider GOOGLE, sem duplicar o cadastro
+
+Quando o Google reporta email_verified=false para esse e-mail
+Então o vínculo automático NÃO ocorre, e o sistema orienta o usuário a confirmar a conta por outro meio
+```
+
 ---
 
 ## 6. Regras de Negócio Detalhadas
@@ -336,6 +364,11 @@ E NÃO posso alterar para nenhum outro status
 | RN-AUTH-05 🔵 | Deve existir um **refresh token** de vida longa, também `httpOnly`, para renovar o access token sem exigir novo login — rotação de token a cada uso (evita replay) |
 | RN-AUTH-06 🟢 | Logout invalida o cookie no cliente; se o refresh token existir, deve haver blacklist/revogação no servidor |
 | RN-AUTH-07 🟢 | Toda rota protegida passa pelo middleware `requireAuth`, que decodifica e valida o JWT antes de liberar acesso ao `req.user` |
+| RN-AUTH-08 🔵 🆕 | Login externo (Google) usa **Authorization Code Flow + PKCE**; o backend troca o `code` por `id_token` e o verifica com biblioteca oficial (ex.: `google-auth-library`), validando assinatura, `aud` (`CLIENT_ID`) e `iss` (`accounts.google.com`) |
+| RN-AUTH-09 🔵 🆕 | O `id_token`/`access_token` do Google **nunca** é usado como sessão da aplicação — serve apenas para comprovar identidade. A sessão continua sendo o JWT próprio (RN-AUTH-02), emitido pelo backend somente após a verificação |
+| RN-AUTH-10 🔵 🆕 | O campo `User.password` torna-se **opcional** (nullable); contas com `provider=GOOGLE` não possuem senha local e não podem autenticar pelo fluxo de e-mail/senha |
+| RN-AUTH-11 🔵 🆕 | Vínculo automático de conta (conta local existente + login Google no mesmo e-mail) só ocorre se `email_verified=true` no token do Google; caso contrário, o sistema rejeita o vínculo automático, para evitar *account takeover* |
+| RN-AUTH-12 🔵 🆕 | A rota `/auth/google` deve estar sob o mesmo rate limiter já aplicado às demais rotas de autenticação (RNF-06) |
 
 ### 6.2 Criptografia de Senhas 🟢
 
@@ -345,6 +378,7 @@ E NÃO posso alterar para nenhum outro status
 | RN-CRYPT-02 🟢 | Comparação de senha usa `bcrypt.compare`, nunca comparação manual de hash |
 | RN-CRYPT-03 🟢 | Senha nunca é incluída em nenhum payload de resposta da API (ver DTOs, Seção 6.5) |
 | RN-CRYPT-04 🟢 | Política de senha mínima: 9+ caracteres, ao menos 1 número, ao menos 1 caractere especial e ao menos uma letra maiúscula — validada via Zod tanto no client quanto no server |
+| RN-CRYPT-05 🔵 🆕 | A política de senha (RN-CRYPT-04) aplica-se somente a contas `provider=LOCAL`; contas `provider=GOOGLE` não possuem senha e são isentas dessa validação |
 
 ### 6.3 Gerenciamento de Roles (RBAC) 🟢 (atual) + 🔵 (futuro)
 
@@ -503,7 +537,10 @@ erDiagram
         string id PK
         string name
         string email UK
-        string passwordHash
+        string passwordHash "opcional (nulo se provider=GOOGLE)"
+        enum provider "LOCAL | GOOGLE (proposto)"
+        string providerId "sub do Google; nulo se provider=LOCAL (proposto)"
+        boolean emailVerified "proposto"
         enum role "USER | ADMIN | ATTEND(futuro) | DELIVER(futuro)"
         datetime createdAt
     }
@@ -567,6 +604,7 @@ erDiagram
 > - `PAYMENT` é a entidade nova do Módulo de Pagamento (Seção 3.6/6.9) — hoje só o status `SIMULATED` é usado na prática.
 > - `ORDER_ITEM` **não** tem foreign key "viva" para os campos exibidos — são colunas de snapshot, mesmo mantendo `productId` como referência de rastreabilidade.
 > - `CART_ITEM` mantém a constraint `@@unique([userId, productId])` (RN-CART-02).
+> - 🆕 `USER.provider`/`providerId`/`emailVerified` são **propostos** (🔵) para suportar login via Google (RN-AUTH-08 a 12) — `passwordHash` deixa de ser obrigatório.
 
 ---
 
@@ -651,6 +689,37 @@ sequenceDiagram
     F-->>C: Exibe confirmação do pedido
 ```
 
+### 9.3 Fluxo de Login via Google 🔵 🆕
+
+```mermaid
+sequenceDiagram
+    actor C as Cliente
+    participant F as Frontend (React)
+    participant A as API (Express)
+    participant G as Google (OAuth 2.0)
+    participant DB as PostgreSQL
+
+    C->>F: Clica em "Entrar com Google"
+    F->>G: Authorization Code Flow + PKCE (redirect)
+    G-->>F: redirect com authorization code + state
+    F->>A: POST /auth/google { code }
+    A->>G: troca code por id_token (com CLIENT_SECRET, só no backend)
+    G-->>A: id_token (JWT assinado pelo Google)
+    A->>A: verifica assinatura, aud (CLIENT_ID), iss, exp
+    A->>DB: findUnique({ email }) ou findUnique({ providerId })
+    alt usuário não existe
+        A->>DB: create User (provider=GOOGLE, password=null, emailVerified)
+    else e-mail já existe como conta LOCAL e email_verified=true
+        A->>DB: vincula automaticamente (RN-AUTH-11)
+    end
+    A->>A: Gera JWT próprio (jose) com { sub, role } — igual ao login local
+    A-->>F: 200 OK + Set-Cookie httpOnly (mesmo mecanismo do RF-04)
+    F->>F: Zustand: seta usuário autenticado
+    F-->>C: Redireciona para área logada
+```
+
+> 🔒 Nota: a partir do passo "Gera JWT próprio", o fluxo é **idêntico** ao login local (Seção 9.1) — é por isso que nenhum middleware (`requireAuth`/`requiredAdmin`) precisa mudar.
+
 ---
 
 ## 10. MVP e Roadmap Evolutivo
@@ -674,7 +743,7 @@ sequenceDiagram
 |---|---|---|
 | **Fase 2 — Fechar o MVP** | Finalizar fluxo de criação de pedido, máquina de estados validada no service | **Alta — próxima sprint** |
 | **Fase 3 — Robustez** | Refresh token + rotação, rate limiting, Helmet, testes automatizados (ver Seção 14) | Alta |
-| **Fase 4 — Experiência** | Notificações de status, histórico de pedidos, recuperação de senha | Média |
+| **Fase 4 — Experiência** | Notificações de status, histórico de pedidos, recuperação de senha, login via Google (RF-51 a 55, ver ADR-0003) | Média |
 | **Fase 5 — Operação** | Roles `ATTEND`/`DELIVER`, painel de métricas admin, soft delete, auditoria | Média |
 | **Fase 6 — Pagamento real** | Integração Stripe/Mercado Pago em modo live, webhooks | Média |
 | **Fase 7 — Escala** | Extração do domínio de Pedidos para microsserviço dedicado (ver 10.3) | Baixa (só se necessário) |
@@ -715,7 +784,7 @@ graph LR
 | A03 — Injection | Prisma (queries parametrizadas) + Zod na entrada | 🟢 |
 | A04 — Insecure Design | Snapshot Pattern em pedidos; total recalculado no backend | 🔵 |
 | A05 — Security Misconfiguration | Helmet, CSP, variáveis de ambiente sem hardcode | 🟢 |
-| A07 — Identification/Auth Failures | Mensagens de erro genéricas no login; rate limiting | 🟡 |
+| A07 — Identification/Auth Failures | Mensagens de erro genéricas no login; rate limiting; verificação de `id_token` no login via Google (RN-AUTH-08/09) | 🟡 |
 | A08 — Software and Data Integrity | Magic bytes na validação de upload | 🟢 |
 | A09 — Logging & Monitoring Failures | Logs estruturados de erro de API | 🔵 |
 | A10 — SSRF | N/A no escopo atual (sem fetch de URLs arbitrárias do usuário) | — |
@@ -751,6 +820,9 @@ graph LR
 | **httpOnly Cookie** | Cookie inacessível via JavaScript no navegador, mitigando roubo de token via XSS |
 | **Sandbox / Test Mode** | Ambiente de um serviço externo (ex.: gateway de pagamento) que simula o comportamento real sem mover dinheiro/dados reais, usado para desenvolvimento e testes |
 | **Webhook** | Chamada HTTP assíncrona feita por um serviço externo (ex.: gateway de pagamento) para notificar o sistema sobre um evento (ex.: pagamento confirmado) |
+| **OAuth 2.0** | Protocolo padrão de autorização delegada; usado para permitir que o Google confirme a identidade do usuário sem que o sistema veja a senha da conta Google |
+| **OpenID Connect (OIDC)** | Camada de identidade construída sobre o OAuth 2.0; é o que permite obter o `id_token` com dados verificados do usuário (e-mail, nome, `sub`) |
+| **PKCE (Proof Key for Code Exchange)** | Extensão de segurança do OAuth 2.0 que impede interceptação do código de autorização durante a troca por token |
 
 ---
 
