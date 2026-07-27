@@ -9,11 +9,12 @@ import { loginSchema, registerSchema } from '../schemas/authSchemas.js'
 import { createProductsSchema } from '../schemas/products.schemas.js'
 import { cartItemSchema } from '../schemas/cartItemSchema.js'
 import { uploadProductImage, validateImageMagicBytes } from '../middlewares/upload.js'
+import { Loginlimiter, registerLimiter } from '../middlewares/rateLimiter.js'
 
 const router = Router()
 
-router.post('/login', validateBody(loginSchema), authController.login)
-router.post('/register', validateBody(registerSchema), authController.register)
+router.post('/login', Loginlimiter, validateBody(loginSchema), authController.login)
+router.post('/register', registerLimiter, validateBody(registerSchema), authController.register)
 router.get('/me', requireAuth, authController.userAuth)
 router.post('/logout', requireAuth, clearAuthCookie, authController.logout)
 router.get('/products', authController.getProducts)

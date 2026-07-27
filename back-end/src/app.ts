@@ -1,12 +1,17 @@
-// arquivo inicial padrão do projeto
-import cors from 'cors'
+// src/app.ts
 import express from 'express'
-import { connection } from './src/db'
-import authRoutes from './src/routes/authRoutes'
+import authRoutes from './routes/authRoutes.js'
+import cors from 'cors'
+import { connection } from './db.js'
 import cookieParser from 'cookie-parser'
 
-const app = express()
+connection()
 
+// Todas as rotas de auth sob o prefixo /auth (opcional mas recomendado para fins de organização do código) ou seja, http://localhost:3000/auth/resto-da-rota
+
+export const app = express()
+
+// coors no top antes de toda resposta
 app.use(
   cors({
     origin: 'http://localhost:5173', // URL do front-end ajustar conforme necessário. Isso faz com que o navegador permita que o front-end faça requisições para o back-end mesmo estando em domínios diferentes (CORS). Vai aceitar requisições dessa origem específica, ou seja, do front-end rodando localmente na porta 5173. Se for para produção, ajuste para a URL do seu front-end em produção.
@@ -16,17 +21,10 @@ app.use(
 app.use(express.json())
 app.use(cookieParser())
 
-connection()
-
-// Todas as rotas de auth sob o prefixo /auth (opcional mas recomendado para fins de organização do código) ou seja, http://localhost:3000/auth/resto-da-rota
+// rotas só depois de todos os pipelines de middlewares globais
 app.use('/auth', authRoutes)
+// Todas as rotas de auth sob o prefixo /auth (opcional mas recomendado para fins de organização do código) ou seja, http://localhost:3000/auth/resto-da-rota
 
-// rodando o servidor
-app.listen(3000, () => {
-  console.log('Server is running on port 3000')
-})
-
-// index.ts — middlewares globais (rodam em TODA requisição)
 // app.use(cors())
 // app.use(cookieParser())
 // app.use(express.json())
