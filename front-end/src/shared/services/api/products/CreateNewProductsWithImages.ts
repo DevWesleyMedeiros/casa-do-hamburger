@@ -15,7 +15,7 @@ export const createProduct = async (
   formData.append("image", input.image);
 
   // — o Axios detecta FormData como content-type automaticamente e gera "multipart/form-data; boundary=..." sozinho
-  const { data } = await api().post<ProductResponseDTO>(
+  const { data } = await api.post<ProductResponseDTO>(
     "/auth/products",
     formData,
   );

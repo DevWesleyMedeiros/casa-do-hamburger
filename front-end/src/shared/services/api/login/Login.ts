@@ -9,10 +9,7 @@ export const LoginDate = {
   create: async (payload: LoginPayloadInterface) => {
     try {
       // POST para /auth/login (caminho relativo)
-      const { data } = await api().post(
-        "/auth/login",
-        payload,
-      );
+      const { data } = await api.post("/auth/login", payload);
       return data;
     } catch (error) {
       if (axios.isAxiosError(error)) {

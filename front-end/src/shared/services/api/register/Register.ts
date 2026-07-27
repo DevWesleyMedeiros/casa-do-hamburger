@@ -6,7 +6,7 @@ import { ApiError } from "../ApiExceptions";
 export const RegisterDate = {
   create: async (payload: RegisterPayloadInterface) => {
     try {
-      const { data } = await api().post("/auth/register", payload);
+      const { data } = await api.post("/auth/register", payload);
       return data;
     } catch (error) {
       if (axios.isAxiosError(error)) {

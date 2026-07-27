@@ -9,7 +9,7 @@ export const updateCartItemQuantity = {
     quantity: number,
   ): Promise<CartItemType | ApiError> => {
     try {
-      const { data } = await api().patch(`/auth/cart-item/${cartItemId}`, {
+      const { data } = await api.patch(`/auth/cart-item/${cartItemId}`, {
         quantity,
       });
       return data;

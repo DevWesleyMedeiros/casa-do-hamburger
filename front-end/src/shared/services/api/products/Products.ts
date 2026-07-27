@@ -10,7 +10,7 @@ export const getProductsData = {
   getProducts: async (): Promise<ProductsInterface[]> => {
     try {
       // GET para /auth/products (caminho relativo)
-      const response = await api().get("/auth/products");
+      const response = await api.get("/auth/products");
       return response.data ?? [];
       // [] garante array vazio se a API retornar null/undefined
     } catch (error: unknown) {
