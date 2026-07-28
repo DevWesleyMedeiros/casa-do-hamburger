@@ -10,9 +10,7 @@ export const deleteProductById = {
     // retorno aqui é um objeto message: "produto deletado com sucesso" ou uma instância de ApiError
     try {
       // id vem como params
-      const response = await api().delete(
-        `/auth/products/${id}`,
-      );
+      const response = await api.delete(`/auth/products/${id}`);
       // já tenho o date do produto, portanto só o retorno
       return response.data;
     } catch (error) {

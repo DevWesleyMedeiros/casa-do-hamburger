@@ -8,7 +8,7 @@ export const deleteCartItem = {
     cartItemId: string,
   ): Promise<{ message: string } | ApiError> => {
     try {
-      const response = await api().delete(
+      const response = await api.delete(
         `/auth/cart-item/${cartItemId}`,
       );
       return response.data;
