@@ -9,12 +9,16 @@ import { loginSchema, registerSchema } from '../schemas/authSchemas.js'
 import { createProductsSchema } from '../schemas/products.schemas.js'
 import { cartItemSchema } from '../schemas/cartItemSchema.js'
 import { uploadProductImage, validateImageMagicBytes } from '../middlewares/upload.js'
-import { Loginlimiter, registerLimiter } from '../middlewares/rateLimiter.js'
+import { loginLimiter, registerLimiter } from '../middlewares/rateLimiter.js'
 
 const router = Router()
 
-router.post('/login', Loginlimiter, validateBody(loginSchema), authController.login)
-router.post('/register', registerLimiter, validateBody(registerSchema), authController.register)
+// Ordem intencional: valida Zod ANTES de gastar cota do rate limiter.
+// Assim, payloads inválidos (formato de email errado, campos faltando etc.)
+// são rejeitados sem incrementar contador, evitando DoS de validação e
+// bloqueios injustos de usuários legítimos que só erraram o formato.
+router.post('/login', validateBody(loginSchema), loginLimiter, authController.login)
+router.post('/register', validateBody(registerSchema), registerLimiter, authController.register)
 router.get('/me', requireAuth, authController.userAuth)
 router.post('/logout', requireAuth, clearAuthCookie, authController.logout)
 router.get('/products', authController.getProducts)
