@@ -11,6 +11,12 @@ connection()
 
 export const app = express()
 
+// ⚠️ OBRIGATÓRIO para Railway/Vercel e qualquer proxy reverso
+// Confia nos headers X-Forwarded-* enviados por 1 camada de proxy (load balancer)
+// Sem isto, `req.ip` retorna o IP interno do Railway, não o IP real do cliente,
+// e o rate limiting torna-se completamente ineficaz (todos contam como 1 origem).
+app.set('trust proxy', 1)
+
 // coors no top antes de toda resposta
 app.use(
   cors({
