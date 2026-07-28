@@ -17,7 +17,7 @@ beforeEach(() => {
   registerLimiterTargetedStore.resetAll()
 })
 
-// teste para requisições dentro da janela e tentativas
+// teste para requisições dentro da janela e tentativas (loginLimiter)
 describe('Rate limiter - POST /auth/login (RF-12 / RNF-06)', () => {
   it('deve permitir até 5 tentativas dentro da janela de 15 minutos', async () => {
     const email = faker.internet.email()
@@ -32,11 +32,11 @@ describe('Rate limiter - POST /auth/login (RF-12 / RNF-06)', () => {
   // Testando o TARGETED (loginLimiter)
   it('deve bloquear (Targeted) com 429 a partir da 6ª tentativa para o MESMO e-mail', async () => {
     const email = faker.internet.email()
-
     // Esgota o limite do Targeted (5)
     for (let i = 0; i < 5; i++) {
       await request(app).post('/auth/login').send({ email, password: 'x' })
     }
+    // req de 6° tentiva para forçar o estouro de limite
     const response = await request(app).post('/auth/login').send({ email, password: 'x' })
 
     expect(response.status).toBe(429)
@@ -49,9 +49,10 @@ describe('Rate limiter - POST /auth/login (RF-12 / RNF-06)', () => {
   it('deve bloquear (Broad) com 429 a partir da 21ª tentativa da mesma origem, com e-mails DIFERENTES', async () => {
     // Esgota o limite Broad (20), mas desvia do Targeted mudando o e-mail sempre
     for (let i = 0; i < 20; i++) {
-      await request(app).post('/auth/login').send({ email: faker.internet.email(), password: 'x' }) // E-mail único a cada vez
+      await request(app).post('/auth/login').send({ email: faker.internet.email(), password: 'x' }) // E-mail único a cada vez, a cada iteração com se fosse tentativas de login
     }
 
+    // última requisição para forçar no estouro de broad
     const response = await request(app)
       .post('/auth/login')
       .send({ email: faker.internet.email(), password: 'x' })
@@ -110,7 +111,7 @@ describe('Rate limiter - POST /auth/register (RF-12 / RNF-06)', () => {
     expect(res.body.status).toBe(429)
   })
 
-  // ⚠️ MÉDIA (5) — Teste do BROAD de registro (antes não existia)
+  // Teste do BROAD de registro 
   it('deve bloquear (Broad) com 429 a partir da 11ª tentativa de registro, e-mails DIFERENTES, mesma origem', async () => {
     const dadosBase = { password: 'SenhaForte123!', name: 'Teste', cep: '12345-678' }
 
@@ -132,13 +133,11 @@ describe('Rate limiter - POST /auth/register (RF-12 / RNF-06)', () => {
   })
 })
 
-// ⚠️ MÉDIA (6) — Confirma que rate limit é só em /login e /register, NÃO no resto de /auth
+// Confirma que rate limit é só em /login e /register, NÃO no resto de /auth
 describe('Rate limiter — escopo correto: APENAS /login e /register (RNF-06)', () => {
   it('NÃO aplica rate limiter em /auth/products mesmo após 25 requisições da mesma origem', async () => {
-    // Passa do limite Broad de login (20) para garantir que se o limiter estivesse
-    // aplicado globalmente retornaria 429. Se a rota estiver fora do limiter,
-    // vai retornar o status de negócio dela (404/200 — o que vier do controller)
-    // e NUNCA 429.
+    // Passa do limite Broad de login (20) para garantir que se o limiter estivesse aplicado globalmente retornaria 429. 
+    // Se a rota estiver fora do limiter, vai retornar o status de negócio dela (404/200 — o que vier do controller) e NUNCA 429.
     for (let i = 0; i < 25; i++) {
       const res = await request(app).get('/auth/products')
       expect(res.status).not.toBe(429)
@@ -148,7 +147,7 @@ describe('Rate limiter — escopo correto: APENAS /login e /register (RNF-06)', 
   it('NÃO aplica rate limiter em /auth/me (rota protegida sem credencial → 401 mas nunca 429)', async () => {
     for (let i = 0; i < 30; i++) {
       const res = await request(app).get('/auth/me')
-      // /me retorna 401 por falta de cookie de auth — o importante é NÃO ser 429
+      // me retorna 401 por falta de cookie de auth — o importante é NÃO ser 429
       expect(res.status).not.toBe(429)
       expect(res.status).toBe(401)
     }

@@ -3,8 +3,8 @@
 > **Tipo de documento:** Especificação de Requisitos + Regras de Negócio (BRD/SRS)
 > **Projeto:** Casa do Hambúrguer — Sistema de Pedidos para Hamburgueria (E-commerce de Food Service)
 > **Natureza:** Boilerplate reutilizável para aplicações de e-commerce/pedidos
-> **Versão:** 1.2.0
-> **Status:** Documento vivo — Proposta de Login via Google OAuth 2.0 incorporada (Seções 3.1, 4, 5, 6.1, 6.2, 7, 9)
+> **Versão:** 1.3.0
+> **Status:** Documento vivo — Rate limiting em rotas de autenticação concluído (RF-12, RNF-06); Proposta de Login via Google OAuth 2.0 incorporada (Seções 3.1, 4, 5, 6.1, 6.2, 7, 9)
 
 ---
 
@@ -30,6 +30,7 @@ Selos de status:
 | 1.0.0 | 19/07/2026 | Documento inicial, gerado por engenharia reversa de requisitos |
 | 1.1.0 | 20/07/2026 | Seção 12 (pontos em aberto) respondida pelo mantenedor; adicionado Módulo de Pagamento (3.6/6.9); adicionadas roles futuras `ATTEND`/`DELIVER`; adicionadas Seção 14 (Estratégia de Testes) e Seção 15 (Governança e Gatilhos de Code Review) |
 | 1.2.0 | 25/07/2026 | Proposta (🔵) de login via **Google OAuth 2.0** como alternativa ao login local: RF-51 a RF-55 (3.1), RNF-23 a RNF-25 (4), US-11 (5), RN-AUTH-08 a RN-AUTH-12 (6.1), RN-CRYPT-05 (6.2); ERD atualizado com `provider`/`providerId`/`emailVerified` e `passwordHash` opcional (7); novo diagrama de sequência 9.3; ver **ADR-0003** (a ser criada, registro da decisão arquitetural) |
+| 1.3.0 | 28/07/2026 | **RF-12** e **RNF-06** concluídos (🟡→🟢): implementado rate limiting em duas camadas (broad por IP + targeted por IP/e-mail) nas rotas `/auth/login` e `/auth/register`, com `trust proxy` configurado para o proxy reverso da Railway e cobertura de testes de integração (Vitest + Supertest). Corrigida, na mesma branch, uma violação pré-existente de **US-02**: o serviço de login retornava mensagens distintas para "e-mail não encontrado" e "senha incorreta", permitindo enumeração de usuários — unificado para uma mensagem genérica ("Credenciais inválidas"), conforme já previsto na nota de segurança da própria US-02 |
 
 ---
 
@@ -100,7 +101,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | RF-09 | O sistema deve permitir recuperação de senha via e-mail (fluxo "esqueci minha senha") | 🔵 |
 | RF-10 | O sistema deve permitir edição de dados de perfil (nome, e-mail, avatar) | 🔵 |
 | RF-11 | O sistema deve suportar renovação de token via refresh token (rotação de sessão) | 🔵 |
-| RF-12 | O sistema deve registrar tentativas de login falhas para fins de rate limiting sem persistência auditável | 🟡 |
+| RF-12 | O sistema deve registrar tentativas de login falhas para fins de rate limiting sem persistência auditável | 🟢 |
 | RF-51 🆕 | O sistema deve permitir login/cadastro via **Google OAuth 2.0** ("Entrar com Google") como alternativa ao login local por e-mail/senha | 🔵 |
 | RF-52 🆕 | O backend deve verificar o `id_token` retornado pelo Google (assinatura, `aud`, `iss`, `exp`) antes de criar qualquer sessão — nunca confiar em dados de identidade enviados diretamente pelo frontend | 🔵 |
 | RF-53 🆕 | Contas criadas via Google devem ser persistidas com `provider=GOOGLE` e `password` nulo; contas locais mantêm `provider=LOCAL` | 🔵 |
@@ -189,7 +190,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | RNF-03 | Segurança | Uploads devem ser validados por assinatura binária (magic bytes), não apenas extensão | 🟢 |
 | RNF-04 | Segurança | Toda entrada de API deve ser validada via schema (Zod) antes de tocar a camada de serviço | 🟢 |
 | RNF-05 | Segurança | Rotas administrativas nunca devem vazar para operações de usuário comum (e vice-versa) | 🟢 |
-| RNF-06 | Segurança | Rate limiting em rotas de autenticação | 🟡 |
+| RNF-06 | Segurança | Rate limiting em rotas de autenticação | 🟢 |
 | RNF-07 | Segurança | Proteção CSRF para rotas mutáveis expostas a cookies | 🔵 |
 | RNF-08 | Segurança | Cabeçalhos de segurança HTTP (Helmet: CSP, HSTS, X-Frame-Options) | 🔵 |
 | RNF-09 | Performance | Imagens devem ser servidas em tamanho adequado ao contexto via transformação de URL (CDN) | 🟢 |
@@ -234,6 +235,8 @@ Quando informo credenciais incorretas, então recebo uma mensagem genérica de e
 ```
 
 > 🔒 Nota de segurança: a mensagem de erro de login **não deve diferenciar** "e-mail não encontrado" de "senha incorreta" — isso evita enumeração de usuários (OWASP A07).
+
+> ✅ **Atualização (28/07/2026):** esta nota de segurança era apenas especificada, mas não estava sendo cumprida — `authService.login` retornava `404` para e-mail inexistente e `401` para senha incorreta, permitindo enumeração. Corrigido junto com a entrega de RF-12/RNF-06: agora ambos os casos retornam `401` com a mensagem genérica "Credenciais inválidas".
 
 ### US-03 — Adicionar produto ao carrinho 🟢
 **Como** cliente autenticado, **eu quero** adicionar um hambúrguer ao carrinho, **para que** eu possa comprá-lo depois.
@@ -784,7 +787,7 @@ graph LR
 | A03 — Injection | Prisma (queries parametrizadas) + Zod na entrada | 🟢 |
 | A04 — Insecure Design | Snapshot Pattern em pedidos; total recalculado no backend | 🔵 |
 | A05 — Security Misconfiguration | Helmet, CSP, variáveis de ambiente sem hardcode | 🟢 |
-| A07 — Identification/Auth Failures | Mensagens de erro genéricas no login; rate limiting; verificação de `id_token` no login via Google (RN-AUTH-08/09) | 🟡 |
+| A07 — Identification/Auth Failures | Mensagens de erro genéricas no login (🟢); rate limiting em rotas de autenticação (🟢, RNF-06); verificação de `id_token` no login via Google (🔵, RN-AUTH-08/09) | 🟡 |
 | A08 — Software and Data Integrity | Magic bytes na validação de upload | 🟢 |
 | A09 — Logging & Monitoring Failures | Logs estruturados de erro de API | 🔵 |
 | A10 — SSRF | N/A no escopo atual (sem fetch de URLs arbitrárias do usuário) | — |

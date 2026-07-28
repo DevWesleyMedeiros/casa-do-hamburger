@@ -1,17 +1,17 @@
 // src/app.ts
-import express from 'express'
-import authRoutes from './routes/authRoutes.js'
-import cors from 'cors'
-import { connection } from './db.js'
 import cookieParser from 'cookie-parser'
+import cors from 'cors'
+import express from 'express'
+import { connection } from './db.js'
+import authRoutes from './routes/authRoutes.js'
 
+// conection linka o backend com o banco de dados. Deve ser a primeira linha
 connection()
 
-// Todas as rotas de auth sob o prefixo /auth (opcional mas recomendado para fins de organização do código) ou seja, http://localhost:3000/auth/resto-da-rota
-
 export const app = express()
+app.disable('x-powered-by') // desabilita o header X-Powered-By, que contém a versão do Express usado para evitar ataques de informação
 
-// ⚠️ OBRIGATÓRIO para Railway/Vercel e qualquer proxy reverso
+// TRUST PROXY OBRIGATÓRIO para Railway/Vercel e qualquer proxy reverso
 // Confia nos headers X-Forwarded-* enviados por 1 camada de proxy (load balancer)
 // Sem isto, `req.ip` retorna o IP interno do Railway, não o IP real do cliente,
 // e o rate limiting torna-se completamente ineficaz (todos contam como 1 origem).
@@ -29,7 +29,7 @@ app.use(cookieParser())
 
 // rotas só depois de todos os pipelines de middlewares globais
 app.use('/auth', authRoutes)
-// Todas as rotas de auth sob o prefixo /auth (opcional mas recomendado para fins de organização do código) ou seja, http://localhost:3000/auth/resto-da-rota
+// Todas as rotas de auth sob o prefixo /auth (opcional, mas recomendado para fins de organização do código), ou seja, http://localhost:3000/auth/resto-da-rota
 
 // app.use(cors())
 // app.use(cookieParser())

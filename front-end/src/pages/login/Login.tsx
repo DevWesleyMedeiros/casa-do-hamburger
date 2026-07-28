@@ -74,7 +74,7 @@ export const Login = () => {
 
   return (
     <form
-      className="bg-brand-dark flex h-screen items-center justify-center"
+      className="bg-brand-dark flex h-screen w-screen items-center justify-center"
       onSubmit={handleSubmit(onSubmit)} // ← Zod valida antes de chamar onSubmit
     >
       <div className="justify-left flex flex-col items-center gap-2 rounded-xl border-[0.5px] border-white/13 p-7">
@@ -137,7 +137,7 @@ export const Login = () => {
 
             {/* erro vindo do backend */}
             {backendError && (
-              <p className="text-left text-sm font-bold text-red-500">
+              <p className="w-80 text-left text-sm font-bold text-red-500">
                 {backendError}
               </p>
             )}
