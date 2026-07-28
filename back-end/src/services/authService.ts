@@ -8,13 +8,17 @@ export const authService = {
   login: async (email: string, password: string) => {
     const user = await userRepository.findByEmail(email)
 
-    if (!user) {
-      throw new AppError(404, 'Usuário não encontrado')
-    }
-    const passwordMatch = await compare(password, user.password)
+    // OWASP A07 + US-02 (🔒 nota de segurança no REGRAS_DE_NEGOCIO):
+    // NÃO diferenciar "usuário não existe" de "senha errada" — evita enumeração.
+    // Compara o hash mesmo sem usuário para equalizar tempo de resposta
+    // (senão atacante distingue os dois casos por timing: bcrypt ~200ms vs instantâneo).
+    const dummyHash = '$2b$10$ABCDEFGHIJKLMNOPQRSTUvwxyz1234567890abcdefghijklmnop'
+    const passwordMatch = user
+      ? await compare(password, user.password)
+      : await compare(password, dummyHash)
 
-    if (!passwordMatch) {
-      throw new AppError(401, 'Senha incorreta')
+    if (!user || !passwordMatch) {
+      throw new AppError(401, 'Credenciais inválidas')
     }
     const tokenPayload = {
       id: user.id,
