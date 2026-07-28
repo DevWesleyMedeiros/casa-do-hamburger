@@ -7,7 +7,7 @@ import { type UserLogin } from "../../../../types/Payload";
 // tanktack já lida com try e catch nas requisições
 export const getAuth = {
   getMe: async (): Promise<UserLogin | undefined> => {
-    const response = await api().get("/auth/me");
+    const response = await api.get("/auth/me");
     return response.data.user ?? [];
   },
 };

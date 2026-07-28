@@ -13,10 +13,7 @@ export const NewCartItem = {
     payload: CreateCartItemPayload,
   ): Promise<CartItemType | ApiError> => {
     try {
-      const { data } = await api().post(
-        "/auth/create-cart-item",
-        payload,
-      );
+      const { data } = await api.post("/auth/create-cart-item", payload);
       return data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
