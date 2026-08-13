@@ -16,7 +16,7 @@ no mesmo commit (ver Seção 15 — Governança e Gatilhos de Revisão).
 Selos de status:
 
 | Selo | Significado |
-|---|---|
+| --- | --- |
 | 🟢 **Implementado** | Já existe no código, confirmado pelo mantenedor |
 | 🟡 **Em andamento** | Parcialmente implementado ou próximo passo imediato do backlog |
 | 🔵 **Proposto (MVP+)** | Sugestão de arquiteto para o boilerplate ficar completo |
@@ -26,7 +26,7 @@ Selos de status:
 ## 📋 Changelog
 
 | Versão | Data | Mudança |
-|---|---|---|
+| --- | --- | --- |
 | 1.0.0 | 19/07/2026 | Documento inicial, gerado por engenharia reversa de requisitos |
 | 1.1.0 | 20/07/2026 | Seção 12 (pontos em aberto) respondida pelo mantenedor; adicionado Módulo de Pagamento (3.6/6.9); adicionadas roles futuras `ATTEND`/`DELIVER`; adicionadas Seção 14 (Estratégia de Testes) e Seção 15 (Governança e Gatilhos de Code Review) |
 | 1.2.0 | 25/07/2026 | Proposta (🔵) de login via **Google OAuth 2.0** como alternativa ao login local: RF-51 a RF-55 (3.1), RNF-23 a RNF-25 (4), US-11 (5), RN-AUTH-08 a RN-AUTH-12 (6.1), RN-CRYPT-05 (6.2); ERD atualizado com `provider`/`providerId`/`emailVerified` e `passwordHash` opcional (7); novo diagrama de sequência 9.3; ver **ADR-0003** (a ser criada, registro da decisão arquitetural) |
@@ -39,7 +39,7 @@ Selos de status:
 ### 1.1 Elevator Pitch
 
 > "Casa do Hambúrguer é uma plataforma web de pedidos para uma hamburgueria, onde clientes
-> navegam pelo cardápio, montam um carrinho, finalizam pedidos e acompanham seu status 
+> navegam pelo cardápio, montam um carrinho, finalizam pedidos e acompanham seu status
 > enquanto administradores gerenciam o catálogo de produtos e o fluxo operacional dos pedidos."
 
 ### 1.2 Objetivo de Negócio
@@ -50,7 +50,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 ### 1.3 Stack Tecnológica 🟢
 
 | Camada | Tecnologias |
-|---|---|
+| --- | --- |
 | **Frontend** | React, TypeScript, Vite, Tailwind CSS v4, Zustand, TanStack Query, React Hook Form, Zod, Axios, Sonner |
 | **Backend** | Node.js, Express, Bun (runtime/tooling), Prisma ORM, Zod, JWT (`jose`), bcrypt |
 | **Banco de Dados** | PostgreSQL (hospedado na Neon) |
@@ -61,7 +61,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 ### 1.4 Identidade Visual 🟢
 
 | Token | Cor | Uso |
-|---|---|---|
+| --- | --- | --- |
 | `--color-bg` | `#161410` | Fundo (tema escuro) |
 | `--color-primary` | `#C41E00` | Ação primária / destaque (vermelho hambúrguer) |
 | `--color-accent` | `#F2DAAC` | Texto/detalhes (tom pão brioche) |
@@ -71,7 +71,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 ## 2. Stakeholders e Personas
 
 | Persona | Papel | Objetivo Principal | Status |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **Cliente (Guest)** | Visitante não autenticado | Navegar pelo cardápio, decidir se cria conta | 🟢 |
 | **Cliente (Customer)** | Usuário autenticado, role `USER` | Montar carrinho, finalizar pedido, acompanhar status | 🟢 |
 | **Administrador** | Usuário autenticado, role `ADMIN` | Gerenciar produtos, visualizar/gerenciar todos os pedidos | 🟢 |
@@ -89,7 +89,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 ### 3.1 Módulo de Autenticação e Conta
 
 | ID | Requisito | Status |
-|---|---|---|
+| --- | --- | --- |
 | RF-01 | O sistema deve permitir cadastro de novo usuário com nome, e-mail e senha | 🟢 |
 | RF-02 | A senha deve ser armazenada apenas como hash (bcrypt), nunca em texto puro | 🟢 |
 | RF-03 | O sistema deve permitir login via e-mail e senha | 🟢 |
@@ -111,7 +111,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 ### 3.2 Módulo de Catálogo de Produtos
 
 | ID | Requisito | Status |
-|---|---|---|
+| --- | --- | --- |
 | RF-13 | O sistema deve listar produtos disponíveis publicamente (sem autenticação) | 🟢 |
 | RF-14 | Apenas administradores podem criar produtos (`POST /products`, rota protegida) | 🟢 |
 | RF-15 | Um produto pode ter múltiplas imagens, armazenadas em tabela relacional `ProductsImage` | 🟢 |
@@ -128,7 +128,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 ### 3.3 Módulo de Carrinho
 
 | ID | Requisito | Status |
-|---|---|---|
+| --- | --- | --- |
 | RF-23 | Usuário autenticado pode adicionar produto ao carrinho | 🟢 |
 | RF-24 | Usuário pode atualizar a quantidade de um item via `PATCH /cart-item/:cartItemId` | 🟢 |
 | RF-25 | Adicionar um produto já existente no carrinho deve incrementar a quantidade (não duplicar linha) via upsert de chave composta `userId_productId` | 🟢 |
@@ -142,7 +142,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 ### 3.4 Módulo de Pedidos (Orders)
 
 | ID | Requisito | Status |
-|---|---|---|
+| --- | --- | --- |
 | RF-32 | O sistema deve permitir converter um carrinho em um pedido (`Order`) | 🔵 |
 | RF-33 | Cada item do pedido (`OrderItem`) deve gravar uma **cópia (snapshot)** dos dados do produto no momento da compra (nome, preço, imagem) — *Snapshot Pattern* | 🔵 |
 | RF-34 | Pedidos devem ter um campo de status: `PENDING`, `PREPARING`, `READY`, `DELIVERED`, `CANCELLED` | 🔵 |
@@ -154,13 +154,13 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | RF-40 | Sistema deve suportar cancelamento de pedido pelo cliente, respeitando janela de tempo/status | 🔵 |
 
 > ✅ **Confirmado (Seção 12, pergunta 3):** os cinco status permanecem exatamente `PENDING/PREPARING/READY/DELIVERED/CANCELLED`,
-> `ATTEND`/`DELIVER` roles futuras. 
+> `ATTEND`/`DELIVER` roles futuras.
 > A proposta de mapeamento role↔status está na Seção 6.3 (RN-RBAC-08).
 
 ### 3.5 Módulo Administrativo
 
 | ID | Requisito | Status |
-|---|---|---|
+| --- | --- | --- |
 | RF-41 | Rotas administrativas devem ser protegidas por middleware `requiredAdmin` | 🟢 |
 | RF-42 | Painel administrativo deve permitir CRUD completo de produtos | 🟢 |
 | RF-43 | Painel administrativo deve permitir gestão de pedidos (Kanban de status) | 🟢 |
@@ -172,7 +172,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 > Módulo novo nesta versão — não existia na v1.0.0. Nasce das respostas à perguntas 2 da Seção 12 original.
 
 | ID | Requisito | Status |
-|---|---|---|
+| --- | --- | --- |
 | RF-46 | O sistema deve simular a etapa de pagamento no fluxo de checkout, sem processar transação financeira real | 🔵 |
 | RF-47 | O sistema deve integrar um gateway de pagamento real (ex.: Stripe) para processar cobranças de verdade | 🔵 |
 | RF-48 | O sistema **nunca** deve armazenar dados sensíveis de cartão (PAN, CVV) no próprio banco — toda tokenização deve ocorrer no gateway (escopo PCI-DSS minimizado) | 🔵 |
@@ -184,7 +184,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 ## 4. Requisitos Não Funcionais (RNF)
 
 | ID | Categoria | Requisito | Status |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | RNF-01 | Segurança | Senhas devem usar bcrypt com salt rounds ≥ 10 | 🟢 |
 | RNF-02 | Segurança | Sessão via JWT em cookie `httpOnly`, `secure`, `sameSite` correto por ambiente | 🟢 |
 | RNF-03 | Segurança | Uploads devem ser validados por assinatura binária (magic bytes), não apenas extensão | 🟢 |
@@ -218,6 +218,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 Formato: `Como <persona>, eu quero <ação>, para que <benefício>` + Critérios de Aceite (Gherkin).
 
 ### US-01 — Cadastro de conta 🟢
+
 **Como** visitante, **eu quero** criar uma conta com e-mail e senha, com no mínimo 9 caracteres **para que** eu possa fazer pedidos.
 
 ```gherkin
@@ -227,6 +228,7 @@ e confirmo o cadastro. Então, minha conta é criada com a senha armazenada como
 ```
 
 ### US-02 — Login 🟢
+
 **Como** cliente cadastrado, **eu quero** logar com e-mail e senha, **para que** eu acesse minha conta.
 
 ```gherkin
@@ -239,6 +241,7 @@ Quando informo credenciais incorretas, então recebo uma mensagem genérica de e
 > ✅ **Atualização (28/07/2026):** esta nota de segurança era apenas especificada, mas não estava sendo cumprida — `authService.login` retornava `404` para e-mail inexistente e `401` para senha incorreta, permitindo enumeração. Corrigido junto com a entrega de RF-12/RNF-06: agora ambos os casos retornam `401` com a mensagem genérica "Credenciais inválidas".
 
 ### US-03 — Adicionar produto ao carrinho 🟢
+
 **Como** cliente autenticado, **eu quero** adicionar um hambúrguer ao carrinho, **para que** eu possa comprá-lo depois.
 
 ```gherkin
@@ -251,6 +254,7 @@ Então a quantidade do item existente é incrementada, sem duplicar a linha
 ```
 
 ### US-04 — Atualizar quantidade no carrinho 🟢
+
 **Como** cliente, **eu quero** alterar a quantidade de um item no carrinho, **para que** eu possa ajustar meu pedido antes de finalizar.
 
 ```gherkin
@@ -265,6 +269,7 @@ E uma notificação de erro é exibida
 ```
 
 ### US-05 — Finalizar pedido 🔵
+
 **Como** cliente, **eu quero** finalizar meu carrinho como um pedido, **para que** a hamburgueria comece a prepará-lo.
 
 ```gherkin
@@ -278,6 +283,7 @@ E a etapa de pagamento é simulada (RF-46), sem cobrança real
 ```
 
 ### US-06 — Administrador cadastra produto 🟢
+
 **Como** administrador, **eu quero** cadastrar um novo produto com imagem, **para que** ele apareça no cardápio.
 
 ```gherkin
@@ -292,6 +298,7 @@ Então a API retorna 403 Forbidden
 ```
 
 ### US-07 — Administrador gerencia status de pedidos 🔵
+
 **Como** administrador, **eu quero** alterar o status de um pedido, **para que** o cliente saiba o andamento.
 
 ```gherkin
@@ -302,6 +309,7 @@ E a alteração é refletida na listagem em tempo real (revalidação de query)
 ```
 
 ### US-08 — Cliente acompanha pedido 🔵
+
 **Como** cliente, **eu quero** ver o status atual do meu pedido, **para que** eu saiba quando retirar/receber.
 
 ```gherkin
@@ -312,6 +320,7 @@ E vejo o status atual e o histórico de itens (snapshot no momento da compra)
 ```
 
 ### US-09 — Atendente avança o pedido na cozinha 🔵 *(role futura `ATTEND`)*
+
 Como atendente, quero marcar um pedido como "em preparo" e, depois, "pronto", para que o fluxo da cozinha fique visível para todos.
 
 ```gherkin
@@ -323,6 +332,7 @@ E eu NÃO tenho acesso às rotas de gestão de catálogo (criar/editar/excluir p
 ```
 
 ### US-10 — Entregador finaliza a entrega 🔵 *(role futura `DELIVER`)*
+
 **Como** entregador, **eu quero** ver os pedidos com status "READY", **para que** eu saiba o que retirar para entrega.
 
 ```gherkin
@@ -334,6 +344,7 @@ E NÃO posso alterar para nenhum outro status
 ```
 
 ### US-11 — Login via Google 🔵 🆕
+
 **Como** visitante, **eu quero** entrar com minha conta Google, **para que** eu não precise criar nem lembrar de mais uma senha.
 
 ```gherkin
@@ -359,7 +370,7 @@ Então o vínculo automático NÃO ocorre, e o sistema orienta o usuário a conf
 ### 6.1 Autenticação, Cookies e Tokenização 🟢 / 🔵
 
 | Regra | Descrição |
-|---|---|
+| --- | --- |
 | RN-AUTH-01 🟢 | Senha nunca trafega nem é armazenada em texto puro — hash bcrypt (custo ≥ 10) antes de qualquer persistência |
 | RN-AUTH-02 🟢 | Sessão é representada por JWT assinado com `jose`, contendo `sub` (userId) e `role`, com expiração curta (ex.: 15min–1h) |
 | RN-AUTH-03 🟢 | O JWT é entregue exclusivamente via cookie `httpOnly` + `secure` (produção) — nunca em `localStorage`/`sessionStorage`, para mitigar roubo via XSS |
@@ -376,7 +387,7 @@ Então o vínculo automático NÃO ocorre, e o sistema orienta o usuário a conf
 ### 6.2 Criptografia de Senhas 🟢
 
 | Regra | Descrição |
-|---|---|
+| --- | --- |
 | RN-CRYPT-01 🟢 | Algoritmo: `bcrypt`, fator de custo mínimo 10 (idealmente 12 em produção) |
 | RN-CRYPT-02 🟢 | Comparação de senha usa `bcrypt.compare`, nunca comparação manual de hash |
 | RN-CRYPT-03 🟢 | Senha nunca é incluída em nenhum payload de resposta da API (ver DTOs, Seção 6.5) |
@@ -386,7 +397,7 @@ Então o vínculo automático NÃO ocorre, e o sistema orienta o usuário a conf
 ### 6.3 Gerenciamento de Roles (RBAC) 🟢 (atual) + 🔵 (futuro)
 
 | Regra | Descrição | Status |
-|---|---|---|
+| --- | --- | --- |
 | RN-RBAC-01 | Papéis suportados hoje: `USER` (padrão) e `ADMIN` | 🟢 |
 | RN-RBAC-02 | Role é definida no banco (`User.role`) e embutida no payload do JWT no login | 🟢 |
 | RN-RBAC-03 | Middleware `requiredAdmin` verifica `req.user.role === 'ADMIN'`; qualquer outra role recebe `403 Forbidden` | 🟢 |
@@ -433,7 +444,7 @@ Requisição HTTP
 ```
 
 | Camada | Responsabilidade | Não deve fazer |
-|---|---|---|
+| --- | --- | --- |
 | **Routes** | Mapear método+path → controller, aplicar middlewares | Lógica de negócio |
 | **Controllers** | Ler `req`, chamar service, formatar `res` | Acessar Prisma diretamente |
 | **Services** | Regras de negócio, transações, orquestração entre repositórios | Conhecer `req`/`res` do Express |
@@ -443,7 +454,7 @@ Requisição HTTP
 ### 6.5 DTO e Serialização de Dados 🟢 / 🟡 / 🔵
 
 | Regra | Descrição |
-|---|---|
+| --- | --- |
 | RN-DTO-01 🔵 | Toda resposta de API que envolve `User` deve passar por um mapper que remove `password` (hash) do payload — nunca confiar no Prisma `select` implícito |
 | RN-DTO-02 🟢 | Entrada de dados (`request body`) é validada com **schemas Zod dedicados por rota** (ex.: `createUserSchema`, `createOrderSchema`), nunca reaproveitando o schema do banco |
 | RN-DTO-03 🟡 | Saída de dados usa **DTOs explícitos** (ex.: `UserResponseDTO`, `ProductResponseDTO`, `OrderResponseDTO`) — desacopla o formato de API do schema interno do Prisma |
@@ -473,17 +484,17 @@ type UserResponseDTO = {
 ### 6.6 Persistência de Dados 🟢 / 🔵
 
 | Regra | Descrição |
-|---|---|
+| --- | --- |
 | RN-DATA-01 🟢 | ORM: Prisma sobre PostgreSQL (Neon) |
 | RN-DATA-02 🟢 | Alterações de schema **sempre** via `prisma migrate dev` (nunca `db push` fora do ambiente local de prototipagem) — garante histórico auditável de migrations |
 | RN-DATA-03 🟢 | Chaves compostas únicas para evitar duplicidade lógica (ex.: `@@unique([userId, productId])` em `CartItem`) |
-| RN-DATA-04 🔵| Operações que afetam múltiplas tabelas de forma atômica (ex.: finalizar pedido = criar Order + OrderItems + esvaziar Cart) devem usar `prisma.$transaction([...])` |
+| RN-DATA-04 🔵 | Operações que afetam múltiplas tabelas de forma atômica (ex.: finalizar pedido = criar Order + OrderItems + esvaziar Cart) devem usar `prisma.$transaction([...])` |
 | RN-DATA-05 🔵 | Soft delete (`deletedAt: DateTime?`) para entidades com histórico relevante (Product, User) em vez de `DELETE` físico |
 
 ### 6.7 Carrinho de Compras 🟢
 
 | Regra | Descrição |
-|---|---|
+| --- | --- |
 | RN-CART-01 🟢 | Cada usuário possui um único carrinho ativo (implícito ou explícito via `Cart` 1:1 com `User`) |
 | RN-CART-02 🟢 | Adicionar produto já presente no carrinho **incrementa** a quantidade via upsert com chave `(userId, productId)` — nunca cria linha duplicada |
 | RN-CART-03 🟢 | Quantidade mínima por item é 1; ao reduzir para 0, o item deve ser removido do carrinho |
@@ -494,7 +505,7 @@ type UserResponseDTO = {
 ### 6.8 Pedidos (Orders) — Snapshot Pattern 🔵
 
 | Regra | Descrição |
-|---|---|
+| --- | --- |
 | RN-ORDER-01 🔵 | Ao criar um pedido, cada `CartItem` gera um `OrderItem` com **cópia imutável** dos dados do produto (nome, preço unitário, URL de imagem) no momento da compra |
 | RN-ORDER-02 🔵 | Justificativa do Snapshot Pattern: se o preço ou nome do produto mudar no catálogo depois, o histórico do pedido **não pode ser afetado retroativamente** — nota fiscal/histórico é imutável |
 | RN-ORDER-03 🔵 | `Order` referencia `productId` apenas para rastreabilidade (ex.: link "ver produto"), mas os dados exibidos no pedido vêm do snapshot, nunca de um `JOIN` ao vivo com `Product` |
@@ -506,19 +517,17 @@ type UserResponseDTO = {
 ### 6.9 Pagamento (Simulado hoje, Gateway real no futuro) 🆕
 
 | Regra | Descrição | Status |
-|---|---|---|
+| --- | --- | --- |
 | RN-PAY-01 | Hoje, "pagamento" é um passo simulado do checkout — nenhuma cobrança real ocorre, nenhum dado de cartão é coletado | 🟢 |
 | RN-PAY-02 | O campo `Order.paymentStatus` (ou entidade `Payment` dedicada) deve existir independentemente do gateway, para já preparar o modelo de dados para a integração futura | 🔵 |
 | RN-PAY-03 | Quando um gateway real for integrado, o backend **nunca** deve tocar em dados brutos de cartão — apenas em tokens/IDs devolvidos pelo gateway (Stripe Elements, Checkout hospedado, etc.) | 🔵 |
 | RN-PAY-04 | Confirmação de pagamento definitiva deve vir de **webhook assíncrono** do gateway, não apenas da resposta imediata do checkout (evita fraude de "response spoofing" no client) | 🔵 |
 | RN-PAY-05 | Ambiente de desenvolvimento/portfólio deve usar exclusivamente o **modo de teste (sandbox)** do gateway escolhido — nunca chaves de produção em `.env` de exemplo ou repositório público | 🟢 |
 
-
-
 ### 6.10 Escopo e Multi-tenancy
 
 | Regra | Descrição | Status |
-|---|---|---|
+| --- | --- | --- |
 | RN-TENANT-01 | O sistema é **single-tenant**: representa uma única hamburgueria por deploy. Não há coluna `storeId`/`tenantId` em nenhuma tabela, nem isolamento de dados por loja | 🟢 |
 | RN-TENANT-02 | Caso um projeto futuro derivado deste boilerplate precise de multi-tenancy, a estratégia recomendada é **schema-per-tenant** ou coluna `tenantId` + Row-Level Security no Postgres | 🔵 |
 
@@ -603,6 +612,7 @@ erDiagram
 ```
 
 > 🔒 Notas do ERD:
+>
 > - `category` agora é um **atributo direto** de `PRODUCT` (confirmado, Seção 12), não mais uma FK "futura".
 > - `PAYMENT` é a entidade nova do Módulo de Pagamento (Seção 3.6/6.9) — hoje só o status `SIMULATED` é usado na prática.
 > - `ORDER_ITEM` **não** tem foreign key "viva" para os campos exibidos — são colunas de snapshot, mesmo mantendo `productId` como referência de rastreabilidade.
@@ -630,7 +640,7 @@ stateDiagram-v2
 **Mapeamento role → transição permitida (proposta, RN-RBAC-07/08):**
 
 | Transição | `ADMIN` | `ATTEND` (futuro) | `DELIVER` (futuro) |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `PENDING → PREPARING` | ✅ | ✅ | ❌ |
 | `PREPARING → READY` | ✅ | ✅ | ❌ |
 | `READY → DELIVERED` | ✅ | ❌ | ✅ |
@@ -730,7 +740,7 @@ sequenceDiagram
 ### 10.1 Definição de MVP (o mínimo para o boilerplate ser reutilizável)
 
 | Módulo | Escopo mínimo do MVP |
-|---|---|
+| --- | --- |
 | Auth | Cadastro, login, logout, JWT em cookie httpOnly, RBAC (USER/ADMIN) |
 | Catálogo | CRUD de produto (admin), categorias, listagem pública, upload de imagem seguro |
 | Carrinho | Adicionar/atualizar/remover item, upsert por chave composta |
@@ -743,7 +753,7 @@ sequenceDiagram
 ### 10.2 Roadmap Pós-MVP
 
 | Fase | Entregas | Prioridade sugerida |
-|---|---|---|
+| --- | --- | --- |
 | **Fase 2 — Fechar o MVP** | Finalizar fluxo de criação de pedido, máquina de estados validada no service | **Alta — próxima sprint** |
 | **Fase 3 — Robustez** | Refresh token + rotação, rate limiting, Helmet, testes automatizados (ver Seção 14) | Alta |
 | **Fase 4 — Experiência** | Notificações de status, histórico de pedidos, recuperação de senha, login via Google (RF-51 a 55, ver ADR-0003) | Média |
@@ -781,7 +791,7 @@ graph LR
 ## 11. Segurança — Checklist OWASP Aplicado ao Projeto
 
 | Risco OWASP Top 10 | Mitigação no projeto | Status |
-|---|---|---|
+| --- | --- | --- |
 | A01 — Broken Access Control | `requireAuth`/`requiredAdmin` middlewares; RN-RBAC-04 | 🟢 |
 | A02 — Cryptographic Failures | bcrypt para senha; JWT assinado; cookies httpOnly/secure | 🟢 |
 | A03 — Injection | Prisma (queries parametrizadas) + Zod na entrada | 🟢 |
@@ -800,7 +810,7 @@ graph LR
 > Mantida aqui como **registro histórico de decisão**, no espírito de um ADR resumido.
 
 | # | Pergunta original | Decisão | Onde foi aplicada |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | 1 | Roles além de USER/ADMIN? | Hoje só USER/ADMIN. `ATTEND` e `DELIVER` no roadmap, com permissões propostas | Seção 2, 6.3, 8 |
 | 2 | Gateway de pagamento pago? | Mantido simulado por ora; Stripe test mode é gratuito e é a recomendação para quando integrar de verdade | Seção 3.6, 6.9 |
 | 3 | Nomes reais do status do pedido? | Confirmado `PENDING/PREPARING/READY/DELIVERED/CANCELLED`, mantidos mesmo com roles futuras | Seção 3.4, 7, 8 |
@@ -813,7 +823,7 @@ graph LR
 ## 13. Glossário
 
 | Termo | Definição |
-|---|---|
+| --- | --- |
 | **Snapshot Pattern** | Padrão onde uma entidade histórica (ex.: item de pedido) guarda uma cópia imutável dos dados de origem no momento do evento, em vez de referenciar dados que podem mudar |
 | **DTO (Data Transfer Object)** | Objeto que define exatamente o formato de dados trafegado entre camadas/API, desacoplado do modelo de banco |
 | **RBAC (Role-Based Access Control)** | Controle de acesso baseado em papéis (roles) atribuídos ao usuário |
@@ -848,7 +858,7 @@ graph LR
 ```
 
 | Tipo | Ferramenta recomendada | O que testar aqui | Prioridade |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **Unitários** | Vitest | Regras de negócio puras e isoláveis: cálculo de total do carrinho (RN-CART-06), lógica de máquina de estados (RN-ORDER-05), validações de Zod, funções de mapeamento DTO | 🔴 Alta — comece aqui |
 | **Integração / API** | Vitest + Supertest (+ banco de teste via Docker/Testcontainers ou schema isolado na Neon) | Rotas reais ponta a ponta no backend: `POST /auth/login`, `POST /cart-item`, `POST /orders` — valida middlewares, status HTTP, formato de resposta (DTOs) | 🔴 Alta |
 | **E2E** | Playwright | Jornadas completas do usuário no navegador: cadastro→login→adicionar ao carrinho→finalizar pedido; e login admin→criar produto→ver na listagem pública | 🟡 Média — depois que unit/integração cobrirem o core |
@@ -856,7 +866,7 @@ graph LR
 ### 14.2 Complementos opcionais (não são os 3 principais, mas vale considerar depois)
 
 | Tipo extra | Quando vale a pena |
-|---|---|
+| --- | --- |
 | **Mutation Testing (Stryker)** | Depois que já existir boa cobertura — mede se os testes *realmente* pegam bugs, não só se "passam" |
 | **Testes de segurança automatizados** | Scanner de dependências vulneráveis (`npm audit`/Dependabot) no CI — barato de configurar, alto retorno |
 | **Testes de contrato de API** | Se o frontend e backend forem mantidos por pessoas/times diferentes no futuro — garante que a API não quebra o contrato esperado pelo client |
@@ -871,6 +881,7 @@ graph LR
 ### 14.4 Definition of Done (DoD) proposta
 
 Uma feature só é considerada "pronta" quando:
+
 - [ ] Regra de negócio correspondente no `REGRAS_DE_NEGOCIO.md` está com status 🟢
 - [ ] Teste unitário cobre a regra de negócio isolada (quando aplicável)
 - [ ] Teste de integração cobre a rota de API correspondente
