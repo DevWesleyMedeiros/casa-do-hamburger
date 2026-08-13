@@ -1,8 +1,8 @@
 import { compare, genSaltSync, hashSync } from 'bcrypt-ts'
 import * as jose from 'jose'
 import { getJwtSecret } from '../config/jwt.js'
-import { userRepository } from '../repositories/userRepositories.js'
 import { AppError } from '../errors/AppError.js'
+import { userRepository } from '../repositories/userRepositories.js'
 
 export const authService = {
   login: async (email: string, password: string) => {
@@ -12,7 +12,7 @@ export const authService = {
     // NÃO diferenciar "usuário não existe" de "senha errada" — evita enumeração.
     // Compara o hash mesmo sem usuário para equalizar tempo de resposta
     // (senão atacante distingue os dois casos por timing: bcrypt ~200ms vs instantâneo).
-    const dummyHash = '$2b$10$ABCDEFGHIJKLMNOPQRSTUvwxyz1234567890abcdefghijklmnop'
+    const dummyHash = '$2b$10$dXHhLJnhR70QFKD2krJlne9pU3y5gPmCvXrFXipEfaVXP2E0v1uUK'
     const passwordMatch = user
       ? await compare(password, user.password)
       : await compare(password, dummyHash)
@@ -40,7 +40,6 @@ export const authService = {
       user: { id: user.id, name: user.name, email: user.email, admin: user.admin, cep: user.cep },
     }
   },
-
   register: async (name: string, email: string, password: string, cep: string) => {
     const existing = await userRepository.findByEmail(email)
 
@@ -54,32 +53,5 @@ export const authService = {
     const newUser = await userRepository.create({ name, email, password: hashedPassword, cep })
 
     return { id: newUser.id, name: newUser.name, email: newUser.email, cep: newUser.cep }
-  },
-  products: async () => {
-    const productsDate = await userRepository.findManyProducts()
-    if (productsDate.length === 0) {
-      throw new AppError(404, 'Nenhum produto cadastrado no sistema')
-    }
-    return productsDate
-  },
-  deleteProduct: async (id: string) => {
-    const deleted = await userRepository.findProductAndDelete(id)
-    return deleted
-  },
-  findProductInCartItem: async (userId: string) => {
-    const productsFound = await userRepository.findCartItemProduct(userId)
-    return productsFound
-  },
-  addToCart: async (productId: string, userId: string) => {
-    const cartItems = await userRepository.createCartItem(productId, userId)
-    return cartItems
-  },
-  deleteCartItemById: async (cartItemId: string, userId: string) => {
-    const deleted = await userRepository.deleteCartItemById(cartItemId, userId)
-    return deleted
-  },
-  updateCartItemQuantity: async (cartItemId: string, userId: string, quantity: number) => {
-    const updated = await userRepository.updateCartItemQuantity(cartItemId, userId, quantity)
-    return updated
   },
 }

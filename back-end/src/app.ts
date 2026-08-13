@@ -3,7 +3,10 @@ import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import express from 'express'
 import { connection } from './db.js'
-import authRoutes from './routes/authRoutes.js'
+import { errorHandler } from './middlewares/errorHandler.js'
+import authRoutes from './routes/auth.routes.js'
+import cartRoutes from './routes/cart.routes.js'
+import productsRoutes from './routes/products.routes.js'
 
 // conection linka o backend com o banco de dados. Deve ser a primeira linha
 connection()
@@ -29,7 +32,11 @@ app.use(cookieParser())
 
 // rotas só depois de todos os pipelines de middlewares globais
 app.use('/auth', authRoutes)
-// Todas as rotas de auth sob o prefixo /auth (opcional, mas recomendado para fins de organização do código), ou seja, http://localhost:3000/auth/resto-da-rota
+app.use('/auth', productsRoutes)
+app.use('/auth', cartRoutes)
+
+app.use(errorHandler)
+// middleware que vai sempre por último — Express só invoca middleware de 4 parâmetros depois de todas as rotas
 
 // app.use(cors())
 // app.use(cookieParser())

@@ -8,7 +8,7 @@ export const requireAuth = async (
   res: Response,
   next: NextFunction,
 ): Promise<Response | void> => {
-  const token = req.cookies?.user_section
+  const token = req.cookies?.['user_section']
 
   if (!token) {
     return res.status(401).json({ message: 'Usuário não autentificado' })

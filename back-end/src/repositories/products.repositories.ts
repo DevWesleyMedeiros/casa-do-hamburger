@@ -1,5 +1,6 @@
 import { prisma } from '../db.js'
 import { CreateProductInput } from '../schemas/products.schemas.js'
+import { handlePrismaError } from '../utils/handlePrismaError.js'
 
 interface CreateProductWithImageParams {
   data: CreateProductInput
@@ -20,5 +21,17 @@ export const productsRepository = {
       },
       include: { images: true },
     })
+  },
+  findManyProducts: async () => {
+    return await prisma.products.findMany({ include: { images: true } })
+  },
+  findProductAndDelete: async (id: string) => {
+    try {
+      return await prisma.products.delete({
+        where: { id: id },
+      })
+    } catch (error) {
+      return handlePrismaError(error)
+    }
   },
 }
