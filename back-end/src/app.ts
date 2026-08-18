@@ -2,6 +2,7 @@
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import express from 'express'
+import helmet from 'helmet'
 import { connection } from './db.js'
 import { errorHandler } from './middlewares/errorHandler.js'
 import authRoutes from './routes/auth.routes.js'
@@ -19,6 +20,7 @@ app.disable('x-powered-by') // desabilita o header X-Powered-By, que contém a v
 // Sem isto, `req.ip` retorna o IP interno do Railway, não o IP real do cliente,
 // e o rate limiting torna-se completamente ineficaz (todos contam como 1 origem).
 app.set('trust proxy', 1)
+app.use(helmet())
 
 // coors no top antes de toda resposta
 app.use(
