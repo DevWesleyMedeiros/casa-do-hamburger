@@ -3,8 +3,8 @@
 > **Tipo de documento:** Especificação de Requisitos + Regras de Negócio (BRD/SRS)
 > **Projeto:** Casa do Hambúrguer — Sistema de Pedidos para Hamburgueria (E-commerce de Food Service)
 > **Natureza:** Boilerplate reutilizável para aplicações de e-commerce/pedidos
-> **Versão:** 1.3.0
-> **Status:** Documento vivo — Rate limiting em rotas de autenticação concluído (RF-12, RNF-06); Proposta de Login via Google OAuth 2.0 incorporada (Seções 3.1, 4, 5, 6.1, 6.2, 7, 9)
+> **Versão:** 1.4.0
+> **Status:** Documento vivo — Rate limiting em rotas de autenticação concluído (RF-12, RNF-06); Proposta de Login via Google OAuth 2.0 incorporada (Seções 3.1, 4, 5, 6.1, 6.2, 7, 9); Auditoria de segurança "vibe coding" incorporada (Seção 6.11, correção de contradição A05, Seção 14.2)
 
 ---
 
@@ -31,6 +31,7 @@ Selos de status:
 | 1.1.0 | 20/07/2026 | Seção 12 (pontos em aberto) respondida pelo mantenedor; adicionado Módulo de Pagamento (3.6/6.9); adicionadas roles futuras `ATTEND`/`DELIVER`; adicionadas Seção 14 (Estratégia de Testes) e Seção 15 (Governança e Gatilhos de Code Review) |
 | 1.2.0 | 25/07/2026 | Proposta (🔵) de login via **Google OAuth 2.0** como alternativa ao login local: RF-51 a RF-55 (3.1), RNF-23 a RNF-25 (4), US-11 (5), RN-AUTH-08 a RN-AUTH-12 (6.1), RN-CRYPT-05 (6.2); ERD atualizado com `provider`/`providerId`/`emailVerified` e `passwordHash` opcional (7); novo diagrama de sequência 9.3; ver **ADR-0003** (a ser criada, registro da decisão arquitetural) |
 | 1.3.0 | 28/07/2026 | **RF-12** e **RNF-06** concluídos (🟡→🟢): implementado rate limiting em duas camadas (broad por IP + targeted por IP/e-mail) nas rotas `/auth/login` e `/auth/register`, com `trust proxy` configurado para o proxy reverso da Railway e cobertura de testes de integração (Vitest + Supertest). Corrigida, na mesma branch, uma violação pré-existente de **US-02**: o serviço de login retornava mensagens distintas para "e-mail não encontrado" e "senha incorreta", permitindo enumeração de usuários — unificado para uma mensagem genérica ("Credenciais inválidas"), conforme já previsto na nota de segurança da própria US-02 |
+| 1.4.0 | 14/08/2026 | Auditoria de segurança "vibe coding" (5 falhas mais comuns em app gerado por IA): corrigida contradição entre a Seção 11 (A05 marcado 🟢 citando Helmet) e **RNF-08** (Helmet ainda 🔵) — A05 rebaixado para 🟡 até RNF-08 fechar; adicionada **Seção 6.11** documentando a ausência de RLS/defesa em camada de banco como risco aceito consciente (projeto é Postgres puro via Prisma, não Supabase/Firebase) e formalizando **RNF-26** e **RN-SEC-01 a 03** (defesa em profundidade, sanitização de saída, scanner de segredos no CI); Seção 14.2 atualizada com Gitleaks/TruffleHog; reforço de nota em **RN-ORDER-06** (checagem de posse deve nascer junto do checkout, não depois) |
 
 ---
 
@@ -192,7 +193,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | RNF-05 | Segurança | Rotas administrativas nunca devem vazar para operações de usuário comum (e vice-versa) | 🟢 |
 | RNF-06 | Segurança | Rate limiting em rotas de autenticação | 🟢 |
 | RNF-07 | Segurança | Proteção CSRF para rotas mutáveis expostas a cookies | 🔵 |
-| RNF-08 | Segurança | Cabeçalhos de segurança HTTP (Helmet: CSP, HSTS, X-Frame-Options) | 🔵 |
+| RNF-08 | Segurança | Cabeçalhos de segurança HTTP (Helmet: CSP, HSTS, X-Frame-Options) — **bloqueador para considerar A05 (Seção 11) como 🟢** | 🔵 |
 | RNF-09 | Performance | Imagens devem ser servidas em tamanho adequado ao contexto via transformação de URL (CDN) | 🟢 |
 | RNF-10 | Performance | Estado de servidor deve ter única fonte de verdade (TanStack Query), evitando cache duplicado | 🟢 |
 | RNF-11 | Performance | Consultas frequentes devem ter índices no banco (ex.: `productId`, `userId`, `status`) | 🔵 |
@@ -210,6 +211,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | RNF-23 🆕 | Segurança | Fluxo de login via Google deve usar **Authorization Code Flow + PKCE**; o fluxo implícito (deprecado) não deve ser usado | 🔵 |
 | RNF-24 🆕 | Segurança | O `CLIENT_SECRET` do Google nunca deve ser exposto ao frontend — a troca do `code` por `id_token` ocorre exclusivamente no backend | 🔵 |
 | RNF-25 🆕 | Segurança | O fluxo OAuth deve usar o parâmetro `state` na etapa de redirecionamento para mitigar CSRF | 🔵 |
+| RNF-26 🆕 | Segurança | O projeto **não possui controle de acesso em camada de banco (RLS)** — toda autorização é responsabilidade exclusiva da camada de aplicação (Express). Este é um **risco aceito conscientemente** enquanto o projeto for single-tenant sobre PostgreSQL puro via Prisma (não Supabase/Firebase); ver Seção 6.11 para a análise completa e o plano de mitigação compensatório | 🟢 (documentado) |
 
 ---
 
@@ -511,7 +513,7 @@ type UserResponseDTO = {
 | RN-ORDER-03 🔵 | `Order` referencia `productId` apenas para rastreabilidade (ex.: link "ver produto"), mas os dados exibidos no pedido vêm do snapshot, nunca de um `JOIN` ao vivo com `Product` |
 | RN-ORDER-04 🔵 | Preço é armazenado como inteiro em centavos em todo o fluxo (evita erro de ponto flutuante em somas) |
 | RN-ORDER-05 🔵 | Status do pedido segue máquina de estados finita (ver Seção 8) — transições inválidas são rejeitadas no service layer |
-| RN-ORDER-06 🔵 | Um usuário só pode visualizar/cancelar os próprios pedidos (`Order.userId === req.user.id`), exceto administradores |
+| RN-ORDER-06 🔵 | Um usuário só pode visualizar/cancelar os próprios pedidos (`Order.userId === req.user.id`), exceto administradores. ⚠️ **Não é opcional nem posterior ao checkout**: a checagem de posse deve nascer na mesma PR que implementa `GET /orders/:id`, nunca como ajuste "depois" — é a mitigação de IDOR (OWASP A01) para este módulo |
 | RN-ORDER-07 🔵 | Quando `ATTEND`/`DELIVER` existirem, a transição de status deve checar não só o papel (role), mas se o papel tem permissão para **aquela transição específica** (ver RN-RBAC-07/08) |
 
 ### 6.9 Pagamento (Simulado hoje, Gateway real no futuro) 🆕
@@ -530,6 +532,17 @@ type UserResponseDTO = {
 | --- | --- | --- |
 | RN-TENANT-01 | O sistema é **single-tenant**: representa uma única hamburgueria por deploy. Não há coluna `storeId`/`tenantId` em nenhuma tabela, nem isolamento de dados por loja | 🟢 |
 | RN-TENANT-02 | Caso um projeto futuro derivado deste boilerplate precise de multi-tenancy, a estratégia recomendada é **schema-per-tenant** ou coluna `tenantId` + Row-Level Security no Postgres | 🔵 |
+
+### 6.11 Segurança — Defesa em Profundidade e Auditoria "Vibe Coding" 🆕
+
+> Seção adicionada após auditoria de segurança contra as 5 falhas mais comuns em código gerado
+> por IA (RLS ausente, autorização no frontend, IDOR, segredos expostos, input sem validação).
+
+| Regra | Descrição | Status |
+| --- | --- | --- |
+| RN-SEC-01 🆕 | **Ausência de RLS é risco aceito, não descuido**: o projeto usa PostgreSQL puro via Prisma (não Supabase/Firebase), então não há *Row Level Security* nem *Security Rules* equivalentes disponíveis "de graça" na infraestrutura. Toda a autorização depende de RN-RBAC-05 (autorização sempre validada no backend) estar corretamente aplicada em **100% das rotas**, sem segunda camada no banco. Isso é uma decisão de arquitetura válida para o estágio atual do projeto, mas deve ser revista se o projeto migrar para Supabase/Firebase ou virar multi-tenant (RN-TENANT-02) | 🟢 (documentado) |
+| RN-SEC-02 🆕 | Todo conteúdo de usuário que venha a ser renderizado como HTML (hoje não existe nenhum caso no projeto) deve passar por sanitização de saída (`DOMPurify`/`sanitize-html`) antes de ser exibido — complementa RNF-04 (validação de entrada), que sozinha não protege contra XSS armazenado | 🔵 (preventivo — nenhuma renderização de HTML livre do usuário existe hoje) |
+| RN-SEC-03 🆕 | O CI deve rodar um scanner de segredos (Gitleaks ou TruffleHog) contra o histórico completo do repositório antes de qualquer deploy, complementando o `npm audit`/Dependabot já previsto na Seção 14.2 — protege contra o caso de uma chave ter sido commitada e depois removida (permanece no histórico do Git) | 🔵 |
 
 ---
 
@@ -796,7 +809,7 @@ graph LR
 | A02 — Cryptographic Failures | bcrypt para senha; JWT assinado; cookies httpOnly/secure | 🟢 |
 | A03 — Injection | Prisma (queries parametrizadas) + Zod na entrada | 🟢 |
 | A04 — Insecure Design | Snapshot Pattern em pedidos; total recalculado no backend | 🔵 |
-| A05 — Security Misconfiguration | Helmet, CSP, variáveis de ambiente sem hardcode | 🟢 |
+| A05 — Security Misconfiguration | Variáveis de ambiente sem hardcode (🟢); Helmet/CSP/HSTS ainda **não implementados** (RNF-08, 🔵) — corrigida contradição da v1.3.0, que marcava este item como concluído citando Helmet | 🟡 |
 | A07 — Identification/Auth Failures | Mensagens de erro genéricas no login (🟢); rate limiting em rotas de autenticação (🟢, RNF-06); verificação de `id_token` no login via Google (🔵, RN-AUTH-08/09) | 🟡 |
 | A08 — Software and Data Integrity | Magic bytes na validação de upload | 🟢 |
 | A09 — Logging & Monitoring Failures | Logs estruturados de erro de API | 🔵 |
@@ -869,6 +882,7 @@ graph LR
 | --- | --- |
 | **Mutation Testing (Stryker)** | Depois que já existir boa cobertura — mede se os testes *realmente* pegam bugs, não só se "passam" |
 | **Testes de segurança automatizados** | Scanner de dependências vulneráveis (`npm audit`/Dependabot) no CI — barato de configurar, alto retorno |
+| **Scanner de segredos (RN-SEC-03)** | Gitleaks/TruffleHog contra o histórico completo do Git antes do deploy — pega chaves commitadas e depois removidas, que `npm audit` não detecta |
 | **Testes de contrato de API** | Se o frontend e backend forem mantidos por pessoas/times diferentes no futuro — garante que a API não quebra o contrato esperado pelo client |
 
 ### 14.3 Onde priorizar primeiro (dado o estado atual do projeto)

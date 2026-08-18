@@ -22,9 +22,9 @@ export const authService = {
     }
     const tokenPayload = {
       id: user.id,
-      name: user.name,
-      email: user.email,
-      cep: user.cep,
+      // name: user.name,
+      // email: user.email,
+      // cep: user.cep,
       admin: user.admin,
     }
 
@@ -37,7 +37,8 @@ export const authService = {
       .sign(getJwtSecret())
     return {
       token,
-      user: { id: user.id, name: user.name, email: user.email, admin: user.admin, cep: user.cep },
+      // user: { id: user.id, name: user.name, email: user.email, admin: user.admin, cep: user.cep },
+      user,
     }
   },
   register: async (name: string, email: string, password: string, cep: string) => {
