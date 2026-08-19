@@ -4,12 +4,13 @@ import { useCallback } from "react";
 import { toast } from "sonner";
 import { queryKeys } from "../../constant/queryKeys";
 import { ApiError } from "../../shared/services/api/ApiExceptions";
-import { NewCartItem } from "../../shared/services/api/cartItems/createCartItems";
+import { resolveApiErrorMessage } from "../../shared/utils/apiErrorMessage";
 import { useMe } from "../../hook/useMe";
+import { NewCartItem } from "../../shared/services/api/cartItems/createCartItems";
 import { deleteProductById } from "../../shared/services/api/delete/DeleteProduct";
+import { getProductImageUrl } from "../../shared/utils/getProductImageUrl";
 import { brazilinaCurrencyFormat } from "../../shared/utils/Utils";
 import { type ProductsInterface } from "../../types/Products";
-import { getProductImageUrl } from "../../shared/utils/getProductImageUrl";
 
 export const Products = ({
   id, // id vindo da tabela Products
@@ -24,18 +25,13 @@ export const Products = ({
   // função que irá deletar um produto pelo id
   const handleCreateCartItem = useCallback(
     async (productId: string) => {
-      // id já disponível no componente, por isso não precisa ser acessado na função de fetch
       if (!productId) return;
       try {
         const response = await NewCartItem.newCartItem({ productId });
         if (response instanceof ApiError) {
-          if (response.statusCode === 401) {
-            toast.error("Você precisa estar logado");
-          } else if (response.statusCode === 404) {
-            toast.error("Produto não encontrado");
-          } else {
-            toast.error(response.message);
-          }
+          toast.error(
+            resolveApiErrorMessage(response, { 404: "Produto não encontrado" }),
+          );
           return;
         }
         // TanStack rebusca → Cart.tsx recebe o novo item automaticamente
@@ -53,27 +49,22 @@ export const Products = ({
   const handleDeleteProductById = useCallback(
     async (id: string) => {
       if (!id) return;
-
-      const result = await deleteProductById.deleteProduct(id);
-
-      if (result instanceof ApiError) {
-        if (result.statusCode === 404) {
-          toast.error("Produto não foi encontrado ou já foi deletado");
-        } else if (result.statusCode === 403) {
-          toast.error("Acesso restrito aos administradores");
-        } else if (result.statusCode === 401) {
-          toast.error("Você precisa estar logado");
+      try {
+        const response = await deleteProductById.deleteProduct(id);
+        if (response instanceof ApiError) {
+          toast.error(
+            resolveApiErrorMessage(response, {
+              404: "Produto não foi encontrado ou já foi deletado",
+            }),
+          );
           return;
-        } else {
-          toast.error(result.message);
         }
-
-        return;
+        toast.success("Produto deletado com sucesso");
+        await queryClient.invalidateQueries({ queryKey: queryKeys.products });
+      } catch (err) {
+        console.error(err);
+        toast.error("Erro ao deletar produto");
       }
-      // se não caiu em nenhuma das excessões, então o produto foi deletado
-      toast.success("Produto deletado com sucesso");
-      // Invalida o cache → Home.tsx rebusca a lista sem o produto deletado
-      await queryClient.invalidateQueries({ queryKey: queryKeys.products });
     },
     [queryClient],
   );

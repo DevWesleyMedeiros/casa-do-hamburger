@@ -25,6 +25,8 @@ export const productsRepository = {
   findManyProducts: async () => {
     return await prisma.products.findMany({ include: { images: true } })
   },
+
+  // deletar produto pelo id do produto passado. Se der certo, ele me retorna o id deletado
   findProductAndDelete: async (id: string) => {
     try {
       return await prisma.products.delete({

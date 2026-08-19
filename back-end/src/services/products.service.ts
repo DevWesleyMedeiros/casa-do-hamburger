@@ -18,6 +18,7 @@ export const productService = {
     return products
   },
 
+  // delete product pelo id dele
   deleteById: async (id: string) => {
     return productsRepository.findProductAndDelete(id)
   },

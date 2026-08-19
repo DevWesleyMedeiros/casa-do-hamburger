@@ -3,8 +3,8 @@
 > **Tipo de documento:** Especificação de Requisitos + Regras de Negócio (BRD/SRS)
 > **Projeto:** Casa do Hambúrguer — Sistema de Pedidos para Hamburgueria (E-commerce de Food Service)
 > **Natureza:** Boilerplate reutilizável para aplicações de e-commerce/pedidos
-> **Versão:** 1.4.0
-> **Status:** Documento vivo — Rate limiting em rotas de autenticação concluído (RF-12, RNF-06); Proposta de Login via Google OAuth 2.0 incorporada (Seções 3.1, 4, 5, 6.1, 6.2, 7, 9); Auditoria de segurança "vibe coding" incorporada (Seção 6.11, correção de contradição A05, Seção 14.2)
+> **Versão:** 1.5.0
+> **Status:** Documento vivo — Rate limiting em rotas de autenticação concluído (RF-12, RNF-06); Proposta de Login via Google OAuth 2.0 incorporada (Seções 3.1, 4, 5, 6.1, 6.2, 7, 9); Auditoria de segurança "vibe coding" incorporada (Seção 6.11, correção de contradição A05, Seção 14.2); DTO de User com mapper de saída concluído (RN-DTO-01) e payload de sessão minimizado (RN-DTO-06)
 
 ---
 
@@ -32,6 +32,7 @@ Selos de status:
 | 1.2.0 | 25/07/2026 | Proposta (🔵) de login via **Google OAuth 2.0** como alternativa ao login local: RF-51 a RF-55 (3.1), RNF-23 a RNF-25 (4), US-11 (5), RN-AUTH-08 a RN-AUTH-12 (6.1), RN-CRYPT-05 (6.2); ERD atualizado com `provider`/`providerId`/`emailVerified` e `passwordHash` opcional (7); novo diagrama de sequência 9.3; ver **ADR-0003** (a ser criada, registro da decisão arquitetural) |
 | 1.3.0 | 28/07/2026 | **RF-12** e **RNF-06** concluídos (🟡→🟢): implementado rate limiting em duas camadas (broad por IP + targeted por IP/e-mail) nas rotas `/auth/login` e `/auth/register`, com `trust proxy` configurado para o proxy reverso da Railway e cobertura de testes de integração (Vitest + Supertest). Corrigida, na mesma branch, uma violação pré-existente de **US-02**: o serviço de login retornava mensagens distintas para "e-mail não encontrado" e "senha incorreta", permitindo enumeração de usuários — unificado para uma mensagem genérica ("Credenciais inválidas"), conforme já previsto na nota de segurança da própria US-02 |
 | 1.4.0 | 14/08/2026 | Auditoria de segurança "vibe coding" (5 falhas mais comuns em app gerado por IA): corrigida contradição entre a Seção 11 (A05 marcado 🟢 citando Helmet) e **RNF-08** (Helmet ainda 🔵) — A05 rebaixado para 🟡 até RNF-08 fechar; adicionada **Seção 6.11** documentando a ausência de RLS/defesa em camada de banco como risco aceito consciente (projeto é Postgres puro via Prisma, não Supabase/Firebase) e formalizando **RNF-26** e **RN-SEC-01 a 03** (defesa em profundidade, sanitização de saída, scanner de segredos no CI); Seção 14.2 atualizada com Gitleaks/TruffleHog; reforço de nota em **RN-ORDER-06** (checagem de posse deve nascer junto do checkout, não depois) |
+| 1.5.0 | 19/08/2026 | **RN-DTO-01** concluído (🔵→🟢): `toUserDTO` (`dtos/user.dto.ts`) aplicado como mapper obrigatório em `login`, `register` e `/me`, removendo `password`/`cep` de toda resposta de `User`. Nova regra **RN-DTO-06** 🟢: payload do JWT separado do perfil via `toJwtPayloadDTO` (`id`+`admin` apenas — sem `name`/`email`), corrigindo exposição de PII decodificável no cookie de sessão de 7 dias. **RN-DTO-03** avançou parcialmente (User concluído; `Product`/`Order` DTOs seguem pendentes, mantido 🟡). Corrigido bug em `authMiddlewares.ts`: catch-all ausente no bloco de verificação do JWT (`JWEInvalid` não corresponde a nenhum erro real de `jwtVerify`, deixando requests com token inválido sem resposta — travadas até timeout) |
 
 ---
 
@@ -457,11 +458,12 @@ Requisição HTTP
 
 | Regra | Descrição |
 | --- | --- |
-| RN-DTO-01 🔵 | Toda resposta de API que envolve `User` deve passar por um mapper que remove `password` (hash) do payload — nunca confiar no Prisma `select` implícito |
+| RN-DTO-01 🟢 | Toda resposta de API que envolve `User` deve passar por um mapper que remove `password` (hash) do payload — nunca confiar no Prisma `select` implícito. Implementado via `toUserDTO` (`dtos/user.dto.ts`), aplicado consistentemente em `login`, `register` e `/me` |
 | RN-DTO-02 🟢 | Entrada de dados (`request body`) é validada com **schemas Zod dedicados por rota** (ex.: `createUserSchema`, `createOrderSchema`), nunca reaproveitando o schema do banco |
-| RN-DTO-03 🟡 | Saída de dados usa **DTOs explícitos** (ex.: `UserResponseDTO`, `ProductResponseDTO`, `OrderResponseDTO`) — desacopla o formato de API do schema interno do Prisma |
+| RN-DTO-03 🟡 | Saída de dados usa **DTOs explícitos** (ex.: `UserResponseDTO`, `ProductResponseDTO`, `OrderResponseDTO`) — desacopla o formato de API do schema interno do Prisma. Fatia de `User` concluída (`toUserDTO`); `ProductResponseDTO`/`OrderResponseDTO` ainda pendentes |
 | RN-DTO-04 🟢 | Preços são serializados como inteiros em centavos no backend e formatados (R$) somente na camada de apresentação (frontend) |
 | RN-DTO-05 🔵 | Datas trafegam em ISO 8601 (UTC); formatação de fuso/local é responsabilidade do frontend |
+| RN-DTO-06 🟢 🆕 | O payload do JWT (dado de **sessão**) deve conter o mínimo necessário para autorização (`id`, `admin`) e nunca dado de **perfil** (`name`, `email`) — o JWT é assinado, não criptografado, então qualquer um com o cookie decodifica o payload em base64 sem precisar da chave secreta. Sessão (`toJwtPayloadDTO`) e perfil (`toUserDTO`) são DTOs deliberadamente separados, nunca reunidos no mesmo objeto de saída |
 
 **Exemplo de contrato:**
 

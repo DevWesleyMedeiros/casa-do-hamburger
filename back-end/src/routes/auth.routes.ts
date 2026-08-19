@@ -8,7 +8,7 @@ import { loginSchema, registerSchema } from '../schemas/authSchemas.js'
 
 const router = Router()
 
-// Ordem intencional: valida Zod ANTES de gastar cota do rate limiter. Assim, payloads inválidos (formato de email errado, campos faltando etc.) são rejeitados sem incrementar contador, evitando DoS de validação e bloqueios injustos de usuários legítimos que só erraram o formato.
+// Ordem intencional: valida Zod ANTES de gastar cota do rate limiter. Assim, payloads inválidos (formato de email errado, campos faltando etc.) são rejeitados sem incrementar contador, evitando DoS de validação e bloqueios injustos de usuários legítimos que só erraram o formato
 router.post('/login', validateBody(loginSchema), loginLimiter, authController.login)
 router.get('/me', requireAuth, authController.userAuth)
 router.post('/register', validateBody(registerSchema), registerLimiter, authController.register)
