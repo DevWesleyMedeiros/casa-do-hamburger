@@ -381,11 +381,12 @@ Este agente consulta automaticamente as seguintes skills durante o review:
 | Skill | Quando acionar |
 |---|---|
 | `code-review` | Base de todo review — pirâmide, checklists, tipos de comentário |
-| `web-security-specialist` | Endpoints de auth, cookies JWT, OWASP, dados sensíveis |
-| `senior-ux-ui-fullstack` | Componentes React, Zustand, React Hook Form, UX/acessibilidade |
-| `fullstack-web-projects-testing-specialist` | Qualidade de testes, Vitest, Supertest, cobertura, testes de NFR |
-| `git-github-specialist` | Tamanho de PR, estrutura de commits, branch strategy |
-| `software-design-architecture` | SOLID, DRY, padrões arquiteturais, design de contrato de API |
+| `web-security-specialist.md` | Endpoints de auth, cookies JWT, OWASP, dados sensíveis |
+| `web-security-specialist-nextjs.md` | nextjs, OWASP, dados sensíveis, bypass |
+| `senior-ux-ui-fullstack.md` | Componentes React, Zustand, React Hook Form, UX/acessibilidade |
+| `fullstack-web-projects-testing-specialist.md` | Qualidade de testes, Vitest, Supertest, cobertura, testes de NFR |
+| `git-github-specialist.md` | Tamanho de PR, estrutura de commits, branch strategy |
+| `software-design-architecture.md` | SOLID, DRY, padrões arquiteturais, design de contrato de API |
 | `modern-web-guidance` | Praticas modernas aplicadas ao frontend |
 | `learn` | Aprender como e por quê as coisas funcionam, sem ter necessariamente uma tarefa realizada |
  
