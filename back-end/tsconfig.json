@@ -3,7 +3,7 @@
     "ignoreDeprecations": "6.0",
     "lib": ["ESNext"],
     "target": "esnext",
-    "module": "nodenext",
+    "module": "Nodenext",
     "moduleDetection": "auto",
     "allowJs": true,
     "strict": true,
