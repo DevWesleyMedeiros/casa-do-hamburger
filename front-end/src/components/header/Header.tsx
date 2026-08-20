@@ -87,7 +87,6 @@ export const Header = () => {
                     />
                   </div>
                 </Link>
-
                 <Link to="/pedidos">
                   <div className={setNavItemActiveClass("/pedidos")}>
                     <LayoutDashboard

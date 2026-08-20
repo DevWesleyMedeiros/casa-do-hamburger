@@ -5,9 +5,11 @@ import { ApiError } from "../services/api/ApiExceptions";
 
 // mais erros podem ser inseridos aqui
 const STATUS_MESSAGES: Record<number, string> = {
+  400: "Todas informações são obrigatórias",
   401: "Você precisa estar logado",
   403: "Acesso restrito aos administradores",
   404: "Recurso não encontrado",
+  409: "Email já cadastrado",
 };
 
 export const resolveApiErrorMessage = (

@@ -3,8 +3,8 @@
 > **Tipo de documento:** Especificação de Requisitos + Regras de Negócio (BRD/SRS)
 > **Projeto:** Casa do Hambúrguer — Sistema de Pedidos para Hamburgueria (E-commerce de Food Service)
 > **Natureza:** Boilerplate reutilizável para aplicações de e-commerce/pedidos
-> **Versão:** 1.5.0
-> **Status:** Documento vivo — Rate limiting em rotas de autenticação concluído (RF-12, RNF-06); Proposta de Login via Google OAuth 2.0 incorporada (Seções 3.1, 4, 5, 6.1, 6.2, 7, 9); Auditoria de segurança "vibe coding" incorporada (Seção 6.11, correção de contradição A05, Seção 14.2); DTO de User com mapper de saída concluído (RN-DTO-01) e payload de sessão minimizado (RN-DTO-06)
+> **Versão:** 1.6.0
+> **Status:** Documento vivo — Recuperação de senha via e-mail em andamento (RF-09 🔵→🟡; novos RF-56, RF-57, RNF-27, RN-AUTH-13/14/15); Sprint 2 aberta no Trello (board `projeto-casa-do-hamburguer`); Rate limiting em rotas de autenticação concluído (RF-12, RNF-06); Proposta de Login via Google OAuth 2.0 incorporada (Seções 3.1, 4, 5, 6.1, 6.2, 7, 9); Auditoria de segurança "vibe coding" incorporada (Seção 6.11, correção de contradição A05, Seção 14.2); DTO de User com mapper de saída concluído (RN-DTO-01) e payload de sessão minimizado (RN-DTO-06)
 
 ---
 
@@ -27,6 +27,7 @@ Selos de status:
 
 | Versão | Data | Mudança |
 | --- | --- | --- |
+| 1.6.0 | 19/08/2026 | **RF-09** (recuperação de senha via e-mail) entra em desenvolvimento na Sprint 2 (🔵→🟡): fluxo `forgot-password`/`reset-password` com token opaco (hash SHA-256, expira em 30min, uso único). Novos requisitos que a feature arrasta, ainda não previstos no documento: **RF-56** (uso único/expiração do token), **RF-57** (bloqueio do fluxo para contas `provider=GOOGLE`, que não possuem `passwordHash` local — RN-AUTH-10), **RNF-27** (provedor de e-mail transacional dedicado, ex. Resend, nunca SMTP hardcoded), **RN-AUTH-13/14/15** (Seção 6.1: token opaco+hash, expiração/uso único, resposta genérica anti-enumeração — mesma diretriz de US-02/RF-12). Novo model `PasswordResetToken` adicionado ao ERD (Seção 7). Backlog e Sprint 2 abertos no Trello (board `projeto-casa-do-hamburguer`) |
 | 1.0.0 | 19/07/2026 | Documento inicial, gerado por engenharia reversa de requisitos |
 | 1.1.0 | 20/07/2026 | Seção 12 (pontos em aberto) respondida pelo mantenedor; adicionado Módulo de Pagamento (3.6/6.9); adicionadas roles futuras `ATTEND`/`DELIVER`; adicionadas Seção 14 (Estratégia de Testes) e Seção 15 (Governança e Gatilhos de Code Review) |
 | 1.2.0 | 25/07/2026 | Proposta (🔵) de login via **Google OAuth 2.0** como alternativa ao login local: RF-51 a RF-55 (3.1), RNF-23 a RNF-25 (4), US-11 (5), RN-AUTH-08 a RN-AUTH-12 (6.1), RN-CRYPT-05 (6.2); ERD atualizado com `provider`/`providerId`/`emailVerified` e `passwordHash` opcional (7); novo diagrama de sequência 9.3; ver **ADR-0003** (a ser criada, registro da decisão arquitetural) |
@@ -100,10 +101,12 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | RF-06 | O sistema deve permitir logout, invalidando o cookie de sessão | 🟢 |
 | RF-07 | O sistema deve impedir cadastro com e-mail já existente | 🟢 |
 | RF-08 | O sistema deve validar formato de e-mail e força mínima de senha no cadastro | 🟢 |
-| RF-09 | O sistema deve permitir recuperação de senha via e-mail (fluxo "esqueci minha senha") | 🔵 |
+| RF-09 | O sistema deve permitir recuperação de senha via e-mail (fluxo "esqueci minha senha") | 🟡 |
 | RF-10 | O sistema deve permitir edição de dados de perfil (nome, e-mail, avatar) | 🔵 |
 | RF-11 | O sistema deve suportar renovação de token via refresh token (rotação de sessão) | 🔵 |
 | RF-12 | O sistema deve registrar tentativas de login falhas para fins de rate limiting sem persistência auditável | 🟢 |
+| RF-56 🆕 | O token de redefinição de senha deve ser de uso único e expirar 30 minutos após a emissão | 🟡 |
+| RF-57 🆕 | Contas com `provider=GOOGLE` não podem solicitar redefinição de senha local (não possuem `passwordHash` — RN-AUTH-10); o sistema deve orientar o uso do login social nesse caso | 🟡 |
 | RF-51 🆕 | O sistema deve permitir login/cadastro via **Google OAuth 2.0** ("Entrar com Google") como alternativa ao login local por e-mail/senha | 🔵 |
 | RF-52 🆕 | O backend deve verificar o `id_token` retornado pelo Google (assinatura, `aud`, `iss`, `exp`) antes de criar qualquer sessão — nunca confiar em dados de identidade enviados diretamente pelo frontend | 🔵 |
 | RF-53 🆕 | Contas criadas via Google devem ser persistidas com `provider=GOOGLE` e `password` nulo; contas locais mantêm `provider=LOCAL` | 🔵 |
@@ -213,6 +216,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | RNF-24 🆕 | Segurança | O `CLIENT_SECRET` do Google nunca deve ser exposto ao frontend — a troca do `code` por `id_token` ocorre exclusivamente no backend | 🔵 |
 | RNF-25 🆕 | Segurança | O fluxo OAuth deve usar o parâmetro `state` na etapa de redirecionamento para mitigar CSRF | 🔵 |
 | RNF-26 🆕 | Segurança | O projeto **não possui controle de acesso em camada de banco (RLS)** — toda autorização é responsabilidade exclusiva da camada de aplicação (Express). Este é um **risco aceito conscientemente** enquanto o projeto for single-tenant sobre PostgreSQL puro via Prisma (não Supabase/Firebase); ver Seção 6.11 para a análise completa e o plano de mitigação compensatório | 🟢 (documentado) |
+| RNF-27 🆕 | Segurança | Envio de e-mails transacionais (ex.: redefinição de senha) deve usar provedor dedicado (ex.: Resend), nunca SMTP com credenciais hardcoded no código-fonte | 🟡 |
 
 ---
 
@@ -386,6 +390,9 @@ Então o vínculo automático NÃO ocorre, e o sistema orienta o usuário a conf
 | RN-AUTH-10 🔵 🆕 | O campo `User.password` torna-se **opcional** (nullable); contas com `provider=GOOGLE` não possuem senha local e não podem autenticar pelo fluxo de e-mail/senha |
 | RN-AUTH-11 🔵 🆕 | Vínculo automático de conta (conta local existente + login Google no mesmo e-mail) só ocorre se `email_verified=true` no token do Google; caso contrário, o sistema rejeita o vínculo automático, para evitar *account takeover* |
 | RN-AUTH-12 🔵 🆕 | A rota `/auth/google` deve estar sob o mesmo rate limiter já aplicado às demais rotas de autenticação (RNF-06) |
+| RN-AUTH-13 🟡 🆕 | Token de redefinição de senha é opaco, gerado com `crypto.randomBytes(32)` (256 bits de entropia); apenas seu hash SHA-256 é persistido no banco — o valor em texto puro nunca é armazenado, só existe no e-mail enviado uma única vez |
+| RN-AUTH-14 🟡 🆕 | Token de redefinição expira em 30 minutos e é de uso único (`usedAt` marcado no momento do consumo); expirado ou já usado, o token é rejeitado e uma nova solicitação é obrigatória. Emitir um novo token invalida qualquer token anterior ainda válido do mesmo usuário |
+| RN-AUTH-15 🟡 🆕 | A resposta de `POST /auth/forgot-password` é **sempre genérica** (200, mesma mensagem), independentemente de o e-mail existir na base — mesma diretriz anti-enumeração já corrigida em US-02/RF-12 (v1.3.0) |
 
 ### 6.2 Criptografia de Senhas 🟢
 
@@ -554,6 +561,7 @@ type UserResponseDTO = {
 erDiagram
     USER ||--o{ CART_ITEM : possui
     USER ||--o{ ORDER : realiza
+    USER ||--o{ PASSWORD_RESET_TOKEN : solicita
     PRODUCT ||--o{ CART_ITEM : referenciado_por
     PRODUCT ||--o{ PRODUCTS_IMAGE : possui
     PRODUCT ||--o{ ORDER_ITEM : "snapshot origem"
@@ -624,6 +632,15 @@ erDiagram
         string gatewayReferenceId "null ate integrar gateway real"
         datetime createdAt
     }
+
+    PASSWORD_RESET_TOKEN {
+        string id PK
+        string userId FK
+        string tokenHash UK "sha256 do token opaco; token cru nunca persistido"
+        datetime expiresAt "emitido com now() + 30min"
+        datetime usedAt "nulo ate o consumo; marca uso unico"
+        datetime createdAt
+    }
 ```
 
 > 🔒 Notas do ERD:
@@ -633,6 +650,7 @@ erDiagram
 > - `ORDER_ITEM` **não** tem foreign key "viva" para os campos exibidos — são colunas de snapshot, mesmo mantendo `productId` como referência de rastreabilidade.
 > - `CART_ITEM` mantém a constraint `@@unique([userId, productId])` (RN-CART-02).
 > - 🆕 `USER.provider`/`providerId`/`emailVerified` são **propostos** (🔵) para suportar login via Google (RN-AUTH-08 a 12) — `passwordHash` deixa de ser obrigatório.
+> - 🆕 `PASSWORD_RESET_TOKEN` é a entidade nova da RF-09 (🟡, Sprint 2) — só guarda o hash do token (RN-AUTH-13), nunca o valor cru.
 
 ---
 
@@ -771,7 +789,7 @@ sequenceDiagram
 | --- | --- | --- |
 | **Fase 2 — Fechar o MVP** | Finalizar fluxo de criação de pedido, máquina de estados validada no service | **Alta — próxima sprint** |
 | **Fase 3 — Robustez** | Refresh token + rotação, rate limiting, Helmet, testes automatizados (ver Seção 14) | Alta |
-| **Fase 4 — Experiência** | Notificações de status, histórico de pedidos, recuperação de senha, login via Google (RF-51 a 55, ver ADR-0003) | Média |
+| **Fase 4 — Experiência** | Notificações de status, histórico de pedidos, ~~recuperação de senha~~ (em desenvolvimento, RF-09 🟡 — ver Sprint 2 no Trello), login via Google (RF-51 a 55, ver ADR-0003) | Média |
 | **Fase 5 — Operação** | Roles `ATTEND`/`DELIVER`, painel de métricas admin, soft delete, auditoria | Média |
 | **Fase 6 — Pagamento real** | Integração Stripe/Mercado Pago em modo live, webhooks | Média |
 | **Fase 7 — Escala** | Extração do domínio de Pedidos para microsserviço dedicado (ver 10.3) | Baixa (só se necessário) |

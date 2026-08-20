@@ -1,9 +1,5 @@
-// por aqui, eu cadastro um usuário no meu banco de dados enviando um payload via post e que são tratados no meu backend
-
 import { zodResolver } from "@hookform/resolvers/zod";
-// conector que faz o react-hook-form conversar com o Zod
-
-import { Copy, Eye, EyeOff, Wand2, X } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { FcGoogle } from "react-icons/fc";
@@ -17,9 +13,10 @@ import {
   type registerInput,
 } from "../../shared/schemas/authSchemas";
 import { RegisterDate } from "../../shared/services/api/register/Register";
-import { passwordGenerator } from "../../shared/utils/PasswordGenerator";
 import { displayStrongPassword } from "../../shared/utils/Utils";
 import { ApiError } from "../../shared/services/api/ApiExceptions";
+import { PasswordSuggestionPopover } from "../../components/PasswordSuggestionPopover";
+import { resolveApiErrorMessage } from "../../shared/utils/apiErrorMessage";
 
 export const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -28,79 +25,21 @@ export const Register = () => {
     useState<boolean>(false);
 
   const navigate = useNavigate();
-
-  // estados que controlaram o popover effect
-  const [showPopover, setShowPopover] = useState<boolean>(false);
-  const [suggestedPassword, setSuggestedPassword] = useState<string>("");
-
-  // useForm conectado ao Zod via zodResolver
-  // register → conecta cada input ao useForm (como se fosse o value e setValue de um input)
-  // handleSubmit → envolve o onSubmit, só chama se o schema validar
-  // formState → carrega os erros de cada campo
-  // reset → reseta os campos do input
   const {
     register,
     handleSubmit,
     setValue,
-    // é uma função que permite alterar dinamicamente o valor de um campo de forma programática, sem precisar que o usuário digite ou interaja diretamente
     watch,
-    // lê o valor atual de um campo sem causar re-render excessivo
     formState: { errors, isSubmitting },
-    // ainda dentro do formState, temos um propriedade disable -> usada para gerar formulários de visualização somente
     reset,
   } = useForm<registerInput>({
-    resolver: zodResolver(registerSchema), // antes de chamar o submit pelo useForm, o zod irá validar
-    // defaultValues: {
-    //   name: "Seu nome",
-    //   email: "E-mail",
-    //   password: "Sua senha",
-    //   confirmPassword: "Confirme sua senha",
-    //   cep: "Digite um cep",
-    // },
-    // passe os defaults values se você sabe os status inicial dos seus inputs
+    resolver: zodResolver(registerSchema),
   });
-
-  // abre uma janela popover com uma sugestão de senha
-  const handleSugestedPassword = useCallback(() => {
-    setSuggestedPassword(passwordGenerator());
-    setShowPopover((prev) => !prev);
-  }, []);
-
-  // gera outra senha sem fechar o popover
-  const handleRegeneratePassword = useCallback(() => {
-    setSuggestedPassword(passwordGenerator());
-    toast("Nova senha gerada");
-  }, []);
-
-  // aplica a senha sugerida nos dois campos e fecha o popover
-  const handlePassword = useCallback(() => {
-    setValue("password", suggestedPassword, { shouldValidate: true });
-    setValue("confirmPassword", suggestedPassword, { shouldValidate: true });
-    // se shouldValidate for true, vai acionar a validação do campo imediatamente
-    // { shouldValidate: true } → dispara o Zod imediatamente após setar
-    // assim o indicador de força já aparece e o erro some na hora
-    setShowPopover(false);
-    toast.success("Senha aplicada!");
-  }, [suggestedPassword, setValue]);
-
-  // função que pega senha no clipboard
-  const handleCopyPassword = useCallback(async () => {
-    await navigator.clipboard.writeText(suggestedPassword);
-    toast.success("Senha copiada para área de transferência");
-  }, [suggestedPassword]);
-
-  // watch('password') assina o campo e retorna o valor atual
-  // usado para calcular a força em tempo real enquanto o usuário digita
   const passwordValue = watch("password") ?? "";
-  // monitorar e retornar o valor de um ou mais campos do formulário em tempo real
-
   const strength = displayStrongPassword(passwordValue);
-
   const onSubmit: SubmitHandler<registerInput> = useCallback(
     async (data) => {
-      setIsLoading(true); // não se usa toogle para valores booleanos absolutos
-      // toggle para controlar um estado booleano que deveria ser explícito. Isso é um code smell clássico: se por qualquer motivo a função rodar fora da ordem esperada (double-click no botão antes do disabled surtir efeito, StrictMode remontando em dev, etc.), o estado pode "destravar" incorretamente. A prática correta é sempre setar o valor absoluto:
-
+      setIsLoading(true);
       try {
         await RegisterDate.create({
           name: data.name,
@@ -108,9 +47,6 @@ export const Register = () => {
           password: data.password,
           cep: data.cep,
         });
-
-        // Se chegou até aqui, a Promise resolveu = backend respondeu 2xx.
-        // Não existe mais motivo para checar result?.status manualmente.
         reset();
         toast.success("Usuário criado com sucesso");
         navigate("/login");
@@ -120,12 +56,13 @@ export const Register = () => {
             ? error
             : new ApiError(500, "Erro inesperado");
 
-        if (finalError.statusCode === 409) {
-          toast.error("Email já cadastrado");
-        } else if (finalError.statusCode === 400) {
-          toast.error("Todas as informações são obrigatórias");
-        } else {
-          toast.error(finalError.message);
+        if (finalError instanceof ApiError) {
+          toast.error(
+            resolveApiErrorMessage(finalError, {
+              404: "Usuário não foi encontrado ou já foi deletado",
+            }),
+          );
+          return;
         }
       } finally {
         setIsLoading(false);
@@ -196,64 +133,13 @@ export const Register = () => {
               )}
             </button>
 
-            {/* ícone varinha — abre o popover de sugestão */}
-            <button
-              type="button"
-              onClick={handleSugestedPassword}
-              className="absolute top-1/2 right-2 -translate-y-1/2 text-white/40 transition-colors hover:text-[#F2DAAC]"
-              aria-label="Sugerir senha forte"
-              title="Sugerir senha forte"
-            >
-              <Wand2 size={ICON_CONFIG.mnSize} />
-            </button>
+            <PasswordSuggestionPopover
+              onApplyPassword={(password) => {
+                setValue("password", password, { shouldValidate: true });
+                setValue("confirmPassword", password, { shouldValidate: true });
+              }}
+            />
           </div>
-
-          {/* popover de sugestão */}
-          {showPopover && (
-            <div className="mt-2 rounded-lg border border-white/12 bg-[#1f1d18] p-3">
-              {/* senha sugerida */}
-              <div className="mb-2 flex items-center justify-between gap-2">
-                <p className="font-mono text-sm break-all text-white/80">
-                  {suggestedPassword}
-                </p>
-                <button
-                  type="button"
-                  onClick={handleCopyPassword}
-                  className="shrink-0 text-white/40 transition-colors hover:text-[#F2DAAC]"
-                  aria-label="Copiar senha sugerida"
-                  title="Copiar senha"
-                >
-                  <Copy size={ICON_CONFIG.mnSize} />
-                </button>
-              </div>
-
-              {/* ações */}
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={handlePassword}
-                  className="flex-1 rounded-md bg-[#C41E00] py-1.5 text-xs font-bold text-white transition-colors hover:bg-[#a81900]"
-                >
-                  Usar esta senha
-                </button>
-                <button
-                  type="button"
-                  onClick={handleRegeneratePassword}
-                  className="flex-1 rounded-md border border-white/12 py-1.5 text-xs text-white/60 transition-colors hover:bg-white/5"
-                >
-                  Gerar outra
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowPopover(false)}
-                  className="rounded-md border border-white/8 px-2.5 py-1.5 text-white/40 transition-colors hover:bg-white/5"
-                  aria-label="Fechar sugestão"
-                >
-                  <X size={14} />
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* só aparece quando o usuário começa a digitar */}
           {passwordValue && (
