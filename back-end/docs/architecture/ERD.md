@@ -14,6 +14,7 @@ CANCELLED CANCELLED
     String cep 
     String password 
     Boolean admin 
+    String provider 
     }
   
 

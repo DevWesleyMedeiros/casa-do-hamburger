@@ -17,6 +17,7 @@ model User {
   cartItem CartItem[] // cada usuário pode ter vários itens no carrinho
   orders Order[] // cada usuário pode ter vários pedidos
   passwordResetTokens PasswordResetToken[] // cada usuário pode ter vários tokens
+  provider String @default("local")
 }
 
 model Products {
