@@ -2,9 +2,16 @@ import { Router } from 'express'
 import { authController } from '../controllers/auth.controller.js'
 import { requireAuth } from '../middlewares/authMiddlewares.js'
 import { clearAuthCookie } from '../middlewares/clearAuthCookie.js'
-import { loginLimiter, registerLimiter } from '../middlewares/rateLimiter.js'
+import {
+  forgotPasswordBroadLimiter,
+  forgotPasswordTargetedLimiter,
+  loginLimiter,
+  registerLimiter,
+} from '../middlewares/rateLimiter.js'
 import { validateBody } from '../middlewares/validateBody.js'
 import { loginSchema, registerSchema } from '../schemas/authSchemas.js'
+import { forgotPasswordSchema, resetPasswordSchema } from '../schemas/passwordReset.schema.js'
+import { passwordResetController } from '../controllers/passwordReset.controller.js'
 
 const router = Router()
 
@@ -13,5 +20,22 @@ router.post('/login', validateBody(loginSchema), loginLimiter, authController.lo
 router.get('/me', requireAuth, authController.userAuth)
 router.post('/register', validateBody(registerSchema), registerLimiter, authController.register)
 router.post('/logout', requireAuth, clearAuthCookie, authController.logout)
+
+// rotas para forgot password
+router.post(
+  '/forgot-password',
+  validateBody(forgotPasswordSchema),
+  forgotPasswordBroadLimiter,
+  forgotPasswordTargetedLimiter,
+  passwordResetController.forgotPassword,
+)
+
+// rotas para reset-password
+router.post(
+  '/reset-password',
+  validateBody(resetPasswordSchema),
+  forgotPasswordBroadLimiter,
+  passwordResetController.resetPassword,
+)
 
 export default router
