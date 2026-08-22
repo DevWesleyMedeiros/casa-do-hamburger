@@ -1,13 +1,15 @@
 import axios from "axios";
+import { type AuthMessageResponse } from "../../../../types/RecoveryPass";
 import { api } from "../ApiConfig";
 import { ApiError } from "../ApiExceptions";
-import { type RecoveryPassResponse } from "../../../../types/recoveryPass";
 
 export const resetPassword = {
-  reset: async (payload: { token: string; newPassword: string }) => {
+  reset: async (payload: {
+    token: string;
+    newPassword: string;
+  }): Promise<AuthMessageResponse> => {
     try {
-      // POST para /auth/reset-password (caminho relativo)
-      const { data } = await api.post<RecoveryPassResponse>(
+      const { data } = await api.post<AuthMessageResponse>(
         "/auth/reset-password",
         payload,
       );
@@ -15,11 +17,12 @@ export const resetPassword = {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const message =
-          error.response?.data?.message ?? "Erro desconhecido ao resetar senha";
+          error.response?.data?.message ??
+          "Erro desconhecido ao redefinir a senha";
         const statusCode = error.response?.status ?? 0;
-        return new ApiError(statusCode, message);
+        throw new ApiError(statusCode, message);
       }
-      return new ApiError(500, "Erro de conexão com o servidor");
+      throw new ApiError(500, "Erro de conexão com o servidor");
     }
   },
 };

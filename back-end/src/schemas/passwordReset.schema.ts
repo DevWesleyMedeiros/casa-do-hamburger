@@ -8,7 +8,7 @@ export const forgotPasswordSchema = z.object({
 const passwordPolicy = z
   .string()
   .min(9, 'Mínimo 9 caracteres')
-  .regex(/[0-9]/, 'A senha deve conter ao menos um número')
+  .regex(/\d+/, 'A senha deve conter ao menos um número') // era /d+/
   .regex(/[!@#$%^&*(),.?":{}|<>]/, 'A senha deve conter ao menos um caractere especial')
   .regex(/[A-Z]/, 'A senha deve conter ao menos uma letra maiúscula')
 
