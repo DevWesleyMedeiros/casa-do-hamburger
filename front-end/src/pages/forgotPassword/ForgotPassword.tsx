@@ -38,7 +38,7 @@ export const ForgotPassword = () => {
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center justify-center bg-[#282724] px-4">
-      <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-white/3 p-8 shadow-2xl shadow-black/40">
+      <div className="rounded-2xl border border-white/10 bg-white/3 p-8 shadow-2xl shadow-black/40">
         {/* Cabeçalho: título + contexto */}
         <div className="mb-6 text-center">
           <h1 className="text-xl font-semibold text-[#F2DAAC]">
@@ -68,10 +68,10 @@ export const ForgotPassword = () => {
             autoComplete="email"
             aria-invalid={!!errors.email}
             aria-describedby={errors.email ? "email-error" : undefined}
-            className="rounded-lg border border-[#F2DAAC]/25 bg-transparent px-3 py-2.5 text-[#F2DAAC] transition-colors focus:border-[#F2DAAC]/60 focus:outline-none"
+            className="mb-1 w-full rounded-lg border border-[#F2DAAC]/25 bg-transparent px-3 py-2.5 text-[#F2DAAC] transition-colors focus:border-[#F2DAAC]/60 focus:outline-none"
           />
           {errors.email && (
-            <span id="email-error" className="mt-1 text-sm text-red-400">
+            <span id="email-error" className="mb-1 text-sm text-red-400">
               {errors.email.message}
             </span>
           )}

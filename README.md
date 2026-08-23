@@ -257,6 +257,9 @@ Abaixo estão algumas telas representativas da experiência atual da aplicação
 | Login              | ![Tela de login](front-end/public/screenshots/logIn-screen.png)                         |
 | Cadastro           | ![Tela de cadastro](front-end/public/screenshots/signUp-screen.png)                     |
 | Validação de senha | ![Senha forte](<front-end/public/screenshots/password-strenght-meter(strong-pass).png>) |
+| Esqueceu a senha? | ![Esqueceu senha](<front-end/public/screenshots/forgot-password-screen.png>) |
+
+| Reset Password Token | ![Reset Password Token](<front-end/public/screenshots/reset-password-token.png>) |
 
 ### Catálogo e experiência principal
 

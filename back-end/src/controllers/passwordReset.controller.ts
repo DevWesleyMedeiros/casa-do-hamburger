@@ -6,7 +6,7 @@ import type { ForgotPasswordInput, ResetPasswordInput } from '../schemas/passwor
 
 const GENERIC_MESSAGE = `Se o e-mail informado estiver cadastrado, você receberá um link de redefinição em instantes.`
 
-// controller responsável por receber do body o e-mail (quando eu clicar no link forgot-password, eu passo um email num input e o envio por uma requisição. Esse email é capitura aqui) e enviar um email com o link de redefinição de senha
+// controller responsável por receber do body o e-mail (quando eu clicar no link forgot-password, eu passo um email num input e o envio por uma requisição. Esse email é capiturado aqui) e envia um email com o link de redefinição de senha
 export const passwordResetController = {
   async forgotPassword(req: Request, res: Response) {
     const { email } = req.body as ForgotPasswordInput
