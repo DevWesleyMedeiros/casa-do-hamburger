@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Input } from "../../components/input/Input";
 import {
@@ -18,6 +18,7 @@ import { resolveApiErrorMessage } from "../../shared/utils/apiErrorMessage";
 export function ResetPassword() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const [tokenError, setTokenError] = useState<boolean>(false);
   const token = searchParams.get("token") ?? "";
 
   const {
@@ -43,6 +44,9 @@ export function ResetPassword() {
               400: "Link inválido ou expirado. Solicite uma nova redefinição.",
             }),
           );
+          if (error.statusCode === 400) {
+            setTokenError(true);
+          }
         } else {
           // Erro fora do formato ApiError (rede, timeout etc.) — ainda assim
           // precisamos avisar o usuário, senão a falha fica silenciosa
@@ -64,6 +68,12 @@ export function ResetPassword() {
           <p className="mt-1.5 text-sm text-[#F2DAAC]/60">
             Solicite uma nova redefinição de senha.
           </p>
+          <Link
+            to="/forgot-password"
+            className="mt-4 inline-block text-sm font-medium text-[#C41E00] transition-opacity hover:opacity-80"
+          >
+            Solicitar novo link →
+          </Link>
         </div>
       </div>
     );
@@ -145,6 +155,18 @@ export function ResetPassword() {
             {isSubmitting ? "Redefinindo..." : "Redefinir senha"}
           </button>
         </form>
+        {/* caso meu token seja inválido */}
+        {tokenError && (
+          <p className="mt-4 text-center text-sm text-[#F2DAAC]/60">
+            Token expirado ou inválido.{" "}
+            <Link
+              to="/forgot-password"
+              className="font-medium text-[#C41E00] transition-opacity hover:opacity-80"
+            >
+              Solicitar novo link
+            </Link>
+          </p>
+        )}
       </div>
     </div>
   );
