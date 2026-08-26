@@ -4,7 +4,8 @@ import { requireAuth } from '../middlewares/authMiddlewares.js'
 import { clearAuthCookie } from '../middlewares/clearAuthCookie.js'
 import {
   forgotPasswordBroadLimiter,
-  forgotPasswordTargetedLimiter,
+  forgotPasswordEmailLimiter,
+  resetPasswordBroadLimiter,
   loginLimiter,
   registerLimiter,
 } from '../middlewares/rateLimiter.js'
@@ -26,7 +27,7 @@ router.post(
   '/forgot-password',
   validateBody(forgotPasswordSchema),
   forgotPasswordBroadLimiter,
-  forgotPasswordTargetedLimiter,
+  forgotPasswordEmailLimiter,
   passwordResetController.forgotPassword,
 )
 
@@ -34,7 +35,7 @@ router.post(
 router.post(
   '/reset-password',
   validateBody(resetPasswordSchema),
-  forgotPasswordBroadLimiter,
+  resetPasswordBroadLimiter,
   passwordResetController.resetPassword,
 )
 
