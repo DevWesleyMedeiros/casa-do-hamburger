@@ -21,6 +21,15 @@ export const userRepository = {
       },
     })
   },
+  async markEmailAsVerified(userId: string) {
+    return prisma.user.update({
+      where: { id: userId },
+      data: {
+        emailVerified: true,
+        emailVerifiedAt: new Date(),
+      },
+    })
+  },
   async updatePasswordHash(userId: string, passwordHash: string) {
     return prisma.user.update({
       where: { id: userId },
