@@ -1,5 +1,5 @@
 import axios from "axios";
-import { type AuthMessageResponse } from "../../../../types/RecoveryPass";
+import { type AuthMessageResponse } from "../../../../types/recoveryPass";
 import { api } from "../ApiConfig";
 import { ApiError } from "../ApiExceptions";
 
