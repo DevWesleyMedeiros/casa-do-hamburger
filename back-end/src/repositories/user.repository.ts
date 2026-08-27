@@ -14,6 +14,26 @@ export const userRepository = {
   },
 
   create: async (data: { name: string; email: string; password: string; cep: string }) => {
-    return await prisma.user.create({ data })
+    return await prisma.user.create({
+      data: {
+        ...data,
+        provider: 'local',
+      },
+    })
+  },
+  async markEmailAsVerified(userId: string) {
+    return prisma.user.update({
+      where: { id: userId },
+      data: {
+        emailVerified: true,
+        emailVerifiedAt: new Date(),
+      },
+    })
+  },
+  async updatePasswordHash(userId: string, passwordHash: string) {
+    return prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash },
+    })
   },
 }

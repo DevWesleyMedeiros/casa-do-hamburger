@@ -8,7 +8,7 @@ export type ColorVariation =
   | "bgDarkVariation"; // ← novo: ação terciária em tema dark
 
 type ButtonType = {
-  title: string;
+  title?: string;
   type: "button" | "submit";
   colorVariation?: ColorVariation;
   children?: React.ReactNode;

@@ -14,8 +14,26 @@ model User {
   cep      String
   password String
   admin    Boolean @default(false)
-  cartItem CartItem[]
-  orders Order[]
+  cartItem CartItem[] // cada usuário pode ter vários itens no carrinho
+  orders Order[] // cada usuário pode ter vários pedidos
+  passwordResetTokens PasswordResetToken[] // cada usuário pode ter vários tokens
+  provider String @default("local")
+
+  emailVerifiedAt DateTime?
+  emailVerified Boolean @default(false)
+  emailVerificationTokens  EmailVerificationToken[]
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model Products {
@@ -90,6 +108,19 @@ model OrderItem{
   subtotal    Int        // unitPrice * quantity, guardado (não recalculado on-the-fly)
 
   @@index([orderId])
+}
+model PasswordResetToken {
+  id String @id @default(uuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String @unique // RN-AUTH-13: só o hash SHA-256, nunca o token cru
+  expiresAt DateTime  // RN-AUTH-14: emitido com now() + 30min
+  usedAt    DateTime? // RN-AUTH-14: marcado no consumo, garante uso único
+  createdAt DateTime  @default(now())
+
+  @@index([userId]) // consulta de tokens ativos para um usuário. Cria um índice de banco de dados na coluna userId. Na prática, isso acelera drasticamente a velocidade de busca e recuperação de registros quando você faz consultas filtrando pelo ID do usuário (como buscar todos os tokens ativos dele), evitando que o banco de dados precise varrer a tabela inteira.
+  
+  @@map("password_reset_tokens") // mapeamento de tabela no banco de dados. Define o nome real da tabela física no banco de dados como password_reset_tokens. Isso permite que você mantenha o padrão PascalCase e no singular no seu código TypeScript/Prisma (PasswordResetToken), enquanto a tabela no banco segue o padrão convencional snake_case e no plural, sem quebrar o mapeamento.
 }
 
 generator Client {

@@ -14,6 +14,18 @@ CANCELLED CANCELLED
     String cep 
     String password 
     Boolean admin 
+    String provider 
+    DateTime emailVerifiedAt "❓"
+    Boolean emailVerified 
+    }
+  
+
+  "EmailVerificationToken" {
+    String id "🗝️"
+    String token 
+    DateTime expiresAt 
+    DateTime usedAt "❓"
+    DateTime createdAt 
     }
   
 
@@ -62,6 +74,16 @@ CANCELLED CANCELLED
     Int subtotal 
     }
   
+
+  "password_reset_tokens" {
+    String id "🗝️"
+    String tokenHash 
+    DateTime expiresAt 
+    DateTime usedAt "❓"
+    DateTime createdAt 
+    }
+  
+    "EmailVerificationToken" }o--|| "User" : "user"
     "ProductsImage" }o--|| "Products" : "product"
     "CartItem" }o--|| "Products" : "product"
     "CartItem" }o--|| "User" : "user"
@@ -69,4 +91,5 @@ CANCELLED CANCELLED
     "Order" |o--|| "OrderStatus" : "enum:status"
     "OrderItem" }o--|| "Order" : "order"
     "OrderItem" }o--|o "Products" : "product"
+    "password_reset_tokens" }o--|| "User" : "user"
 ```
