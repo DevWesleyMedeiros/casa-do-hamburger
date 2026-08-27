@@ -3,8 +3,8 @@
 > **Tipo de documento:** Especificação de Requisitos + Regras de Negócio (BRD/SRS)
 > **Projeto:** Casa do Hambúrguer — Sistema de Pedidos para Hamburgueria (E-commerce de Food Service)
 > **Natureza:** Boilerplate reutilizável para aplicações de e-commerce/pedidos
-> **Versão:** 1.6.0
-> **Status:** Documento vivo — Recuperação de senha via e-mail em andamento (RF-09 🔵→🟡; novos RF-56, RF-57, RNF-27, RN-AUTH-13/14/15); Sprint 2 aberta no Trello (board `projeto-casa-do-hamburguer`); Rate limiting em rotas de autenticação concluído (RF-12, RNF-06); Proposta de Login via Google OAuth 2.0 incorporada (Seções 3.1, 4, 5, 6.1, 6.2, 7, 9); Auditoria de segurança "vibe coding" incorporada (Seção 6.11, correção de contradição A05, Seção 14.2); DTO de User com mapper de saída concluído (RN-DTO-01) e payload de sessão minimizado (RN-DTO-06)
+> **Versão:** 1.7.0
+> **Status:** Documento vivo — Recuperação de senha via e-mail implementada **em partes** (RF-09 permanece 🟡): fluxo `forgot-password` correto e mergeado na `develop` (PR #22), mas `reset-password` tem bug crítico de campo inexistente no schema (`passwordHash` vs `password`) que provavelmente quebra o caminho feliz em produção — ver Changelog 1.7.0 e Seção 6.1. Sprint 2 encerrada no Trello (board `projeto-casa-do-hamburguer`); Rate limiting em rotas de autenticação concluído (RF-12, RNF-06); Proposta de Login via Google OAuth 2.0 incorporada (Seções 3.1, 4, 5, 6.1, 6.2, 7, 9); Auditoria de segurança "vibe coding" incorporada (Seção 6.11, correção de contradição A05, Seção 14.2); DTO de User com mapper de saída concluído (RN-DTO-01) e payload de sessão minimizado (RN-DTO-06)
 
 ---
 
@@ -27,6 +27,7 @@ Selos de status:
 
 | Versão | Data | Mudança |
 | --- | --- | --- |
+| 1.7.0 | 27/08/2026 | **Auditoria pós-merge da branch `feat/RF09-recuperacao-senha` → `develop`** (PR #22, + 2 commits de correção: `ac176ea`, `8b99ebd`). Confirmado no código: `forgot-password` está correto e completo (token opaco SHA-256, resposta genérica anti-enumeração RN-AUTH-15, rate limit dedicado, e-mail via Resend). **Bug crítico encontrado em `reset-password`**: `userRepository.updatePasswordHash` grava no campo `passwordHash`, mas `schema.prisma` nunca foi migrado de `password` para `passwordHash` — o campo não existe no model `User`. A causa raiz é *drift* entre este documento (que já descrevia `passwordHash` no ERD desde a v1.2.0) e o schema real, que ficou para trás. Resultado previsto: `prisma.user.update` lança erro de validação no caminho feliz do reset. Agrava o problema o fato de `passwordReset.controller.ts` ser o único controller do projeto que **não** usa o wrapper `asyncHandler` — logo esse erro não chega ao `errorHandler` global e a requisição trava sem resposta (a rota de token inválido/expirado, que não toca nesse campo, responde normalmente). Como efeito colateral, `passwordResetTokenRepository.markAsUsed` roda em paralelo (`Promise.all`) e pode marcar o token como usado mesmo com a senha não alterada — token "queimado" sem a troca ter ocorrido. **RF-56** (uso único/expiração) mantido 🟡 por causa desse efeito colateral. **RF-57** (bloqueio de contas Google) tem a regra de negócio implementada em `passwordReset.service.ts` (`user.provider === 'GOOGLE'`), mas o cadastro real grava `provider: 'local'` (minúsculo, sem enum) — convenção de capitalização ainda não formalizada, mantido 🟡. Primeira suíte de testes de integração do projeto para este fluxo foi adicionada (`back-end/src/tests/integration/passwordReset.test.ts`, 7 casos) — porém **3 dos 7 casos referenciam campos inexistentes** (`user.passwordHash` em vez de `user.password`; `providerId`, que não existe no schema) e tendem a falhar se executados contra o Prisma Client real, não apenas contra o schema. Identificado também scaffolding não-documentado e não-consumido: model `EmailVerificationToken` + `emailVerificationTokenRepository` + `userRepository.markEmailAsVerified` foram adicionados ao schema/repositórios nesta mesma branch, mas **nenhuma rota/controller os usa** — dívida técnica sem RF correspondente, registrada aqui até virar feature real ou ser removida. Nenhuma mudança de escopo no `forgot-password`; RF-09 permanece 🟡 (não promovido a 🟢) até o bug de `reset-password` ser corrigido e a suíte de testes rodar verde |
 | 1.6.0 | 19/08/2026 | **RF-09** (recuperação de senha via e-mail) entra em desenvolvimento na Sprint 2 (🔵→🟡): fluxo `forgot-password`/`reset-password` com token opaco (hash SHA-256, expira em 30min, uso único). Novos requisitos que a feature arrasta, ainda não previstos no documento: **RF-56** (uso único/expiração do token), **RF-57** (bloqueio do fluxo para contas `provider=GOOGLE`, que não possuem `passwordHash` local — RN-AUTH-10), **RNF-27** (provedor de e-mail transacional dedicado, ex. Resend, nunca SMTP hardcoded), **RN-AUTH-13/14/15** (Seção 6.1: token opaco+hash, expiração/uso único, resposta genérica anti-enumeração — mesma diretriz de US-02/RF-12). Novo model `PasswordResetToken` adicionado ao ERD (Seção 7). Backlog e Sprint 2 abertos no Trello (board `projeto-casa-do-hamburguer`) |
 | 1.0.0 | 19/07/2026 | Documento inicial, gerado por engenharia reversa de requisitos |
 | 1.1.0 | 20/07/2026 | Seção 12 (pontos em aberto) respondida pelo mantenedor; adicionado Módulo de Pagamento (3.6/6.9); adicionadas roles futuras `ATTEND`/`DELIVER`; adicionadas Seção 14 (Estratégia de Testes) e Seção 15 (Governança e Gatilhos de Code Review) |
@@ -101,12 +102,12 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | RF-06 | O sistema deve permitir logout, invalidando o cookie de sessão | 🟢 |
 | RF-07 | O sistema deve impedir cadastro com e-mail já existente | 🟢 |
 | RF-08 | O sistema deve validar formato de e-mail e força mínima de senha no cadastro | 🟢 |
-| RF-09 | O sistema deve permitir recuperação de senha via e-mail (fluxo "esqueci minha senha") | 🟡 |
+| RF-09 | O sistema deve permitir recuperação de senha via e-mail (fluxo "esqueci minha senha") | 🟡 (forgot-password 🟢 / reset-password 🔴 bug — ver Changelog 1.7.0) |
 | RF-10 | O sistema deve permitir edição de dados de perfil (nome, e-mail, avatar) | 🔵 |
 | RF-11 | O sistema deve suportar renovação de token via refresh token (rotação de sessão) | 🔵 |
 | RF-12 | O sistema deve registrar tentativas de login falhas para fins de rate limiting sem persistência auditável | 🟢 |
-| RF-56 🆕 | O token de redefinição de senha deve ser de uso único e expirar 30 minutos após a emissão | 🟡 |
-| RF-57 🆕 | Contas com `provider=GOOGLE` não podem solicitar redefinição de senha local (não possuem `passwordHash` — RN-AUTH-10); o sistema deve orientar o uso do login social nesse caso | 🟡 |
+| RF-56 🆕 | O token de redefinição de senha deve ser de uso único e expirar 30 minutos após a emissão | 🟡 (lógica de expiração/hash correta; risco de token ser marcado usado mesmo sem a senha mudar, por causa do bug de `reset-password` — ver 1.7.0) |
+| RF-57 🆕 | Contas com `provider=GOOGLE` não podem solicitar redefinição de senha local (não possuem `passwordHash` — RN-AUTH-10); o sistema deve orientar o uso do login social nesse caso | 🟡 (checagem implementada no service; convenção `provider` local='local' vs check='GOOGLE' ainda sem enum formal; teste de integração correspondente falha por `providerId` inexistente no schema) |
 | RF-51 🆕 | O sistema deve permitir login/cadastro via **Google OAuth 2.0** ("Entrar com Google") como alternativa ao login local por e-mail/senha | 🔵 |
 | RF-52 🆕 | O backend deve verificar o `id_token` retornado pelo Google (assinatura, `aud`, `iss`, `exp`) antes de criar qualquer sessão — nunca confiar em dados de identidade enviados diretamente pelo frontend | 🔵 |
 | RF-53 🆕 | Contas criadas via Google devem ser persistidas com `provider=GOOGLE` e `password` nulo; contas locais mantêm `provider=LOCAL` | 🔵 |
@@ -197,7 +198,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | RNF-05 | Segurança | Rotas administrativas nunca devem vazar para operações de usuário comum (e vice-versa) | 🟢 |
 | RNF-06 | Segurança | Rate limiting em rotas de autenticação | 🟢 |
 | RNF-07 | Segurança | Proteção CSRF para rotas mutáveis expostas a cookies | 🔵 |
-| RNF-08 | Segurança | Cabeçalhos de segurança HTTP (Helmet: CSP, HSTS, X-Frame-Options) — **bloqueador para considerar A05 (Seção 11) como 🟢** | 🔵 |
+| RNF-08 | Segurança | Cabeçalhos de segurança HTTP (Helmet: CSP, HSTS, X-Frame-Options) — **bloqueador para considerar A05 (Seção 11) como 🟢** | 🟢 (confirmado em `app.ts`: `app.use(helmet())`, mergeado na `develop` via PR #21, antes da branch de RF-09 — este documento estava desatualizado nesse ponto) |
 | RNF-09 | Performance | Imagens devem ser servidas em tamanho adequado ao contexto via transformação de URL (CDN) | 🟢 |
 | RNF-10 | Performance | Estado de servidor deve ter única fonte de verdade (TanStack Query), evitando cache duplicado | 🟢 |
 | RNF-11 | Performance | Consultas frequentes devem ter índices no banco (ex.: `productId`, `userId`, `status`) | 🔵 |
@@ -216,7 +217,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | RNF-24 🆕 | Segurança | O `CLIENT_SECRET` do Google nunca deve ser exposto ao frontend — a troca do `code` por `id_token` ocorre exclusivamente no backend | 🔵 |
 | RNF-25 🆕 | Segurança | O fluxo OAuth deve usar o parâmetro `state` na etapa de redirecionamento para mitigar CSRF | 🔵 |
 | RNF-26 🆕 | Segurança | O projeto **não possui controle de acesso em camada de banco (RLS)** — toda autorização é responsabilidade exclusiva da camada de aplicação (Express). Este é um **risco aceito conscientemente** enquanto o projeto for single-tenant sobre PostgreSQL puro via Prisma (não Supabase/Firebase); ver Seção 6.11 para a análise completa e o plano de mitigação compensatório | 🟢 (documentado) |
-| RNF-27 🆕 | Segurança | Envio de e-mails transacionais (ex.: redefinição de senha) deve usar provedor dedicado (ex.: Resend), nunca SMTP com credenciais hardcoded no código-fonte | 🟡 |
+| RNF-27 🆕 | Segurança | Envio de e-mails transacionais (ex.: redefinição de senha) deve usar provedor dedicado (ex.: Resend), nunca SMTP com credenciais hardcoded no código-fonte | 🟡 (código correto em `resendEmail.service.ts`, API key só via `process.env`; pendência operacional de domínio não verificado no Resend registrada anteriormente, não é bug de código) |
 
 ---
 
@@ -391,8 +392,9 @@ Então o vínculo automático NÃO ocorre, e o sistema orienta o usuário a conf
 | RN-AUTH-11 🔵 🆕 | Vínculo automático de conta (conta local existente + login Google no mesmo e-mail) só ocorre se `email_verified=true` no token do Google; caso contrário, o sistema rejeita o vínculo automático, para evitar *account takeover* |
 | RN-AUTH-12 🔵 🆕 | A rota `/auth/google` deve estar sob o mesmo rate limiter já aplicado às demais rotas de autenticação (RNF-06) |
 | RN-AUTH-13 🟡 🆕 | Token de redefinição de senha é opaco, gerado com `crypto.randomBytes(32)` (256 bits de entropia); apenas seu hash SHA-256 é persistido no banco — o valor em texto puro nunca é armazenado, só existe no e-mail enviado uma única vez |
-| RN-AUTH-14 🟡 🆕 | Token de redefinição expira em 30 minutos e é de uso único (`usedAt` marcado no momento do consumo); expirado ou já usado, o token é rejeitado e uma nova solicitação é obrigatória. Emitir um novo token invalida qualquer token anterior ainda válido do mesmo usuário |
-| RN-AUTH-15 🟡 🆕 | A resposta de `POST /auth/forgot-password` é **sempre genérica** (200, mesma mensagem), independentemente de o e-mail existir na base — mesma diretriz anti-enumeração já corrigida em US-02/RF-12 (v1.3.0) |
+| RN-AUTH-14 🟡 🆕 | Token de redefinição expira em 30 minutos e é de uso único (`usedAt` marcado no momento do consumo); expirado ou já usado, o token é rejeitado e uma nova solicitação é obrigatória. Emitir um novo token invalida qualquer token anterior ainda válido do mesmo usuário. ⚠️ **Bug (v1.7.0):** `markAsUsed` roda em `Promise.all` junto com a troca de senha (`updatePasswordHash`); se a troca falhar por causa do bug de campo inexistente (ver Changelog 1.7.0), o token ainda pode ser marcado como usado — violação sutil da regra "uso único só depois de sucesso real" |
+| RN-AUTH-15 🟢 🆕 | A resposta de `POST /auth/forgot-password` é **sempre genérica** (200, mesma mensagem), independentemente de o e-mail existir na base — mesma diretriz anti-enumeração já corrigida em US-02/RF-12 (v1.3.0). Confirmado em código (`passwordReset.controller.ts`, `ForgotPassword.tsx`) e coberto por 2 dos 7 testes de integração |
+| RN-AUTH-16 🔴 🆕 | A troca efetiva da senha no `reset-password` deve persistir no mesmo campo usado no restante do sistema (`User.password`). **Violação encontrada (v1.7.0):** `userRepository.updatePasswordHash` grava em `data: { passwordHash }`, campo que não existe em `schema.prisma` (o model `User` só tem `password`). Efeito esperado em runtime: `PrismaClientValidationError` no caminho feliz do reset — e como `passwordReset.controller.ts` não usa `asyncHandler` (único controller do projeto nessa situação), o erro não chega ao `errorHandler` global e a requisição trava sem resposta ao invés de devolver um 500 tratado. Bloqueia a promoção de RF-09 para 🟢 |
 
 ### 6.2 Criptografia de Senhas 🟢
 
@@ -650,7 +652,9 @@ erDiagram
 > - `ORDER_ITEM` **não** tem foreign key "viva" para os campos exibidos — são colunas de snapshot, mesmo mantendo `productId` como referência de rastreabilidade.
 > - `CART_ITEM` mantém a constraint `@@unique([userId, productId])` (RN-CART-02).
 > - 🆕 `USER.provider`/`providerId`/`emailVerified` são **propostos** (🔵) para suportar login via Google (RN-AUTH-08 a 12) — `passwordHash` deixa de ser obrigatório.
+> - ⚠️ **v1.7.0 — divergência ERD × schema real:** este ERD já descreve o campo como `passwordHash` desde a v1.2.0, mas `schema.prisma` nunca foi migrado — o campo real no banco continua `password` (String, não opcional). `provider` e `emailVerified`/`emailVerifiedAt` **já existem** de fato no banco (não são mais só propostos), mas `providerId` ainda não existe. É esse *drift* entre este ERD e o schema real que causou o bug de RN-AUTH-16 (Seção 6.1) no `reset-password`.
 > - 🆕 `PASSWORD_RESET_TOKEN` é a entidade nova da RF-09 (🟡, Sprint 2) — só guarda o hash do token (RN-AUTH-13), nunca o valor cru.
+> - 🆕 `EMAIL_VERIFICATION_TOKEN` (v1.7.0): model e repositório existem no banco desde a branch de RF-09, mas **nenhuma rota/controller os consome** hoje — não é uma entidade "proposta" nem "implementada" no sentido funcional, é scaffolding não conectado a nenhum fluxo. Não incluído no diagrama acima até virar feature real (ou ser removido).
 
 ---
 
@@ -829,7 +833,7 @@ graph LR
 | A02 — Cryptographic Failures | bcrypt para senha; JWT assinado; cookies httpOnly/secure | 🟢 |
 | A03 — Injection | Prisma (queries parametrizadas) + Zod na entrada | 🟢 |
 | A04 — Insecure Design | Snapshot Pattern em pedidos; total recalculado no backend | 🔵 |
-| A05 — Security Misconfiguration | Variáveis de ambiente sem hardcode (🟢); Helmet/CSP/HSTS ainda **não implementados** (RNF-08, 🔵) — corrigida contradição da v1.3.0, que marcava este item como concluído citando Helmet | 🟡 |
+| A05 — Security Misconfiguration | Variáveis de ambiente sem hardcode (🟢); Helmet aplicado globalmente em `app.ts` (RNF-08, 🟢 confirmado em código na v1.7.0, PR #21) | 🟢 |
 | A07 — Identification/Auth Failures | Mensagens de erro genéricas no login (🟢); rate limiting em rotas de autenticação (🟢, RNF-06); verificação de `id_token` no login via Google (🔵, RN-AUTH-08/09) | 🟡 |
 | A08 — Software and Data Integrity | Magic bytes na validação de upload | 🟢 |
 | A09 — Logging & Monitoring Failures | Logs estruturados de erro de API | 🔵 |
@@ -874,7 +878,7 @@ graph LR
 
 ## 14. Estratégia de Testes 🆕
 
-> Nenhum teste automatizado existe hoje (confirmado, Seção 12). Esta seção define a estratégia mínima antes de escrever o primeiro teste — pensar a pirâmide antes de codificar evita "testar tudo de qualquer jeito" depois.
+> Esta seção definiu a estratégia mínima antes do primeiro teste do projeto. **Atualização v1.7.0:** já existem 2 suítes de integração (Vitest + Supertest) em `back-end/src/tests/integration/`: `loginLimiter.test.ts` (rate limiting, v1.3.0) e `passwordReset.test.ts` (RF-09, 7 casos). A segunda tem **3 casos que referenciam campos inexistentes no schema** (`passwordHash`, `providerId` — ver Changelog 1.7.0) e tendem a falhar se executados contra o banco real; corrigir isso é pré-requisito para promover RF-09 a 🟢. Ainda não há testes unitários nem E2E.
 
 ### 14.1 Os 3 tipos essenciais (Pirâmide de Testes)
 
