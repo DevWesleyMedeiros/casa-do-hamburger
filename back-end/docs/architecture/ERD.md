@@ -15,6 +15,17 @@ CANCELLED CANCELLED
     String password 
     Boolean admin 
     String provider 
+    DateTime emailVerifiedAt "❓"
+    Boolean emailVerified 
+    }
+  
+
+  "EmailVerificationToken" {
+    String id "🗝️"
+    String token 
+    DateTime expiresAt 
+    DateTime usedAt "❓"
+    DateTime createdAt 
     }
   
 
@@ -72,6 +83,7 @@ CANCELLED CANCELLED
     DateTime createdAt 
     }
   
+    "EmailVerificationToken" }o--|| "User" : "user"
     "ProductsImage" }o--|| "Products" : "product"
     "CartItem" }o--|| "Products" : "product"
     "CartItem" }o--|| "User" : "user"

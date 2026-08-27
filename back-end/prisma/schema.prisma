@@ -18,6 +18,22 @@ model User {
   orders Order[] // cada usuário pode ter vários pedidos
   passwordResetTokens PasswordResetToken[] // cada usuário pode ter vários tokens
   provider String @default("local")
+
+  emailVerifiedAt DateTime?
+  emailVerified Boolean @default(false)
+  emailVerificationTokens  EmailVerificationToken[]
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model Products {
