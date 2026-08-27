@@ -260,6 +260,7 @@ Abaixo estão algumas telas representativas da experiência atual da aplicação
 | Esqueceu a senha? | ![Esqueceu senha](<front-end/public/screenshots/forgot-password-screen.png>) |
 
 | Reset Password Token | ![Reset Password Token](<front-end/public/screenshots/reset-password-token.png>) |
+| Reset Password Token | ![Reset Password Token](<front-end/public/screenshots/reset-password-screen.png>) |
 
 ### Catálogo e experiência principal
 
