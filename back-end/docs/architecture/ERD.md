@@ -1,6 +1,13 @@
 ```mermaid
 erDiagram
 
+        AuthProviders {
+            LOCAL LOCAL
+GOOGLE GOOGLE
+        }
+    
+
+
         OrderStatus {
             PENDING PENDING
 PICKED_UP PICKED_UP
@@ -12,11 +19,15 @@ CANCELLED CANCELLED
     String name 
     String email 
     String cep 
-    String password 
+    String password "❓"
     Boolean admin 
-    String provider 
+    AuthProviders provider 
+    String googleId "❓"
     DateTime emailVerifiedAt "❓"
     Boolean emailVerified 
+    DateTime createdAt 
+    DateTime updatedAt 
+    DateTime deletedAt "❓"
     }
   
 
@@ -83,6 +94,7 @@ CANCELLED CANCELLED
     DateTime createdAt 
     }
   
+    "User" |o--|| "AuthProviders" : "enum:provider"
     "EmailVerificationToken" }o--|| "User" : "user"
     "ProductsImage" }o--|| "Products" : "product"
     "CartItem" }o--|| "Products" : "product"

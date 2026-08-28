@@ -12,16 +12,26 @@ model User {
   name     String
   email    String  @unique
   cep      String
-  password String
+  password String?
   admin    Boolean @default(false)
   cartItem CartItem[] // cada usuário pode ter vários itens no carrinho
   orders Order[] // cada usuário pode ter vários pedidos
   passwordResetTokens PasswordResetToken[] // cada usuário pode ter vários tokens
-  provider String @default("local")
+  provider AuthProviders @default(LOCAL)
+  googleId String?
 
   emailVerifiedAt DateTime?
   emailVerified Boolean @default(false)
   emailVerificationTokens  EmailVerificationToken[]
+
+// vão servir para logs do usuário
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  deletedAt DateTime?
+}
+enum AuthProviders {
+  LOCAL
+  GOOGLE
 }
 
 model EmailVerificationToken {
