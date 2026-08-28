@@ -18,7 +18,7 @@ model User {
   orders Order[] // cada usuário pode ter vários pedidos
   passwordResetTokens PasswordResetToken[] // cada usuário pode ter vários tokens
   provider AuthProviders @default(LOCAL)
-  googleId String?
+  googleId String? // duas constas não podem compartilhar o mesmo uid e nullable porque não tem esse campo preenchido contas via google
 
   emailVerifiedAt DateTime?
   emailVerified Boolean @default(false)
