@@ -18,7 +18,7 @@ CANCELLED CANCELLED
     String id "🗝️"
     String name 
     String email 
-    String cep 
+    String cep "❓"
     String password "❓"
     Boolean admin 
     AuthProviders provider 
