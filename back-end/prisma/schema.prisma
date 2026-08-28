@@ -19,6 +19,7 @@ model User {
   passwordResetTokens PasswordResetToken[] // cada usuário pode ter vários tokens
   provider AuthProviders @default(LOCAL)
   googleId String? // duas constas não podem compartilhar o mesmo uid e nullable porque não tem esse campo preenchido contas via google
+  firebaseUid String? @unique  // cada usuário do firebase tem um uid único
 
   emailVerifiedAt DateTime?
   emailVerified Boolean @default(false)

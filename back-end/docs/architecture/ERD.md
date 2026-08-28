@@ -23,6 +23,7 @@ CANCELLED CANCELLED
     Boolean admin 
     AuthProviders provider 
     String googleId "❓"
+    String firebaseUid "❓"
     DateTime emailVerifiedAt "❓"
     Boolean emailVerified 
     DateTime createdAt 
