@@ -13,6 +13,8 @@ import { validateBody } from '../middlewares/validateBody.js'
 import { loginSchema, registerSchema } from '../schemas/authSchemas.js'
 import { forgotPasswordSchema, resetPasswordSchema } from '../schemas/passwordReset.schema.js'
 import { passwordResetController } from '../controllers/passwordReset.controller.js'
+import { googleAuthController } from '../controllers/googleAuth.controller.js'
+import { googleAuthSchema } from '../schemas/googleAuthSchema.js'
 
 const router = Router()
 
@@ -21,6 +23,11 @@ router.post('/login', validateBody(loginSchema), loginLimiter, authController.lo
 router.get('/me', requireAuth, authController.userAuth)
 router.post('/register', validateBody(registerSchema), registerLimiter, authController.register)
 router.post('/logout', requireAuth, clearAuthCookie, authController.logout)
+
+// rotas para google auth
+router.post('/google', validateBody(googleAuthSchema), googleAuthController.loginWithGoogle)
+
+
 
 // rotas para forgot password
 router.post(
