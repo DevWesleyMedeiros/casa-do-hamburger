@@ -29,10 +29,14 @@ export const authController = {
       return
     }
     const { token, user } = await authService.login(email, password)
+    // na response, eu seto o cookie de sessão com o token
+    // user_section é o nome da sessão e token vem do authService
     res.cookie('user_section', token, {
       httpOnly: true,
       secure: process.env['NODE_ENV'] === 'production',
-      sameSite: 'lax',
+      // secure: true, A propriedade Secure de um cookie é responsável por garantir que o cookie seja transmitido apenas através de conexões criptografadas (HTTPS). Mantê-la desativada até colocarmos o projeto em produção, já que não funcionaria em localhost
+      // sameSite: 'lax', sameSite aqui, com valor lax, define que o cookie só será enviado em solicitações de primeira partidade (não em solicitações de rede interna), ou seja, apenas quando o usuário estiver na mesma origem do site. É o padrão moderno dos navegadores quando o atributo não é declarado. O cookie é restrito, mas é enviado em navegações de nível superior (top-level navigation) que utilizam métodos seguros — por exemplo, quando o usuário clica em um link que direciona para o outro site usando o método GET
+      sameSite: 'none',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     })
     res.status(200).json({ user: toUserDTO(user) })
