@@ -1,20 +1,21 @@
 import { Router } from 'express'
 import { authController } from '../controllers/auth.controller.js'
+import { googleAuthController } from '../controllers/googleAuth.controller.js'
+import { passwordResetController } from '../controllers/passwordReset.controller.js'
 import { requireAuth } from '../middlewares/authMiddlewares.js'
 import { clearAuthCookie } from '../middlewares/clearAuthCookie.js'
 import {
   forgotPasswordBroadLimiter,
   forgotPasswordEmailLimiter,
-  resetPasswordBroadLimiter,
+  googleAuthBroadLimiter,
   loginLimiter,
   registerLimiter,
+  resetPasswordBroadLimiter,
 } from '../middlewares/rateLimiter.js'
 import { validateBody } from '../middlewares/validateBody.js'
 import { loginSchema, registerSchema } from '../schemas/authSchemas.js'
-import { forgotPasswordSchema, resetPasswordSchema } from '../schemas/passwordReset.schema.js'
-import { passwordResetController } from '../controllers/passwordReset.controller.js'
-import { googleAuthController } from '../controllers/googleAuth.controller.js'
 import { googleAuthSchema } from '../schemas/googleAuthSchema.js'
+import { forgotPasswordSchema, resetPasswordSchema } from '../schemas/passwordReset.schema.js'
 
 const router = Router()
 
@@ -25,9 +26,12 @@ router.post('/register', validateBody(registerSchema), registerLimiter, authCont
 router.post('/logout', requireAuth, clearAuthCookie, authController.logout)
 
 // rotas para google auth
-router.post('/google', validateBody(googleAuthSchema), googleAuthController.loginWithGoogle)
-
-
+router.post(
+  '/google',
+  validateBody(googleAuthSchema),
+  googleAuthBroadLimiter,
+  googleAuthController.loginWithGoogle,
+)
 
 // rotas para forgot password
 router.post(
