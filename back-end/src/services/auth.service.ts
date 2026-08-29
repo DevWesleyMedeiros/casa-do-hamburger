@@ -32,7 +32,7 @@ export const authService = {
     // (senão atacante distingue os dois casos por timing: bcrypt ~200ms vs instantâneo).
     const dummyHash = '$2b$10$dXHhLJnhR70QFKD2krJlne9pU3y5gPmCvXrFXipEfaVXP2E0v1uUK'
     const passwordMatch = user
-      ? await compare(password, user.password)
+      ? await compare(password, user?.password ?? dummyHash)
       : await compare(password, dummyHash)
 
     if (!user || !passwordMatch) {

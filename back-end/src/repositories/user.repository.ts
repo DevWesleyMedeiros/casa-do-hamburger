@@ -46,7 +46,7 @@ export const userRepository = {
   },
   // RF-53: cria usuário novo vindo do Google — provider=GOOGLE, password=null.
   // name/email/emailVerified vêm do Firebase ID Token já verificado (nunca do corpo cru da requisição - ver googleAuth.service.ts
-  async createFormGoogle(data: {
+  async createFromGoogle(data: {
     name: string
     email: string
     firebaseUid: string
@@ -67,12 +67,12 @@ export const userRepository = {
   // RF-54 + RN-AUTH-11: vincula uma conta LOCAL existente a uma identidade Google, SEM criar usuário novo. Só deve ser chamado depois que service já confirmou email_verified=true (o gate de segurança fica no service, não aqui — este método só persiste).
   async linkGoogleIdentity(userId: string, firebaseUid: string) {
     return prisma.user.update({
-      where: {id: userId},
+      where: { id: userId },
       data: {
         firebaseUid,
         emailVerified: true,
         emailVerifiedAt: new Date(),
-      }
+      },
     })
-  }
+  },
 }
