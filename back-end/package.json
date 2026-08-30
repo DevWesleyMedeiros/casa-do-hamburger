@@ -5,21 +5,27 @@
   "private": true,
   "version": "1.0.0",
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@faker-js/faker": "^10.5.0",
     "@mermaid-js/mermaid-cli": "^11.16.0",
     "@types/bun": "latest",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
+    "@types/eslint-plugin-security": "^3.0.1",
     "@types/express": "^5.0.6",
     "@types/multer": "^2.2.0",
     "@types/node": "^25.9.1",
     "@types/pg": "^8.20.0",
     "@types/supertest": "^7.2.1",
+    "eslint": "^10.9.1",
+    "eslint-plugin-security": "^4.0.1",
+    "globals": "^17.11.0",
     "prisma": "^7.8.0",
     "prisma-erd-generator": "^2.4.4",
     "puppeteer": "^25.3.0",
     "supertest": "^7.2.2",
     "tsx": "^4.22.3",
+    "typescript-eslint": "^8.68.0",
     "vitest": "^4.1.10"
   },
   "scripts": {
@@ -33,7 +39,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:integration": "vitest run tests/integration"
+    "test:integration": "vitest run tests/integration",
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix",
+    "pretest": "bun run lint"
   },
   "peerDependencies": {
     "typescript": "^6.0.3"
