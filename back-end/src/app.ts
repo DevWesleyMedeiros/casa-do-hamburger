@@ -1,4 +1,3 @@
-// src/app.ts
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import express from 'express'
@@ -40,6 +39,8 @@ app.use('/auth', cartRoutes)
 
 // registrar rota do GoogleAuth
 app.use('/auth', googleAuthRoutes)
+
+console.log('errorHandler no momento do use:', typeof errorHandler, errorHandler)
 
 app.use(errorHandler)
 // middleware que vai sempre por último — Express só invoca middleware de 4 parâmetros depois de todas as rotas
