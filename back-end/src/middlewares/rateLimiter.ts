@@ -127,7 +127,6 @@ export const resetPasswordBroadLimiter = rateLimit({
 })
 
 // rate-limiter para google auth RN-AUTH-12: /auth/google já aplicado às demais rotas de autenticação (RNF-06). Aqui Sem chave "targeted, uma vez que por o e-mail só é conhecido DEPOIS de verificar o Firebase ID Token (não vem legível no corpo da requisição, que só tem `idToken`). Por isso: só a camada broad (por IP).
-
 export const googleAuthBroadLimiterStore = new MemoryStore()
 export const googleAuthBroadLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,

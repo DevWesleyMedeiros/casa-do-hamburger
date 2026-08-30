@@ -82,7 +82,7 @@ export const googleAuthService = {
   },
 }
 
-// Extraído porque os 3 branches acima (login direto, criação, vínculo) terminam do mesmo jeito: assinar o MESMO formato de JWT que o login local usa (RF-55) — repetir esse bloco 3x seria a violação de DRY que o que desrespeitaria o Clean Code da skill de arquitetura pede pra evitar.
+// Extraído porque os 3 branches acima (login direto, criação, vínculo) terminam do mesmo jeito: assinar o MESMO formato de JWT que o login local usa (RF-55) — repetir esse bloco 3x seria a violação de DRY que o que desrespeitaria o Clean Code da skill de arquitetura pede pra evitar
 async function signSessionJwt(user: User): Promise<string> {
   return new jose.SignJWT(toJwtPayloadDTO(user))
     .setProtectedHeader({ alg: 'HS256' })

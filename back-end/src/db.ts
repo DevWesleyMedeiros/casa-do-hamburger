@@ -1,7 +1,7 @@
 // arquivo que conecta meu cliente prisma com meu backend
 
-import 'dotenv/config'
 import { PrismaPg } from '@prisma/adapter-pg'
+import 'dotenv/config'
 import { PrismaClient } from '../generated/prisma/index.js'
 
 const connectionString = `${process.env['DATABASE_URL']}`
@@ -18,8 +18,8 @@ export { prisma }
 export async function connection() {
   try {
     await prisma.$connect()
-    console.log('Conectado com o meu Banco de Dados')
+    console.warn('Conectado com o meu Banco de Dados')
   } catch (error) {
-    console.log(error)
+    console.error(error)
   }
 }

@@ -1,0 +1,12 @@
+// extensão do tsconfig.json para o vitest. Ou seja, aqui eu setup o ambiente de teste
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // "types": ["vitest/globals"],
+    // "typeRoots": ["./types", "./node_modules/@types", "./node_modules"],
+  },
+  "include": [
+    "./vitest.config.ts",
+    "./tests/**/*.test.ts"
+  ]
+}

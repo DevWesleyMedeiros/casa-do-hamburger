@@ -1,20 +1,17 @@
 import { Router } from 'express'
 import { authController } from '../controllers/auth.controller.js'
-import { googleAuthController } from '../controllers/googleAuth.controller.js'
 import { passwordResetController } from '../controllers/passwordReset.controller.js'
 import { requireAuth } from '../middlewares/authMiddlewares.js'
 import { clearAuthCookie } from '../middlewares/clearAuthCookie.js'
 import {
   forgotPasswordBroadLimiter,
   forgotPasswordEmailLimiter,
-  googleAuthBroadLimiter,
   loginLimiter,
   registerLimiter,
   resetPasswordBroadLimiter,
 } from '../middlewares/rateLimiter.js'
 import { validateBody } from '../middlewares/validateBody.js'
 import { loginSchema, registerSchema } from '../schemas/authSchemas.js'
-import { googleAuthSchema } from '../schemas/googleAuthSchema.js'
 import { forgotPasswordSchema, resetPasswordSchema } from '../schemas/passwordReset.schema.js'
 
 const router = Router()
@@ -24,14 +21,6 @@ router.post('/login', validateBody(loginSchema), loginLimiter, authController.lo
 router.get('/me', requireAuth, authController.userAuth)
 router.post('/register', validateBody(registerSchema), registerLimiter, authController.register)
 router.post('/logout', requireAuth, clearAuthCookie, authController.logout)
-
-// rotas para google auth
-router.post(
-  '/google',
-  validateBody(googleAuthSchema),
-  googleAuthBroadLimiter,
-  googleAuthController.loginWithGoogle,
-)
 
 // rotas para forgot password
 router.post(

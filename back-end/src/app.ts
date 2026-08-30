@@ -8,6 +8,7 @@ import { errorHandler } from './middlewares/errorHandler.js'
 import authRoutes from './routes/auth.routes.js'
 import cartRoutes from './routes/cart.routes.js'
 import productsRoutes from './routes/products.routes.js'
+import googleAuthRoutes from './routes/googleAuth.routes.js'
 
 // conection linka o backend com o banco de dados. Deve ser a primeira linha
 connection()
@@ -36,6 +37,9 @@ app.use(cookieParser())
 app.use('/auth', authRoutes)
 app.use('/auth', productsRoutes)
 app.use('/auth', cartRoutes)
+
+// registrar rota do GoogleAuth
+app.use('/auth', googleAuthRoutes)
 
 app.use(errorHandler)
 // middleware que vai sempre por último — Express só invoca middleware de 4 parâmetros depois de todas as rotas

@@ -1,9 +1,11 @@
 {
   "compilerOptions": {
+    // "typeRoots": ["./types", "./node_modules/@types", "./node_modules"],
+    // "types": ["vitest/globals"],
     "ignoreDeprecations": "6.0",
     "lib": ["ESNext"],
     "target": "esnext",
-    "module": "Nodenext",
+    "module": "NodeNext",
     "moduleDetection": "auto",
     "allowJs": true,
     "strict": true,
@@ -22,7 +24,7 @@
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noUncheckedIndexedAccess": true,
-    "moduleResolution": "nodenext"
+    "moduleResolution": "NodeNext"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
