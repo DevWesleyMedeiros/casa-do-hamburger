@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from 'express'
-import { ZodType } from 'zod'
+import type { ZodType } from 'zod'
 
 export const validateBody = (schema: ZodType) => {
   return (req: Request, res: Response, next: NextFunction): Response | void => {

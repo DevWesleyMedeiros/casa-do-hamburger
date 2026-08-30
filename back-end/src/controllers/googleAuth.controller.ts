@@ -3,7 +3,7 @@
  * Reaproveita literalmente as mesmas opções de cookie do login local
  * (httpOnly, secure condicional a NODE_ENV, sameSite, maxAge de 7 dias) — é assim que RF-55 fica garantido no código, não só na regra de negócio.
  */
-import { Request, Response } from 'express'
+import type { Request, Response } from 'express'
 import { toUserDTO } from '../dtos/user.dto.js'
 import { googleAuthService } from '../services/google/googleAuth.service.js'
 import { asyncHandler } from '../utils/asyncHandler.js'

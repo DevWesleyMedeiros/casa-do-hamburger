@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+import type { Request, Response } from 'express'
 import { passwordResetService } from '../services/passwordReset.service.js'
 import type { ForgotPasswordInput, ResetPasswordInput } from '../schemas/passwordReset.schema.js'
 

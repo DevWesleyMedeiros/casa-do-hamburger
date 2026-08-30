@@ -1,5 +1,5 @@
 // src/dto/cartItem.dto.ts
-import { CartItem, Products, ProductsImage } from '../../generated/prisma/index.js'
+import type { CartItem, Products, ProductsImage } from '../../generated/prisma/index.js'
 import { toProductDTO } from './product.dto.js'
 
 type CartItemWithProduct = CartItem & {

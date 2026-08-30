@@ -1,7 +1,7 @@
 import { productsRepository } from '../repositories/products.repositories.js'
 import { uploadImageToCloudinary } from './uploads/cloudinary.service.js'
 import { AppError } from '../errors/AppError.js'
-import { CreateProductInput } from '../schemas/products.schemas.js'
+import type { CreateProductInput } from '../schemas/products.schemas.js'
 
 export const productService = {
   async createProduct(data: CreateProductInput, file?: Express.Multer.File) {

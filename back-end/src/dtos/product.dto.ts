@@ -1,4 +1,4 @@
-import { Products, ProductsImage } from '../../generated/prisma/index.js'
+import type { Products, ProductsImage } from '../../generated/prisma/index.js'
 import { buildImageVariants } from '../services/uploads/cloudinaryURLBuilder.service.js'
 
 type ProductWithImages = Products & { images: ProductsImage[] }
@@ -15,4 +15,3 @@ export const toProductDTO = (product: ProductWithImages) => ({
     variants: buildImageVariants(img.key),
   })),
 })
-
