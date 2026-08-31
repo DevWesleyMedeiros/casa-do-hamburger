@@ -35,3 +35,8 @@ export type UserContextTypes = {
   // O setUser não é uma função qualquer — ela é um Dispatch, ou seja, uma função que despacha uma atualização de estado para o React processar.
   //Basicamente quando você passa o setter do useState como prop ou dentro de um contexto.
 };
+
+// GoogleAuthRequest é o tipo do payload do POST /auth/google
+export interface GoogleLoginPayloadInterface {
+  idToken: string
+}
