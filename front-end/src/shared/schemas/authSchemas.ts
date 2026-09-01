@@ -48,6 +48,15 @@ export const registerSchema = z
     message: "As senhas não coincidem",
     path: ["confirmPassword"], // aponta o erro no campo confirmPassword
   });
+  export const googleAuthTokenSchema = z.object({
+    // O Firebase ID Token do usuário do Google
+    idToken: z
+      .string()
+      .nonempty()
+      .min(1, "Token do Google é obrigatório")
+      .trim(),
+  });
+  export type GoogleAuthRequest = z.infer<typeof googleAuthTokenSchema>;
 
 // tipo inferido automaticamente do schema
 // RegisterInput = { name: string, email: string, password: string, confirmPassword: string, cep: string }

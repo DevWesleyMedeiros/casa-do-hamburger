@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom";
@@ -14,9 +14,17 @@ import { LoginDate } from "../../shared/services/api/login/Login";
 import { queryKeys } from "../../constant/queryKeys";
 import { useQueryClient } from "@tanstack/react-query";
 
+// import login firebase
+import {
+  signInWithGoogleRedirect,
+  getGoogleRedirectResult,
+} from "../../shared/config/firebase";
+import { GoogleLoginDate } from "../../shared/services/api/login/googleLogin";
+
 export const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [backendError, setBackendError] = useState<string | null>(null);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -68,6 +76,145 @@ export const Login = () => {
     },
     [navigate, reset, queryClient],
   );
+
+  // Fecha o ciclo do login Google: manda o idToken pro backend e trata a
+  // resposta. Extraído do handler de clique porque agora também é chamado
+  // pelo useEffect (retorno do redirect), não só por interação direta.
+  const finishGoogleLogin = useCallback(
+    async (idToken: string) => {
+      setIsGoogleLoading(true);
+      setBackendError(null);
+      try {
+        const result = await GoogleLoginDate.create({ idToken });
+
+        if (result instanceof ApiError) {
+          if (result.statusCode === 409) {
+            setBackendError("Usuário já cadastrado");
+            return;
+          } else if (result.statusCode === 401) {
+            setBackendError(
+              "Não foi possível confirmar sua conta Google. Tente novamente",
+            );
+            return;
+          } else {
+            setBackendError(result.message);
+            return;
+          }
+        }
+
+        toast("Login realizado");
+        queryClient.setQueryData(queryKeys.me, result.user);
+        reset();
+        navigate("/home");
+      } catch {
+        setBackendError("Ocorreu um erro inesperado. Tente novamente.");
+      } finally {
+        setIsGoogleLoading(false);
+      }
+    },
+    [navigate, reset, queryClient],
+  );
+
+  // Roda no mount da página. Quando o Google redireciona de volta pro app, esta página remonta — é aqui, não no clique do botão, que o idToken realmente chega. Em visita normal (sem redirect pendente),
+  // getGoogleRedirectResult() resolve pra null e não faz nada.
+  useEffect(() => {
+    let isMounted = true;
+
+    (async () => {
+      try {
+        const idToken = await getGoogleRedirectResult();
+        if (idToken && isMounted) {
+          await finishGoogleLogin(idToken);
+        }
+      } catch {
+        if (isMounted) {
+          setBackendError("Ocorreu um erro inesperado. Tente novamente.");
+        }
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Dispara o redirect pro Google. Não trate "sucesso" aqui — a página é descartada nesta chamada; quem processa a volta é o useEffect acima.
+  const handleGoogleLogin = useCallback(async () => {
+    setIsGoogleLoading(true);
+    setBackendError(null);
+    try {
+      await signInWithGoogleRedirect();
+    } catch {
+      setBackendError("Ocorreu um erro inesperado. Tente novamente.");
+      setIsGoogleLoading(false);
+    }
+  }, []);
+
+  // --- Versão anterior (signInWithPopup) — mantida comentada de propósito.
+  // Volta a ser a versão ativa quando o popup for reabilitado (também exige
+  // trocar de volta o import lá em cima, de signInWithGoogleRedirect/
+  // getGoogleRedirectResult pra signInWithGooglePopup, e descomentar o
+  // export correspondente em firebase.ts). Até lá, o fluxo em uso é o de
+  // cima (signInWithGoogleRedirect + useEffect).
+  // const handleGoogleLogin = useCallback(async () => {
+  //   setIsGoogleLoading(true);
+  //   setBackendError(null);
+  //   try {
+  //     const idToken = await signInWithGooglePopup(); // ← nome corrigido, bate com o import
+  //     const result = await GoogleLoginDate.create({ idToken });
+
+  //     if (result instanceof ApiError) {
+  //       if (result.statusCode === 409) {
+  //         setBackendError("Usuário já cadastrado");
+  //         return;
+  //       } else if (result.statusCode === 401) {
+  //         setBackendError(
+  //           "Não foi possível confirmar sua conta Google. Tente novamente",
+  //         );
+  //         return;
+  //       } else {
+  //         setBackendError(result.message);
+  //         return;
+  //       }
+  //     }
+
+  //     toast("Login realizado");
+  //     queryClient.setQueryData(queryKeys.me, result.user);
+  //     reset();
+  //     navigate("/home");
+  //   } catch {
+  //     setBackendError("Ocorreu um erro inesperado. Tente novamente.");
+  //   } finally {
+  //     setIsGoogleLoading(false);
+  //   }
+  // }, [navigate, reset, queryClient]);
+
+  // const handleGoogleLogin = useCallback(async () => {
+  //   setIsGoogleLoading(true);
+  //   setBackendError(null);
+  //   try {
+  //     const idToken = await handleRedirectResult();
+  //     if (!idToken) return;
+  //     const result = await GoogleLoginDate.create({ idToken });
+  //     if (result instanceof ApiError) {
+  //       if (result.statusCode === 409) {
+  //         setBackendError("Usuário já cadastrado");
+  //         return;
+  //       } else if (result.statusCode === 401) {
+  //         setBackendError(
+  //           "Não foi possível confirmar sua conta Google. Tente novamente",
+  //         );
+  //         return;
+  //       } else {
+  //         setBackendError(result.message);
+  //         return;
+  //       } catch {
+  //         setBackendError("Ocorreu um erro inesperado. Tente novamente.");
+  //       } finally {
+  //         setBackendError(false)
+  //       }
+  //   })
 
   const togglePasswordVisibility = useCallback(() => {
     setShowPassword((prev) => !prev);
@@ -162,7 +309,6 @@ export const Login = () => {
                   {errors.password.message}
                 </p>
               )}
-              {/* erro vindo do backend (401/404/500) — desacoplado dos erros de validação do Zod */}
               {backendError && (
                 <p
                   role="alert"
@@ -172,9 +318,6 @@ export const Login = () => {
                 </p>
               )}
 
-              {/* Links de recuperação de senha: "Esqueceu senha" dispara o fluxo por e-mail (RF-09);
-                "Redefinir senha" leva direto para a tela de nova senha — só funciona com um token
-                válido na URL (?token=...), então é útil sobretudo em ambiente de dev/QA. */}
               <div className="mt-1 flex items-center justify-end gap-3 text-xs">
                 <Link className="text-brand-amber" to="/forgot-password">
                   Esqueceu senha
@@ -201,9 +344,10 @@ export const Login = () => {
 
             <Button
               type="button"
-              title="Cadastrar com Google"
+              title={isGoogleLoading ? "Conectando..." : "Entrar com Google"}
               colorVariation="bgGoogleVariation"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isGoogleLoading}
+              onClick={handleGoogleLogin}
             >
               <FcGoogle size={ICON_CONFIG.mxSize} />
             </Button>
