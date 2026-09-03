@@ -33,9 +33,21 @@ export const googleAuthService = {
     // Awaited<...>: Desembrulha a Promise. Se o retorno era Promise<DadosDoUsuario>, o Awaited transforma isso apenas em DadosDoUsuario (o valor real que sobra após o await).
     // O código valida o token do usuário e salva o resultado na variável decoded. Graças à tipagem utilizada, se você digitar decoded. no seu editor de código, o autocomplete mostrará exatamente as propriedades que existem dentro do token (como uid, email, name, etc.), mantendo seu código seguro e livre de erros de digitação.
     try {
+      console.log(
+        '[GoogleAuth] Iniciando verificação do token Firebase:',
+        idToken.substring(0, 20) + '...',
+      )
       decoded = await verifyFirebaseIdToken(idToken)
-      // Chama uma função do Firebase Admin SDK, verifyIdToken, para verifica o token do usuário é valido.
-    } catch {
+      console.log(
+        '[GoogleAuth] Token verificado com sucesso. UID:',
+        decoded.uid,
+        'Email:',
+        decoded.email,
+        'Email verificado:',
+        decoded.email_verified,
+      )
+    } catch (error) {
+      console.error('[GoogleAuth] Erro ao verificar token Firebase:', error)
       // Token expirado, assinatura inválida, revogado, ou malformado — todos os casos viram a mesma resposta genérica pro cliente (não vale a pena diferenciar: não é dado sensível de conta, é sempre "tenta de novo o login com Google").
       throw new AppError(401, 'Autenticação com Google inválida ou expirada')
     }
@@ -49,21 +61,26 @@ export const googleAuthService = {
     // Já existe usuário vinculado a esse firebaseUid? → login direto,
     // não passa pelo RN-AUTH-11 de novo (o vínculo já foi decidido antes).
     const byFirebaseUid = await userRepository.findByFirebaseUid(decoded.uid)
+    console.log('[GoogleAuth] Usuário encontrado por firebaseUid:', !!byFirebaseUid)
     if (byFirebaseUid) {
+      console.log('[GoogleAuth] Login direto para usuário existente:', byFirebaseUid.id)
       return { user: byFirebaseUid, token: await signSessionJwt(byFirebaseUid) }
     }
 
     // Primeira vez desse firebaseUid — procura por e-mail para decidir
     // entre "criar conta nova" (RF-53) e "vincular a existente" (RF-54).
     const byEmail = await userRepository.findByEmail(decoded.email)
+    console.log('[GoogleAuth] Usuário encontrado por e-mail:', !!byEmail)
 
     if (!byEmail) {
+      console.log('[GoogleAuth] Criando novo usuário Google:', decoded.email)
       const newUser = await userRepository.createFromGoogle({
         name: decoded['name'] ?? decoded.email.split('@')[0] ?? 'Usuário Google',
         email: decoded.email,
         firebaseUid: decoded.uid,
         emailVerified: decoded.email_verified ?? false,
       })
+      console.log('[GoogleAuth] Novo usuário criado com ID:', newUser.id)
       return { user: newUser, token: await signSessionJwt(newUser) }
     }
 
@@ -78,6 +95,7 @@ export const googleAuthService = {
     }
 
     const linkedUser = await userRepository.linkGoogleIdentity(byEmail.id, decoded.uid)
+    console.log('[GoogleAuth] Conta local vinculada ao Google. ID:', linkedUser.id)
     return { user: linkedUser, token: await signSessionJwt(linkedUser) }
   },
 }

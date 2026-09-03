@@ -5,6 +5,7 @@
  * - login: delega a validação de credenciais ao authService, seta o JWT
  *   (só dado de sessão) no cookie httpOnly, e responde com o PERFIL do
  *   usuário (toUserDTO) — nunca o token nem o User completo do Prisma.
+ * 
  * - register: cria o usuário via authService e responde com o perfil
  *   (toUserDTO) — nunca o User cru, que ainda carrega o hash da senha.
  * - userAuth (rota /me): NÃO confia em req.user para montar a resposta —
@@ -35,8 +36,8 @@ export const authController = {
       httpOnly: true,
       secure: process.env['NODE_ENV'] === 'production',
       // secure: true, A propriedade Secure de um cookie é responsável por garantir que o cookie seja transmitido apenas através de conexões criptografadas (HTTPS). Mantê-la desativada até colocarmos o projeto em produção, já que não funcionaria em localhost
-      // sameSite: 'lax', sameSite aqui, com valor lax, define que o cookie só será enviado em solicitações de primeira partidade (não em solicitações de rede interna), ou seja, apenas quando o usuário estiver na mesma origem do site. É o padrão moderno dos navegadores quando o atributo não é declarado. O cookie é restrito, mas é enviado em navegações de nível superior (top-level navigation) que utilizam métodos seguros — por exemplo, quando o usuário clica em um link que direciona para o outro site usando o método GET
-      sameSite: 'none',
+      sameSite: 'lax', // sameSite aqui, com valor lax, define que o cookie só será enviado em solicitações de primeira partidade (não em solicitações de rede interna), ou seja, apenas quando o usuário estiver na mesma origem do site. É o padrão moderno dos navegadores quando o atributo não é declarado. O cookie é restrito, mas é enviado em navegações de nível superior (top-level navigation) que utilizam métodos seguros — por exemplo, quando o usuário clica em um link que direciona para o outro site usando o método GET
+      // sameSite: 'none',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     })
     res.status(200).json({ user: toUserDTO(user) })
@@ -50,8 +51,13 @@ export const authController = {
 
   // quando acesso a rota "/me" o payload jwt separado do perfil
   userAuth: asyncHandler(async (req: Request, res: Response) => {
-    const jwtPayload = req.user // vem do token: só { id, admin }
-    const user = await userRepository.findById(jwtPayload.id)
+    const jwtPayload = req.user as { id: string; admin: boolean } // vem do token: só { id, admin }
+
+    if (!jwtPayload || typeof jwtPayload !== 'object' || !('id' in jwtPayload)) {
+      res.status(401).json({ message: 'Usuário não autenticado' })
+      return
+    }
+    const user = await userRepository.findById(String(jwtPayload['id']))
     if (!user) {
       res.status(404).json({ message: 'Usuário não encontrado' })
       return

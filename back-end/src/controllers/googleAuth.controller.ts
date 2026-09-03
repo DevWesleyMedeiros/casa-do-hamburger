@@ -18,14 +18,14 @@ export const googleAuthController = {
       throw new Error('idToken não enviado')
     }
     const { token, user } = await googleAuthService.loginWithGoogle(idToken)
-
     // gerar um cookie de sessão após decodificarmos o JWT vindo do Firebase
+    const isProduction = process.env['NODE_ENV'] === 'production'
     res.cookie('user_section', token, {
       httpOnly: true,
-      secure: process.env['NODE_ENV'] === 'production',
-      sameSite: 'none',
-      maxAge: 7 * 24 * 60 * 1000,
+      secure: isProduction, // required para sameSite: 'none'
+      sameSite: isProduction ? 'none' : 'lax', // usa none só em produção (HTTPS), lax em dev
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     })
-    res.json({ token, user: toUserDTO(user) })
+    res.json({ user: toUserDTO(user) }) // não retorna token no corpo, só no cookie (segurança)
   }),
 }

@@ -1,5 +1,6 @@
 // Isso garante que saibamos exatamente o formato dos dados que transitam na aplicação.
 // usados aqui somente para payloads da nossa api
+// payload para login
 export interface LoginPayloadInterface {
   email: string;
   password: string;
@@ -13,19 +14,16 @@ export interface RegisterPayloadInterface {
   cep: string;
 }
 
-// UserLogin pega a interface RegisterPayloadInterface, omit duas propriedades: "password" e "confirmPassword" e cria mais um id e admin
-// UserLogin = { id: string, name: string, email: string, cep: string}
-export type UserLogin = Omit<
-  RegisterPayloadInterface,
-  "password" | "confirmPassword"
-> & {
+// UserLogin bate exatamente com o UserDTO retornado pelo backend: id, name, email, admin
+// O backend não retorna mais 'cep' no DTO de perfil do usuário
+export type UserLogin = {
   id: string;
+  name: string;
+  email: string;
   admin: boolean;
 };
 
-export type UserDate = Pick<LoginPayloadInterface, "email"> &
-  Pick<RegisterPayloadInterface, "name"> &
-  Pick<UserLogin, "admin">;
+export type UserDate = UserLogin; // Mantém a mesma estrutura do UserLogin, já que é o mesmo tipo de dados de usuário
 
 export type UserContextTypes = {
   user: UserDate | null;
@@ -38,5 +36,5 @@ export type UserContextTypes = {
 
 // GoogleAuthRequest é o tipo do payload do POST /auth/google
 export interface GoogleLoginPayloadInterface {
-  idToken: string
+  idToken: string;
 }

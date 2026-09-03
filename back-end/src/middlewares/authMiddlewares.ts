@@ -27,13 +27,29 @@ export const requireAuth = async (
   next: NextFunction,
 ): Promise<Response | void> => {
   const token = req.cookies?.['user_section']
+  console.log(
+    '[requireAuth] Rota acessada:',
+    req.path,
+    'Cookies recebidos:',
+    Object.keys(req.cookies || {}),
+    'Token presente:',
+    !!token,
+  )
 
   if (!token) {
+    console.error('[requireAuth] Cookie user_section não encontrado na requisição')
     return res.status(401).json({ message: 'Usuário não autentificado' })
   }
 
   try {
+    console.log('[requireAuth] Verificando assinatura do JWT...')
     const { payload } = await jose.jwtVerify(token, getJwtSecret())
+    console.log(
+      '[requireAuth] JWT verificado com sucesso. User ID:',
+      payload['id'],
+      'Admin:',
+      payload['admin'],
+    )
 
     req['user'] = {
       id: payload['id'],
@@ -43,6 +59,7 @@ export const requireAuth = async (
     next()
     return
   } catch (error: unknown) {
+    console.error('[requireAuth] Erro ao verificar JWT:', error)
     if (error instanceof jose.errors.JWTExpired) {
       const err = new AppError(401, 'Token expirado')
       return res.status(401).json({ status: err.status, message: err.message })

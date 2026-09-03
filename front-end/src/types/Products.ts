@@ -1,12 +1,13 @@
 import type { ProductImage } from "./ProductImage";
 
-// types para interface de produtos
+// Tipo exato correspondente ao DTO do backend (toProductDTO)
 export interface ProductsInterface {
   id: string;
-  category: string;
   name: string;
   description: string;
   price: number;
+  category: string;
   images: ProductImage[];
-  createAt?: Date;
 }
+
+export type ProductCategory = "hamburguer" | "bebidas" | "porções";

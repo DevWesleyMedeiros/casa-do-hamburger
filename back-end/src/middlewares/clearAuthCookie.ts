@@ -11,10 +11,10 @@ export const clearAuthCookie = async (
   res.clearCookie('user_section', {
     httpOnly: true,
     secure: process.env['NODE_ENV'] === 'production',
-    // sameSite: 'lax',
+    sameSite: 'lax',
     // deploy no railway e no vercel não funcionará com sameSite: lax e security no valor de produção
     // secure: true,
-    sameSite: 'none', // permite o envio do cookie em qualquer requisição entre sites diferentes (inclusive em requisições em segundo plano como fetch ou iframe
+    // sameSite: 'none', // permite o envio do cookie em qualquer requisição entre sites diferentes (inclusive em requisições em segundo plano como fetch ou iframe
     // Comportamento: O navegador envia o cookie em solicitações cruzadas (cross-site) sem restrições de origem.
     // Exigência obrigatória: Precisa obrigatoriamente estar acompanhado do atributo Secure (exigindo conexão HTTPS), caso contrário será rejeitado pelos navegadores.
   })

@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { Eye, EyeOff } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -8,16 +9,15 @@ import { toast } from "sonner";
 import { Button } from "../../components/button/Button";
 import { Input } from "../../components/input/Input";
 import { ICON_CONFIG } from "../../constant/iconConfig";
+import { queryKeys } from "../../constant/queryKeys";
 import { loginSchema, type loginInput } from "../../shared/schemas/authSchemas";
 import { ApiError } from "../../shared/services/api/ApiExceptions";
 import { LoginDate } from "../../shared/services/api/login/Login";
-import { queryKeys } from "../../constant/queryKeys";
-import { useQueryClient } from "@tanstack/react-query";
 
 // import login firebase
 import {
-  signInWithGoogleRedirect,
   getGoogleRedirectResult,
+  signInWithGoogleRedirect,
 } from "../../shared/config/firebase";
 import { GoogleLoginDate } from "../../shared/services/api/login/googleLogin";
 
@@ -98,6 +98,9 @@ export const Login = () => {
             return;
           } else {
             setBackendError(result.message);
+            console.log(result);
+            console.log(result.statusCode);
+            console.log(result.message);
             return;
           }
         }

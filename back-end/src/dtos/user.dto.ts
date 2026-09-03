@@ -9,7 +9,7 @@ import type { User } from '../../generated/prisma/index.js'
  *
  * Usado sempre que o usuário completo (vindo do Prisma) precisa virar
  * resposta de API: login, register, /me. NÃO é usado para montar o JWT
- * — para isso existe o toJwtPayloadDTO (ver toJwtPayloadDTO.ts).
+ * — para isso existe o toJwtPayloadDTO (ver toJwtPayloadDTO.ts)
  */
 export type UserDTO = Pick<User, 'id' | 'name' | 'email' | 'admin'>
 

@@ -6,8 +6,8 @@ import { connection } from './db.js'
 import { errorHandler } from './middlewares/errorHandler.js'
 import authRoutes from './routes/auth.routes.js'
 import cartRoutes from './routes/cart.routes.js'
-import productsRoutes from './routes/products.routes.js'
 import googleAuthRoutes from './routes/googleAuth.routes.js'
+import productsRoutes from './routes/products.routes.js'
 
 // conection linka o backend com o banco de dados. Deve ser a primeira linha
 connection()
@@ -22,11 +22,24 @@ app.disable('x-powered-by') // desabilita o header X-Powered-By, que contém a v
 app.set('trust proxy', 1)
 app.use(helmet())
 
-// coors no top antes de toda resposta
+// CORS no top antes de toda resposta
+const allowedOrigins =
+  process.env['NODE_ENV'] === 'production'
+    ? [process.env['FRONTEND_URL'] || '']
+    : ['http://localhost:5173', 'http://localhost:5174', 'http://127.0.0.1:5173']
+
 app.use(
   cors({
-    origin: 'http://localhost:5173', // URL do front-end ajustar conforme necessário. Isso faz com que o navegador permita que o front-end faça requisições para o back-end mesmo estando em domínios diferentes (CORS). Vai aceitar requisições dessa origem específica, ou seja, do front-end rodando localmente na porta 5173. Se for para produção, ajuste para a URL do seu front-end em produção.
-    credentials: true, // permite envio de cookies do front-end para o back-end, necessário para autenticação baseada em cookies. Sem isso, o navegador não enviará os cookies nas requisições, mesmo que o back-end os configure corretamente.
+    origin: (origin, callback) => {
+      console.log('[CORS] Origem da requisição:', origin)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true)
+      } else {
+        callback(new Error('Origem não permitida pelo CORS'))
+      }
+    },
+    credentials: true, // permite envio de cookies do front-end para o back-end, obrigatório para autenticação
+    optionsSuccessStatus: 200, // compatibilidade com navegadores antigos
   }),
 )
 app.use(express.json())

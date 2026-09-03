@@ -26,14 +26,12 @@ export const authService = {
   login: async (email: string, password: string) => {
     const user = await userRepository.findByEmail(email)
 
-    // OWASP A07 + US-02 (🔒 nota de segurança no REGRAS_DE_NEGOCIO):
+    // OWASP A07 + US-02 (nota de segurança no REGRAS_DE_NEGOCIO):
     // NÃO diferenciar "usuário não existe" de "senha errada" — evita enumeração.
     // Compara o hash mesmo sem usuário para equalizar tempo de resposta
     // (senão atacante distingue os dois casos por timing: bcrypt ~200ms vs instantâneo).
     const dummyHash = '$2b$10$dXHhLJnhR70QFKD2krJlne9pU3y5gPmCvXrFXipEfaVXP2E0v1uUK'
-    const passwordMatch = user
-      ? await compare(password, user?.password ?? dummyHash)
-      : await compare(password, dummyHash)
+    const passwordMatch = user ? await compare(password, user?.password ?? dummyHash) : await compare(password, dummyHash)
 
     if (!user || !passwordMatch) {
       throw new AppError(401, 'Credenciais inválidas')
@@ -64,9 +62,7 @@ export const authService = {
     }
     const salt = genSaltSync(10)
     const hashedPassword = hashSync(password, salt)
-
     const newUser = await userRepository.create({ name, email, password: hashedPassword, cep })
-
     return newUser
   },
 }
