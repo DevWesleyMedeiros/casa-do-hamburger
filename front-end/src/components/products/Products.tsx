@@ -13,7 +13,7 @@ import { brazilinaCurrencyFormat } from "../../shared/utils/Utils";
 import { type ProductsInterface } from "../../types/Products";
 
 export const Products = ({
-  id, // id vindo da tabela Products
+  id,
   name,
   description,
   price,
