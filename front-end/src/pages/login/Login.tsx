@@ -16,9 +16,10 @@ import { LoginDate } from "../../shared/services/api/login/Login";
 
 // import login firebase
 import {
-  // getGoogleRedirectResult,
-  signInWithGoogleRedirect,
+  // firebaseAuthSignOut,
   onGoogleAuthStateChanged,
+  signInWithGoogleRedirect,
+  firebaseAuthSignOut,
 } from "../../shared/config/firebase";
 import { GoogleLoginDate } from "../../shared/services/api/login/googleLogin";
 
@@ -124,16 +125,35 @@ export const Login = () => {
     let isMounted = true;
     // Mantido só pra capturar erro explícito do Google (ex.: usuário fechou a tela de consentimento, conflito de credencial) — não usamos mais o valor de retorno dele pra pegar o token, isso agora é trabalho do onGoogleAuthStateChanged logo abaixo.
 
+    // const unsubscribe = onGoogleAuthStateChanged(async (user) => {
+    //   if (!user || !isMounted) return;
+    //   try {
+    //     const idToken = await user.getIdToken();
+    //     console.log("idToken recebido do Firebase:", idToken); // ← ainda temporário
+    //     await finishGoogleLogin(idToken);
+    //   } catch {
+    //     if (isMounted) {
+    //       setBackendError("Ocorreu um erro inesperado. Tente novamente.");
+    //     }
+    //   }
+    // });
+
     const unsubscribe = onGoogleAuthStateChanged(async (user) => {
       if (!user || !isMounted) return;
       try {
         const idToken = await user.getIdToken();
-        console.log("idToken recebido do Firebase:", idToken); // ← ainda temporário
+        console.log("[GoogleLogin] idToken gerado pelo Firebase:", idToken);
         await finishGoogleLogin(idToken);
-      } catch {
+      } catch (err) {
+        console.error("[GoogleLogin] Erro no fluxo de login:", err);
         if (isMounted) {
           setBackendError("Ocorreu um erro inesperado. Tente novamente.");
         }
+      } finally {
+        // Independente do resultado, o Firebase não deve continuar "logado"
+        // no cliente — a sessão real vive no cookie do seu backend (RN-DATA-01).
+        // Sem isso, revisitar /login relança o mesmo fluxo sozinho.
+        await firebaseAuthSignOut();
       }
     });
 

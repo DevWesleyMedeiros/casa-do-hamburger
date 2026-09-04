@@ -8,6 +8,7 @@ import {
   getRedirectResult,
   // signInWithPopup,
   signInWithRedirect,
+  signOut,
 } from "firebase/auth";
 import { onAuthStateChanged, type User } from "firebase/auth"; // ← adiciona ao import já existente do "firebase/auth"
 
@@ -89,4 +90,9 @@ export const getGoogleRedirectResult = async (): Promise<string | null> => {
   const result = await getRedirectResult(firebaseAuth);
   if (!result) return null;
   return result.user.getIdToken();
+};
+
+// função signOut do firebase
+export const firebaseAuthSignOut = async (): Promise<void> => {
+  await signOut(firebaseAuth);
 };

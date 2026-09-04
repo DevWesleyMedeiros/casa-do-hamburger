@@ -26,7 +26,7 @@ export const getFirebaseApp = (): App => {
   const projectId = process.env['FIREBASE_PROJECT_ID']
   const clientEmail = process.env['FIREBASE_CLIENT_EMAIL']
   // no .env a chave vem com \n escapado — precisa converter para quebra de linha real
-  const privateKey = process.env['FIREBASE_PRIVATE_KEY']?.replaceAll('\\n', '\n')
+  const privateKey = process.env['FIREBASE_PRIVATE_KEY']?.replaceAll(String.raw`\n`, '\n')
 
   if (!projectId || !clientEmail || !privateKey) {
     throw new Error(

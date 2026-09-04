@@ -30,17 +30,24 @@ const verifyFirebaseIdTokenMock = vi.mocked(verifyFirebaseIdToken)
 // TODO(#47): reativar quando app.use(errorHandler) parar de receber undefined.
 // madge --circular não aponta ciclo — investigar depois se é hoisting do vi.mock,
 // export default/named mismatch, ou throw silencioso dentro de errorHandler.ts.
-describe.skip('Google Auth Integration', () => {
+describe('Google Auth Integration', () => {
   describe('POST /auth/google (Login social — RF-51 a RF-55)', () => {
-    beforeEach(async () => {
+    const cleanupUsers = async () => {
+      await prisma.cartItem.deleteMany()
+      await prisma.orderItem.deleteMany()
+      await prisma.order.deleteMany()
+      await prisma.emailVerificationToken.deleteMany()
       await prisma.passwordResetToken.deleteMany()
       await prisma.user.deleteMany()
+    }
+
+    beforeEach(async () => {
+      await cleanupUsers()
       vi.clearAllMocks()
     })
 
     afterEach(async () => {
-      await prisma.passwordResetToken.deleteMany()
-      await prisma.user.deleteMany()
+      await cleanupUsers()
     })
 
     const fakeDecodedToken = (overrides: Partial<DecodedIdToken> = {}) => ({

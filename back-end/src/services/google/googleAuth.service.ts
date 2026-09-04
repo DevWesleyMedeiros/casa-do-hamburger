@@ -33,10 +33,6 @@ export const googleAuthService = {
     // Awaited<...>: Desembrulha a Promise. Se o retorno era Promise<DadosDoUsuario>, o Awaited transforma isso apenas em DadosDoUsuario (o valor real que sobra após o await).
     // O código valida o token do usuário e salva o resultado na variável decoded. Graças à tipagem utilizada, se você digitar decoded. no seu editor de código, o autocomplete mostrará exatamente as propriedades que existem dentro do token (como uid, email, name, etc.), mantendo seu código seguro e livre de erros de digitação.
     try {
-      console.log(
-        '[GoogleAuth] Iniciando verificação do token Firebase:',
-        idToken.substring(0, 20) + '...',
-      )
       decoded = await verifyFirebaseIdToken(idToken)
       console.log(
         '[GoogleAuth] Token verificado com sucesso. UID:',

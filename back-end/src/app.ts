@@ -31,7 +31,6 @@ const allowedOrigins =
 app.use(
   cors({
     origin: (origin, callback) => {
-      console.log('[CORS] Origem da requisição:', origin)
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true)
       } else {
@@ -48,12 +47,10 @@ app.use(cookieParser())
 // rotas só depois de todos os pipelines de middlewares globais
 app.use('/auth', authRoutes)
 app.use('/auth', productsRoutes)
-app.use('/auth', cartRoutes)
-
-// registrar rota do GoogleAuth
+// O router de carrinho usa requireAuth globalmente; as rotas públicas de login
+// precisam ser registradas antes dele para não serem interceptadas.
 app.use('/auth', googleAuthRoutes)
-
-console.log('errorHandler no momento do use:', typeof errorHandler, errorHandler)
+app.use('/auth', cartRoutes)
 
 app.use(errorHandler)
 // middleware que vai sempre por último — Express só invoca middleware de 4 parâmetros depois de todas as rotas
