@@ -1,0 +1,29 @@
+{
+  "hosting": {
+    "public": "frontend/dist",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "^/__(?!/)",
+        "destination": "/index.html"
+      },
+      {
+        "source": "**",
+        "destination": "http://127.0.0.1:5173"
+      }
+    ]
+  },
+  "emulators": {
+    "hosting": {
+      "port": 5000
+    },
+    "ui": {
+      "enabled": true,
+      "port": 4000
+    }
+  }
+}

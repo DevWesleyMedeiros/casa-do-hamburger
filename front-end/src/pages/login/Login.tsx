@@ -16,8 +16,9 @@ import { LoginDate } from "../../shared/services/api/login/Login";
 
 // import login firebase
 import {
-  getGoogleRedirectResult,
+  // getGoogleRedirectResult,
   signInWithGoogleRedirect,
+  onGoogleAuthStateChanged,
 } from "../../shared/config/firebase";
 import { GoogleLoginDate } from "../../shared/services/api/login/googleLogin";
 
@@ -98,9 +99,6 @@ export const Login = () => {
             return;
           } else {
             setBackendError(result.message);
-            console.log(result);
-            console.log(result.statusCode);
-            console.log(result.message);
             return;
           }
         }
@@ -109,8 +107,8 @@ export const Login = () => {
         queryClient.setQueryData(queryKeys.me, result.user);
         reset();
         navigate("/home");
-      } catch {
-        setBackendError("Ocorreu um erro inesperado. Tente novamente.");
+      } catch (err) {
+        setBackendError("Ocorreu um erro inesperado. Tente novamente." + err);
       } finally {
         setIsGoogleLoading(false);
       }
@@ -118,26 +116,30 @@ export const Login = () => {
     [navigate, reset, queryClient],
   );
 
-  // Roda no mount da página. Quando o Google redireciona de volta pro app, esta página remonta — é aqui, não no clique do botão, que o idToken realmente chega. Em visita normal (sem redirect pendente),
-  // getGoogleRedirectResult() resolve pra null e não faz nada.
+  // Roda no mount da página. onGoogleAuthStateChanged é a fonte confiável do
+  // token — dispara assim que o Firebase termina de consolidar o estado,
+  // não importa se isso acontece no primeiro tick (raro) ou um pouco depois
+  // (o caso comum, e o que estava fazendo o idToken chegar null antes).
   useEffect(() => {
     let isMounted = true;
+    // Mantido só pra capturar erro explícito do Google (ex.: usuário fechou a tela de consentimento, conflito de credencial) — não usamos mais o valor de retorno dele pra pegar o token, isso agora é trabalho do onGoogleAuthStateChanged logo abaixo.
 
-    (async () => {
+    const unsubscribe = onGoogleAuthStateChanged(async (user) => {
+      if (!user || !isMounted) return;
       try {
-        const idToken = await getGoogleRedirectResult();
-        if (idToken && isMounted) {
-          await finishGoogleLogin(idToken);
-        }
+        const idToken = await user.getIdToken();
+        console.log("idToken recebido do Firebase:", idToken); // ← ainda temporário
+        await finishGoogleLogin(idToken);
       } catch {
         if (isMounted) {
           setBackendError("Ocorreu um erro inesperado. Tente novamente.");
         }
       }
-    })();
+    });
 
     return () => {
       isMounted = false;
+      unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

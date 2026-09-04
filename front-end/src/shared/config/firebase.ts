@@ -5,10 +5,12 @@ import { initializeApp } from "firebase/app";
 import {
   GoogleAuthProvider,
   getAuth,
+  getRedirectResult,
   // signInWithPopup,
   signInWithRedirect,
-  getRedirectResult,
 } from "firebase/auth";
+import { onAuthStateChanged, type User } from "firebase/auth"; // ← adiciona ao import já existente do "firebase/auth"
+
 // GoogleAuthProvider - pega as credenciais do Google para fazer o login.
 // getAuth - função que pega o objeto de autenticação do Firebase
 // signInWithPopup - função que abre o popup do Google e faz o login.
@@ -60,6 +62,21 @@ const googleRedirectProvider = new GoogleAuthProvider();
  */
 export const signInWithGoogleRedirect = async (): Promise<void> => {
   await signInWithRedirect(firebaseAuth, googleRedirectProvider);
+};
+
+/**
+ * Assina mudanças no estado de autenticação do Firebase. Ao contrário de
+ * getGoogleRedirectResult(), que só funciona se chamado no exato instante
+ * certo, este listener dispara assim que o Firebase termina de consolidar
+ * o estado — seja de um redirect recém-concluído, seja de uma sessão já
+ * persistida no IndexedDB. Resolve a corrida entre o mount da página e a
+ * restauração assíncrona da sessão. Retorna a função de "unsubscribe";
+ * chame no cleanup do useEffect.
+ */
+export const onGoogleAuthStateChanged = (
+  callback: (user: User | null) => void,
+): (() => void) => {
+  return onAuthStateChanged(firebaseAuth, callback);
 };
 
 /**
