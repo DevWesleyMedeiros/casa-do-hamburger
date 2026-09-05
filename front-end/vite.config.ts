@@ -14,6 +14,18 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    proxy: {
+      "/__/auth": {
+        target: "https://login-oauth-casa-do-hambuguer.firebaseapp.com",
+        changeOrigin: true,
+        secure: true,
+        ws: true,
+      },
+      "/api": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+      },
+    },
     headers: {
       "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
     },

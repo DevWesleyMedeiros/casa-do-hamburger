@@ -22,9 +22,10 @@ export const googleAuthController = {
     const isProduction = process.env['NODE_ENV'] === 'production'
     res.cookie('user_section', token, {
       httpOnly: true,
-      secure: isProduction, // required para sameSite: 'none'
-      sameSite: isProduction ? 'none' : 'lax', // usa none só em produção (HTTPS), lax em dev
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      secure: isProduction, // SÓ usa secure em produção (HTTPS) — localhost/127.0.0.1 não precisa
+      sameSite: isProduction ? 'none' : 'lax', // sameSite='none' só é válido com secure=true (produção)
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 dias em milissegundos
+      path: '/', // Cookie acessível em todas as rotas do backend
     })
     res.json({ user: toUserDTO(user) }) // não retorna token no corpo, só no cookie (segurança)
   }),

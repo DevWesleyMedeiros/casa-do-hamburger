@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { Eye, EyeOff } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom";
@@ -16,10 +16,8 @@ import { LoginDate } from "../../shared/services/api/login/Login";
 
 // import login firebase
 import {
-  // firebaseAuthSignOut,
-  onGoogleAuthStateChanged,
-  signInWithGoogleRedirect,
   firebaseAuthSignOut,
+  signInWithGooglePopup,
 } from "../../shared/config/firebase";
 import { GoogleLoginDate } from "../../shared/services/api/login/googleLogin";
 
@@ -79,102 +77,78 @@ export const Login = () => {
     [navigate, reset, queryClient],
   );
 
-  // Fecha o ciclo do login Google: manda o idToken pro backend e trata a
-  // resposta. Extraído do handler de clique porque agora também é chamado
-  // pelo useEffect (retorno do redirect), não só por interação direta.
-  const finishGoogleLogin = useCallback(
-    async (idToken: string) => {
-      setIsGoogleLoading(true);
-      setBackendError(null);
-      try {
-        const result = await GoogleLoginDate.create({ idToken });
+  // Fecha o ciclo do login Google: manda o idToken pro backend e trata a resposta. Extraído do handler de clique porque agora também é chamado pelo useEffect (retorno do redirect), não só por interação direta.
+  // const finishGoogleLogin = useCallback(
+  //   async (idToken: string) => {
+  //     setIsGoogleLoading(true);
+  //     setBackendError(null);
+  //     try {
+  //       const result = await GoogleLoginDate.create({ idToken });
 
-        if (result instanceof ApiError) {
-          if (result.statusCode === 409) {
-            setBackendError("Usuário já cadastrado");
-            return;
-          } else if (result.statusCode === 401) {
-            setBackendError(
-              "Não foi possível confirmar sua conta Google. Tente novamente",
-            );
-            return;
-          } else {
-            setBackendError(result.message);
-            return;
-          }
-        }
+  //       if (result instanceof ApiError) {
+  //         if (result.statusCode === 409) {
+  //           setBackendError("Usuário já cadastrado");
+  //           return;
+  //         } else if (result.statusCode === 401) {
+  //           setBackendError(
+  //             "Não foi possível confirmar sua conta Google. Tente novamente",
+  //           );
+  //           return;
+  //         } else {
+  //           setBackendError(result.message);
+  //           return;
+  //         }
+  //       }
 
-        toast("Login realizado");
-        queryClient.setQueryData(queryKeys.me, result.user);
-        reset();
-        navigate("/home");
-      } catch (err) {
-        setBackendError("Ocorreu um erro inesperado. Tente novamente." + err);
-      } finally {
-        setIsGoogleLoading(false);
-      }
-    },
-    [navigate, reset, queryClient],
-  );
+  //       toast("Login realizado");
+  //       queryClient.setQueryData(queryKeys.me, result.user);
+  //       reset();
+  //       navigate("/home");
+  //     } catch (err) {
+  //       setBackendError("Ocorreu um erro inesperado. Tente novamente." + err);
+  //     } finally {
+  //       setIsGoogleLoading(false);
+  //     }
+  //   },
+  //   [navigate, reset, queryClient],
+  // );
 
-  // Roda no mount da página. onGoogleAuthStateChanged é a fonte confiável do
-  // token — dispara assim que o Firebase termina de consolidar o estado,
-  // não importa se isso acontece no primeiro tick (raro) ou um pouco depois
-  // (o caso comum, e o que estava fazendo o idToken chegar null antes).
-  useEffect(() => {
-    let isMounted = true;
-    // Mantido só pra capturar erro explícito do Google (ex.: usuário fechou a tela de consentimento, conflito de credencial) — não usamos mais o valor de retorno dele pra pegar o token, isso agora é trabalho do onGoogleAuthStateChanged logo abaixo.
-
-    // const unsubscribe = onGoogleAuthStateChanged(async (user) => {
-    //   if (!user || !isMounted) return;
-    //   try {
-    //     const idToken = await user.getIdToken();
-    //     console.log("idToken recebido do Firebase:", idToken); // ← ainda temporário
-    //     await finishGoogleLogin(idToken);
-    //   } catch {
-    //     if (isMounted) {
-    //       setBackendError("Ocorreu um erro inesperado. Tente novamente.");
-    //     }
-    //   }
-    // });
-
-    const unsubscribe = onGoogleAuthStateChanged(async (user) => {
-      if (!user || !isMounted) return;
-      try {
-        const idToken = await user.getIdToken();
-        console.log("[GoogleLogin] idToken gerado pelo Firebase:", idToken);
-        await finishGoogleLogin(idToken);
-      } catch (err) {
-        console.error("[GoogleLogin] Erro no fluxo de login:", err);
-        if (isMounted) {
-          setBackendError("Ocorreu um erro inesperado. Tente novamente.");
-        }
-      } finally {
-        // Independente do resultado, o Firebase não deve continuar "logado"
-        // no cliente — a sessão real vive no cookie do seu backend (RN-DATA-01).
-        // Sem isso, revisitar /login relança o mesmo fluxo sozinho.
-        await firebaseAuthSignOut();
-      }
-    });
-
-    return () => {
-      isMounted = false;
-      unsubscribe();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Dispara o redirect pro Google. Não trate "sucesso" aqui — a página é descartada nesta chamada; quem processa a volta é o useEffect acima.
+  // Fluxo de login com popup — resolve o redirect_uri_mismatch e o COOP
   const handleGoogleLogin = useCallback(async () => {
     setIsGoogleLoading(true);
     setBackendError(null);
     try {
-      await signInWithGoogleRedirect();
-    } catch {
+      const idToken = await signInWithGooglePopup();
+      const result = await GoogleLoginDate.create({ idToken });
+
+      if (result instanceof ApiError) {
+        if (result.statusCode === 409) {
+          setBackendError("Usuário já cadastrado");
+          return;
+        } else if (result.statusCode === 401) {
+          setBackendError(
+            "Não foi possível confirmar sua conta Google. Tente novamente",
+          );
+          return;
+        } else {
+          setBackendError(result.message);
+          return;
+        }
+      }
+
+      toast("Login realizado");
+      queryClient.setQueryData(queryKeys.me, result.user);
+      reset();
+      navigate("/home");
+    } catch (err) {
+      console.error("[GoogleLogin] Erro no fluxo de popup:", err);
       setBackendError("Ocorreu um erro inesperado. Tente novamente.");
+    } finally {
+      // Limpa sessão do Firebase no cliente — sessão real é o cookie do backend
+      await firebaseAuthSignOut();
       setIsGoogleLoading(false);
     }
-  }, []);
+  }, [navigate, reset, queryClient]);
 
   // --- Versão anterior (signInWithPopup) — mantida comentada de propósito.
   // Volta a ser a versão ativa quando o popup for reabilitado (também exige

@@ -6,11 +6,12 @@ import {
   GoogleAuthProvider,
   getAuth,
   getRedirectResult,
-  // signInWithPopup,
+  onAuthStateChanged,
+  signInWithPopup,
   signInWithRedirect,
   signOut,
+  type User,
 } from "firebase/auth";
-import { onAuthStateChanged, type User } from "firebase/auth"; // ← adiciona ao import já existente do "firebase/auth"
 
 // GoogleAuthProvider - pega as credenciais do Google para fazer o login.
 // getAuth - função que pega o objeto de autenticação do Firebase
@@ -23,18 +24,21 @@ const firebaseConfig = {
 
 const firebaseApp = initializeApp(firebaseConfig);
 const firebaseAuth = getAuth(firebaseApp);
-// const googleProvider = new GoogleAuthProvider(); // cria uma instância do provedor de autenticação do Google para ser usada no sistema de login do Firebase.
+const googleProvider = new GoogleAuthProvider();
+// Adiciona scope necessário e configura popup para evitar COOP
+googleProvider.setCustomParameters({ prompt: "select_account" });
 
 /**
  * Abre o popup do Google, autentica, e retorna o Firebase ID Token —
  * é esse token (não o usuário do Firebase) que vai para o backend em
  * POST /auth/google (RF-52). O backend nunca vê o objeto de usuário do
  * Firebase diretamente, só o token assinado que ele mesmo verifica.
+ * Resolve o problema de COOP bloqueando window.closed usando o fluxo de popup.
  */
-// export const signInWithGooglePopup = async (): Promise<string> => {
-//   const result = await signInWithPopup(firebaseAuth, googleProvider);
-//   return result.user.getIdToken();
-// };
+export const signInWithGooglePopup = async (): Promise<string> => {
+  const result = await signInWithPopup(firebaseAuth, googleProvider);
+  return await result.user.getIdToken();
+};
 
 /**
  * Redireciona o usuário para a página de login do Google.
