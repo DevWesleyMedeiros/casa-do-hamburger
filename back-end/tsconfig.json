@@ -6,6 +6,8 @@
     "lib": ["ESNext"],
     "target": "esnext",
     "module": "NodeNext",
+    "rootDir": "./src",
+    "outDir": "./dist",
     "moduleDetection": "auto",
     "allowJs": true,
     "strict": true,
@@ -27,5 +29,5 @@
     "moduleResolution": "NodeNext"
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist", "src/tests"]
 }
