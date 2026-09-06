@@ -1,22 +1,27 @@
 # 🍔 Casa do Hamburguer
 
-> Projeto fullstack de uma hamburgueria com autenticação, catálogo de produtos, carrinho de compras e páginas de pedidos. A aplicação foi evoluída para um fluxo mais realista de e-commerce, com validação de formulários, estado assíncrono e integração entre frontend e backend.
+> Projeto fullstack de e-commerce para hamburgueria com autenticação multi-provedor, catálogo dinâmico, carrinho de compras, gestão de pedidos, sistema de recuperação de senha e upload de imagens escalável. Aplicação construída com arquitetura de camadas, validação em múltiplas camadas, segurança OWASP e testes automatizados.
 
 ---
 
 ## 📌 Sobre o projeto
 
-O Casa do Hamburguer é uma aplicação fullstack desenvolvida para praticar e consolidar conceitos de desenvolvimento web moderno. O projeto cobre desde a interface até a camada de persistência, com foco em autenticação, consumo de API, validação de dados e organização por camadas.
+O Casa do Hamburguer é uma aplicação fullstack moderna que simula um ecossistema completo de hamburgueria online. Desenvolvida com foco em boas práticas de mercado, cobre desde a interface do usuário até a persistência de dados, implementando fluxos reais de e-commerce com segurança, performance e escalabilidade.
 
-### Status atual
+### Status atual — **Versão 2.0**
 
-✅ Frontend e backend integrados
-✅ Autenticação baseada em cookie + JWT
-✅ Catálogo de produtos com filtros por categoria
-✅ Criação de produtos com upload de imagens via Cloudinary
-✅ Carrinho de compras com listagem, remoção e alteração de quantidade
-✅ Páginas de login, cadastro e pedidos
-✅ Estrutura backend organizada com controllers, services e repositories
+✅ **Autenticação e autorização** completa com múltiplos provedores
+✅ **Login social** com Google + Firebase integration
+✅ **Recuperação de senha** com envio de email via Resend
+✅ **Verificação de email** para novas contas
+✅ **Rate limiting** e proteção contra força bruta
+✅ Upload de imagens com validação de magic bytes e Cloudinary
+✅ Carrinho atrelado ao usuário (persistido no banco)
+✅ Sistema completo de pedidos com OrderItems e snapshots
+✅ Backend com camadas bem definidas (Controller → Service → Repository)
+✅ Testes de integração implementados com Vitest + Supertest
+✅ TypeScript em todo o projeto com type-safety
+✅ CI-ready com linting, testes e build automatizáveis
 
 ---
 
@@ -24,35 +29,50 @@ O Casa do Hamburguer é uma aplicação fullstack desenvolvida para praticar e c
 
 ### 🔐 Autenticação e autorização
 
-- Cadastro de usuários com validação de dados via Zod
-- Login com autenticação JWT e armazenamento em cookie httpOnly
-- Logout com limpeza do cookie de sessão
-- Middleware de autenticação para rotas protegidas
-- Proteção de rotas de administrador para operações sensíveis
-- Gate de autenticação no frontend para controlar acesso às páginas
+- ✅ Cadastro local com validação de força de senha
+- ✅ Login com Google (OAuth 2.0) + Firebase Admin
+- ✅ Autenticação JWT com cookie httpOnly, secure e SameSite
+- ✅ Middleware de autenticação e role-based access (admin)
+- ✅ Rate limiting em rotas sensíveis (login, cadastro, reset)
+- ✅ Recuperação de senha com token único e expiração (30min)
+- ✅ Verificação de email para novas contas
+- ✅ Logout seguro com limpeza de cookies
+- ✅ Persistência de provedor (LOCAL/GOOGLE) por usuário
 
-### 🍔 Catálogo de produtos
+### 🍔 Catálogo e produtos
 
-- Listagem de produtos vindos do backend
-- Filtro por categoria (Hamburguer, Bebidas e Porções)
-- Interface de cards com nome, descrição, imagem e preço
-- Endpoint de listagem de produtos consumido no frontend via React Query
-- Criação de novos produtos com upload de imagens (suportando múltiplas imagens via frontend)
-- Integração com Cloudinary para armazenamento e serviço de imagens via stream
-- Validação robusta de upload de arquivos (magic bytes, mimetype e tamanho máximo)
-- Nova entidade ProductsImage (key, url, mimetype, size) para organizar imagens individualmente
+- ✅ Listagem de produtos com cache React Query
+- ✅ Filtro por categorias: Hamburgueres, Bebidas, Porções
+- ✅ Upload múltiplo de imagens com validação server-side
+- ✅ Integração Cloudinary com URLs assinadas
+- ✅ Entidade `ProductsImage` para metadados de imagens
+- ✅ CRUD completo de produtos (apenas admins)
+- ✅ Imagem principal e secondary por produto
 
 ### 🛒 Carrinho de compras
 
-- Lista de itens do carrinho carregada pelo backend
-- Adição, remoção e atualização de quantidade de itens
-- Cálculo automático do valor total
-- Drawer lateral para visualização do carrinho
+- ✅ Carrinho persistido no banco, atrelado ao usuário
+- ✅ Criação, atualização e remoção de itens
+- ✅ Validação de duplicatas (um produto por usuário)
+- ✅ Atualização automática de totais
+- ✅ Drawer lateral com Zustand para estado global da UI
 
-### 📦 Pedidos
+### 📦 Sistema de Pedidos
 
-- Página de pedidos com filtros visuais por status
-- Estrutura preparada para evoluir para dados reais vindos da API
+- ✅ Entidade `Order` com status: PENDING, PICKED_UP, CANCELLED
+- ✅ `OrderItem` com snapshots de nome/preço no momento da compra
+- ✅ Garantia de integridade: produtos podem ser deletados, itens permanecem
+- ✅ Cálculo de subtotal e total persistidos
+- ✅ Índices de banco para consultas rápidas por usuário
+- ✅ Interface frontend com filtros de status de pedidos
+
+### 🛠️ Ferramentas de desenvolvimento
+
+- ✅ Testes de integração com Vitest
+- ✅ ESLint com plugin de segurança
+- ✅ Prisma ERD generator para documentação
+- ✅ Husky-ready (pre-commit hooks)
+- ✅ CI/CD preparado para deploy
 
 ---
 
@@ -126,24 +146,201 @@ src/
 └── errors/
 ```
 
-### Padrões adotados
+### 🎯 Padrões e boas práticas adotadas
 
-- Organização em camadas no backend: controllers → services → repositories
-- Validação de dados no frontend e no backend
-- Uso de React Query para estados assíncronos e cache de dados
-- Uso de Zustand para estado global de UI, como controle do carrinho
-- Tratamento de erros centralizado no backend
+#### Backend
 
-### Arquitetura em camadas
+- **Arquitetura em camadas**: Controllers (roteamento) → Services (regra de negócio) → Repositories (persistência)
+- **Tratamento de erros centralizado**: Classe `AppError` + middleware errorHandler
+- **Validação em duas camadas**: Zod schemas no frontend *e* backend
+- **Tratamento de erros Prisma**: Tradução de erros do banco para erros de aplicação
+- **AsyncHandler**: Wrapper para evitar try/catch repetitivo nas rotas
+- **Rate limiting**: express-rate-limit para proteger endpoints sensíveis
+- **Upload seguro**: Validação de magic bytes, mimetype e tamanho antes de Cloudinary
+- **Segurança**: Helmet, CORS configurado, cookies httpOnly/secure
 
-A aplicação foi estruturada para separar claramente responsabilidades entre apresentação, regras de negócio e persistência de dados:
+#### Frontend
+
+- **React Query**: Cache e sincronização de dados assíncronos
+- **Zustand**: Estado global apenas para UI (não duplicar cache do servidor)
+- **Axios Interceptor**: Tratamento automático de tokens e erros
+- **React Hook Form + Zod**: Validação de formulários performática
+- **React Router**: Proteção de rotas com AuthGate
+- **Sonner**: Feedback visual de sucesso/erro
+- **TailwindCSS 4**: Utilitários CSS com design system
+
+### 🔒 Segurança implementada (OWASP Top 10)
+
+- ✅ **Injeção**: Prepared statements via Prisma ORM
+- ✅ **Autenticação quebrada**: JWT seguro, expiração, refresh pattern
+- ✅ **Dados sensíveis expostos**: Variáveis de ambiente, nunca hardcode
+- ✅ **XML External Entity (XXE)**: Não usa parser XML inseguro
+- ✅ **Acesso controlado**: RBAC (admin vs user), middlewares de proteção
+- ✅ **Má configuração de segurança**: Helmet, CORS, cookies seguros
+- ✅ **XSS**: React escape automático, validação de inputs
+- ✅ **Deserialização insegura**: Nunca usa eval(), serialização segura
+- ✅ **Log e monitoramento**: Tratamento de erros, logs estruturados
+- ✅ **Upload de arquivos inseguros**: Validação de magic bytes, Cloudinary
+
+### 🧪 Testes e qualidade
+
+#### Testes implementados
+
+- Testes de integração no backend: `googleAuth.test.ts`, `loginLimiter.test.ts`, `passwordReset.test.ts`
+- Testes unitários no frontend: API services com `GoogleLogin.test.ts`
+- Cobertura configurada com `vitest --coverage`
+- Linting: ESLint com regras de segurança (eslint-plugin-security)
+
+#### Comandos de teste
+
+```bash
+cd back-end
+bun run test              # Todos os testes
+bun run test:coverage     # Relatório de cobertura
+bun run test:integration  # Apenas testes de integração
+
+cd front-end
+bun run test             # Testes frontend
+```
+
+### 🏗️ Arquitetura geral do sistema
 
 ```mermaid
-flowchart LR
-  U[Usuário] --> FE[Frontend React + Vite]
-  FE --> API[Backend Express + TypeScript]
-  API --> DB[(PostgreSQL + Prisma)]
-  API --> AUTH[(JWT + Cookie httpOnly)]
+flowchart TB
+    subgraph Frontend[Frontend Layer]
+        UI[React 19 + Vite]
+        RQ[React Query (Cache)]
+        ZST[Zustand (UI State)]
+        RT[React Router]
+    end
+    
+    subgraph Backend[Backend Layer]
+        CT[Controllers]
+        SV[Services (Regras de Negócio)]
+        RP[Repositories (Dados)]
+        MW[Middlewares]
+    end
+    
+    subgraph Infra[Infraestrutura & Serviços]
+        DB[(PostgreSQL + Prisma)]
+        CLD[Cloudinary (Imagens)]
+        RSM[Resend (Emails)]
+        FBA[Firebase Admin (Google OAuth)]
+    end
+    
+    UI --> RQ --> AX[Axios Interceptor] --> CT
+    CT --> SV --> RP --> DB
+    MW -->|auth, rate-limit, upload| CT
+    SV --> CLD
+    SV --> RSM
+    SV --> FBA
+    
+    style Frontend fill:#1e40af,color:#fff
+    style Backend fill:#065f46,color:#fff
+    style Infra fill:#7c2d12,color:#fff
+```
+
+### 📊 Modelo de dados — Entidades e relacionamentos
+
+```mermaid
+erDiagram
+    User {
+        uuid id PK
+        string name
+        string email UK
+        string password
+        boolean admin
+        AuthProviders provider
+        datetime createdAt
+        datetime updatedAt
+    }
+    
+    Products {
+        cuid id PK
+        string name
+        string description
+        int price
+        string category
+        datetime createAt
+    }
+    
+    ProductsImage {
+        cuid id PK
+        string url
+        string key
+        string mimeType
+        int size
+        boolean isPrimary
+        string productId FK
+    }
+    
+    CartItem {
+        cuid id PK
+        string userId FK
+        string productId FK
+        int quantity
+        datetime createdAt
+    }
+    
+    Order {
+        cuid id PK
+        string userId FK
+        OrderStatus status
+        int total
+        datetime createdAt
+    }
+    
+    OrderItem {
+        cuid id PK
+        string orderId FK
+        string productId FK
+        string productName
+        int unitPrice
+        int quantity
+        int subtotal
+    }
+    
+    PasswordResetToken {
+        cuid id PK
+        string userId FK
+        string tokenHash UK
+        datetime expiresAt
+        datetime usedAt
+    }
+    
+    User ||--o{ CartItem : "possui"
+    User ||--o{ Order : "cria"
+    User ||--o{ PasswordResetToken : "solicita"
+    Products ||--o{ ProductsImage : "tem"
+    Products ||--o{ CartItem : "adiciona"
+    Products ||--o{ OrderItem : "pertence"
+    Order ||--o{ OrderItem : "contém"
+```
+
+### 🔄 Fluxo de autenticação e dados
+
+```mermaid
+sequenceDiagram
+    actor Usuário
+    participant Frontend
+    participant API
+    participant DB
+    participant AuthServ
+    
+    Usuário->>Frontend: Tenta logar (email/senha ou Google)
+    Frontend->>API: POST /auth/login ou /google/login
+    API->>AuthServ: Valida credenciais / token Google
+    AuthServ->>DB: Busca usuário
+    DB-->>AuthServ: Retorna dados
+    AuthServ->>API: Gera JWT (15d)
+    API->>Frontend: Define cookie httpOnly
+    Frontend->>API: Requisições autenticadas (Authorization Header + Cookie)
+    API->>AuthServ: Valida JWT no middleware
+    AuthServ-->>API: Token válido
+    API->>DB: Busca dados solicitados
+    DB-->>API: Retorna dados
+    API-->>Frontend: Resposta JSON
+    Frontend-->>Usuário: Renderiza dados
 ```
 
 ### Fluxo principal do usuário
@@ -225,13 +422,48 @@ A aplicação frontend fica disponível em `http://localhost:5173`.
 
 ---
 
-## 🚧 Próximos passos
+## 🚧 Próximos passos — Roadmap
 
-- Implementar testes automatizados no frontend e backend
-- Expandir o fluxo de pedidos com integração real ao banco
-- Melhorar a experiência de admin com gestão completa de produtos
-- Adicionar mais feedbacks de UX e tratamento de estados de erro
-- Evoluir o deploy para ambiente de produção
+### Curto prazo
+
+- [ ] Finalizar fluxo de checkout e criação de pedidos
+- [ ] Implementar webhooks para pagamento (Stripe/PIX)
+- [ ] Adicionar mais testes de unidade e E2E (Playwright)
+- [ ] Deploy em produção (Vercel + Render)
+
+### Médio prazo
+
+- [ ] Dashboard de admin com analytics
+- [ ] Sistema de avaliações de produtos
+- [ ] Cupons de desconto e promoções
+- [ ] Notificações em tempo real (Socket.io)
+
+### Longo prazo
+
+- [ ] Módulo de gestão de estoque
+- [ ] Integração com sistemas de entrega
+- [ ] App mobile (React Native)
+
+---
+
+## 📈 Performance e otimizações
+
+- **React Query**: Caching de dados, deduplicação de requisições
+- **Bundle analysis**: Vite com tree shaking, código dividido por rotas
+- **Imagens**: Upload otimizado para WebP, Cloudinary auto-otimização
+- **Banco de dados**: Índices em todas as foreign keys, consultas otimizadas
+- **Server**: Streaming de responses, compressão gzip
+
+---
+
+## 📋 Regras de negócio implementadas
+
+1. Apenas administradores podem criar, editar e deletar produtos
+2. Tokens de reset de senha são single-use e expiram em 30 minutos
+3. Um usuário não pode adicionar o mesmo produto duas vezes no carrinho
+4. Itens de pedido permanecem mesmo que o produto seja deletado (snapshot)
+5. Emails de login social são únicos, não podem duplicar contas locais
+6. Upload de imagens só aceita formatos: JPG, PNG, WebP (validação server-side)
 
 ---
 
