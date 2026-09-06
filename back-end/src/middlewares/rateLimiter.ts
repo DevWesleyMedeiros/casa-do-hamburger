@@ -126,7 +126,8 @@ export const resetPasswordBroadLimiter = rateLimit({
   legacyHeaders: false,
 })
 
-// rate-limiter para google auth RN-AUTH-12: /auth/google já aplicado às demais rotas de autenticação (RNF-06). Aqui Sem chave "targeted, uma vez que por o e-mail só é conhecido DEPOIS de verificar o Firebase ID Token (não vem legível no corpo da requisição, que só tem `idToken`). Por isso: só a camada broad (por IP).
+// rate-limiter para google auth RN-AUTH-12: Camada broad (por IP) aplicada no middleware
+// A camada targeted (por UID) é aplicada no serviço, após verificar o token (pois email/UID só estão disponíveis depois da decodificação)
 export const googleAuthBroadLimiterStore = new MemoryStore()
 export const googleAuthBroadLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -135,15 +136,24 @@ export const googleAuthBroadLimiter = rateLimit({
   keyGenerator: broadKey,
   legacyHeaders: false,
   message: {
-    error: "Muitas tentativas de login com google detectadas, nesta origem. Aguarde 15 minutos",
+    error: "Muitas tentativas de login com Google detectadas nesta origem. Aguarde 15 minutos",
   },
   statusCode: 429,
   standardHeaders: 'draft-8',
   handler: (_req, res, _next, options) => {
-    // Manipulador de requisições do Express que envia uma resposta quando um cliente sofre limitação de taxa (*rate-limiting*). Por padrão, retorna o código de status e a mensagem definidos nas opções.
     res.status(options.statusCode).json({
       message: (options.message as { error: string }).error,
       status: options.statusCode,
     })
-  } 
+  }
+})
+
+// Store compartilhado para o rate limiter direcionado por UID do Google
+export const googleAuthTargetedStore = new MemoryStore()
+export const googleAuthTargetedLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5, // Mesmo limite direcionado das outras rotas de login
+  store: googleAuthTargetedStore,
+  legacyHeaders: false,
+  standardHeaders: 'draft-8'
 })
