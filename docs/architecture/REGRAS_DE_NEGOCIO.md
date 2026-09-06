@@ -3,8 +3,8 @@
 > **Tipo de documento:** Especificação de Requisitos + Regras de Negócio (BRD/SRS)
 > **Projeto:** Casa do Hambúrguer — Sistema de Pedidos para Hamburgueria (E-commerce de Food Service)
 > **Natureza:** Boilerplate reutilizável para aplicações de e-commerce/pedidos
-> **Versão:** 1.8.0
-> **Status:** Documento vivo — Recuperação de senha via e-mail implementada **em partes** (RF-09 permanece 🟡): fluxo `forgot-password` correto e mergeado na `develop` (PR #22), mas `reset-password` tem bug crítico de campo inexistente no schema (`passwordHash` vs `password`) que provavelmente quebra o caminho feliz em produção — ver Changelog 1.7.0 e Seção 6.1. Sprint 2 encerrada no Trello (board `projeto-casa-do-hamburguer`); Rate limiting em rotas de autenticação concluído (RF-12, RNF-06); Proposta de Login via Google OAuth 2.0 incorporada (Seções 3.1, 4, 5, 6.1, 6.2, 7, 9); Auditoria de segurança "vibe coding" incorporada (Seção 6.11, correção de contradição A05, Seção 14.2); DTO de User com mapper de saída concluído (RN-DTO-01) e payload de sessão minimizado (RN-DTO-06)
+> **Versão:** 1.8.1
+> **Status:** Documento vivo — Recuperação de senha via e-mail implementada **em partes** (RF-09 permanece 🟡): fluxo `forgot-password` correto e mergeado na `develop` (PR #22), mas `reset-password` tem bug crítico de campo inexistente no schema (`passwordHash` vs `password`) que provavelmente quebra o caminho feliz em produção — ver Changelog 1.7.0 e Seção 6.1. **Login via Google confirmado no código** (PR #24, commit `904710e`, mergeado na `develop` em 05/09/2026): RF-51 a RF-55 realmente implementados via Firebase Authentication — ver Changelog 1.8.1 para a auditoria completa, incluindo regras de suporte (RN-AUTH-08 a 12, RNF-23 a 25) que ficaram com selo e/ou texto desatualizados na v1.8.0 e foram corrigidas agora. Sprint 2 encerrada no Trello (board `projeto-casa-do-hamburguer`); Rate limiting em rotas de autenticação concluído (RF-12, RNF-06); Auditoria de segurança incorporada (Seção 6.11, correção de contradição A05, Seção 14.2); DTO de User com mapper de saída concluído (RN-DTO-01) e payload de sessão minimizado (RN-DTO-06)
 
 ---
 
@@ -27,7 +27,7 @@ Selos de status:
 
 | Versão | Data | Mudança |
 | --- | --- | --- |
-| 1.8.0 | 05/09/2026 | **Implementação completa do Google OAuth 2.0** (branch `feat/google-oauth-implementation` → `develop`). RF-51 a RF-55 implementados com sucesso: login via Google, verificação de token no backend, persistência de provider, vinculação automática de contas e mesmo mecanismo de sessão. Todas as regras de segurança cumpridas: PII removido de logs, rate limiting dual camada (IP + UID), upsert atômico para evitar condições de corrida, cookie alinhado entre login e logout. Correção no campo `emailVerified` que não era persistido para usuários Google. Documento atualizado para refletir o status real dos requisitos. |
+| 1.8.1 | 06/09/2026 | **Auditoria pós-merge da branch `feat/RF051-055-login-google-firebase` → `develop`** (PR #24, commit único `904710e`, squash merge em 05/09/2026 — o nome real da branch e o nome citado na v1.8.0 (`feat/google-oauth-implementation`) divergem; o histórico do repositório confirma `feat/RF051-055-login-google-firebase (#24)`). **Confirmado no código:** RF-51 a RF-55 estão de fato implementados — `googleAuth.service.ts` verifica o Firebase ID Token via `firebase-admin` (`verifyFirebaseIdToken`), `schema.prisma` tem `password` opcional + enum `AuthProviders (LOCAL\|GOOGLE)` + `googleId`/`firebaseUid`, o vínculo automático de conta usa `prisma.user.upsert` (atômico) com gate por `email_verified` (RN-AUTH-11), e a sessão é emitida com o mesmo `signSessionJwt`/cookie do login local (RF-55), inclusive `sameSite`/`secure` agora alinhados também com `clearAuthCookie.ts`. Rate limiting dual camada confirmado (IP via `googleAuthBroadLimiter` na rota + UID via `googleAuthTargetedStore` no service). Nenhum PII (e-mail, uid, token) aparece nos `console.log`/`console.error` do fluxo. **Porém a v1.8.0 só girou o selo das 5 linhas de RF-51 a RF-55 — as regras de suporte não foram atualizadas junto**, o que é a causa da inconsistência de selos apontada pelo mantenedor: **RN-AUTH-10, RN-AUTH-11, RN-AUTH-12 e RN-CRYPT-05** permaneciam 🔵 mesmo com a regra já implementada e verificada no código — promovidas a 🟢 nesta versão. **RN-AUTH-08 e RN-AUTH-09, e RNF-23/24/25, não foram apenas re-selados: o *texto* delas ainda descrevia a Opção A rejeitada pela ADR-0003 (Authorization Code Flow + PKCE, `google-auth-library`, troca de `code` por `id_token` com `CLIENT_SECRET`)** — mecanismo que nunca chegou a ser construído; o que existe de fato é Firebase Authentication no client + Firebase Admin SDK no backend. Texto reescrito para refletir a Opção D (já formalizada na ADR-0003 revisada) e diagrama de sequência 9.3 redesenhado (não usava mais `code`/PKCE/CLIENT_SECRET, e sim `idToken` do Firebase). ERD (Seção 7) corrigido: `providerId` (nunca existiu) trocado por `googleId`/`firebaseUid` (campos reais), `provider`/`emailVerified` deixam de ser "proposto". OWASP A07 (Seção 11) atualizado. **Achados não bloqueantes, registrados como dívida técnica leve:** (1) `back-end/.env.example` e `front-end/.env.example` ainda têm o Project ID do Firebase com o mesmo typo já corrigido no `.env` real (`hambuguer` em vez de `hamburguer`) — não afeta produção, mas induz erro em quem copiar o exemplo; (2) `googleAuth.test.ts` não está mais com `describe.skip` (o bug #47 de dependência circular parece ter sido resolvido pelo commit que extraiu `googleAuthTargetStore.ts` para arquivo próprio), mas o comentário `TODO(#47)` no arquivo ainda descreve o bug como não resolvido — não executei a suíte, então não posso confirmar se ela passa, só que estruturalmente ela roda; (3) `googleAuthController.loginWithGoogle` lança `Error` genérico (não `AppError`) se `idToken` vier vazio — inconsistente com o padrão do resto do projeto, embora `validateBody(googleAuthSchema)` já bloqueie essa entrada antes de chegar ao controller. |
 | 1.7.0 | 27/08/2026 | **Auditoria pós-merge da branch `feat/RF09-recuperacao-senha` → `develop`** (PR #22, + 2 commits de correção: `ac176ea`, `8b99ebd`). Confirmado no código: `forgot-password` está correto e completo (token opaco SHA-256, resposta genérica anti-enumeração RN-AUTH-15, rate limit dedicado, e-mail via Resend). **Bug crítico encontrado em `reset-password`**: `userRepository.updatePasswordHash` grava no campo `passwordHash`, mas `schema.prisma` nunca foi migrado de `password` para `passwordHash` — o campo não existe no model `User`. A causa raiz é *drift* entre este documento (que já descrevia `passwordHash` no ERD desde a v1.2.0) e o schema real, que ficou para trás. Resultado previsto: `prisma.user.update` lança erro de validação no caminho feliz do reset. Agrava o problema o fato de `passwordReset.controller.ts` ser o único controller do projeto que **não** usa o wrapper `asyncHandler` — logo esse erro não chega ao `errorHandler` global e a requisição trava sem resposta (a rota de token inválido/expirado, que não toca nesse campo, responde normalmente). Como efeito colateral, `passwordResetTokenRepository.markAsUsed` roda em paralelo (`Promise.all`) e pode marcar o token como usado mesmo com a senha não alterada — token "queimado" sem a troca ter ocorrido. **RF-56** (uso único/expiração) mantido 🟡 por causa desse efeito colateral. **RF-57** (bloqueio de contas Google) tem a regra de negócio implementada em `passwordReset.service.ts` (`user.provider === 'GOOGLE'`), mas o cadastro real grava `provider: 'local'` (minúsculo, sem enum) — convenção de capitalização ainda não formalizada, mantido 🟡. Primeira suíte de testes de integração do projeto para este fluxo foi adicionada (`back-end/src/tests/integration/passwordReset.test.ts`, 7 casos) — porém **3 dos 7 casos referenciam campos inexistentes** (`user.passwordHash` em vez de `user.password`; `providerId`, que não existe no schema) e tendem a falhar se executados contra o Prisma Client real, não apenas contra o schema. Identificado também scaffolding não-documentado e não-consumido: model `EmailVerificationToken` + `emailVerificationTokenRepository` + `userRepository.markEmailAsVerified` foram adicionados ao schema/repositórios nesta mesma branch, mas **nenhuma rota/controller os usa** — dívida técnica sem RF correspondente, registrada aqui até virar feature real ou ser removida. Nenhuma mudança de escopo no `forgot-password`; RF-09 permanece 🟡 (não promovido a 🟢) até o bug de `reset-password` ser corrigido e a suíte de testes rodar verde |
 | 1.6.0 | 19/08/2026 | **RF-09** (recuperação de senha via e-mail) entra em desenvolvimento na Sprint 2 (🔵→🟡): fluxo `forgot-password`/`reset-password` com token opaco (hash SHA-256, expira em 30min, uso único). Novos requisitos que a feature arrasta, ainda não previstos no documento: **RF-56** (uso único/expiração do token), **RF-57** (bloqueio do fluxo para contas `provider=GOOGLE`, que não possuem `passwordHash` local — RN-AUTH-10), **RNF-27** (provedor de e-mail transacional dedicado, ex. Resend, nunca SMTP hardcoded), **RN-AUTH-13/14/15** (Seção 6.1: token opaco+hash, expiração/uso único, resposta genérica anti-enumeração — mesma diretriz de US-02/RF-12). Novo model `PasswordResetToken` adicionado ao ERD (Seção 7). Backlog e Sprint 2 abertos no Trello (board `projeto-casa-do-hamburguer`) |
 | 1.0.0 | 19/07/2026 | Documento inicial, gerado por engenharia reversa de requisitos |
@@ -214,9 +214,9 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | RNF-20 | Testabilidade | Cobertura de testes automatizados para regras de negócio críticas (carrinho, pedido, autenticação) — ver Seção 14 | 🔵 |
 | RNF-21 | Portabilidade | Nenhuma URL hardcoded — todo endpoint via variável de ambiente | 🟢 |
 | RNF-22 | Multi-tenancy | Sistema é single-tenant por design — não há isolamento de dados por loja | 🟢 |
-| RNF-23 🆕 | Segurança | Fluxo de login via Google deve usar **Authorization Code Flow + PKCE**; o fluxo implícito (deprecado) não deve ser usado | 🔵 |
-| RNF-24 🆕 | Segurança | O `CLIENT_SECRET` do Google nunca deve ser exposto ao frontend — a troca do `code` por `id_token` ocorre exclusivamente no backend | 🔵 |
-| RNF-25 🆕 | Segurança | O fluxo OAuth deve usar o parâmetro `state` na etapa de redirecionamento para mitigar CSRF | 🔵 |
+| RNF-23 🆕 | Segurança | **(Reescrita v1.8.1)** Superado pela ADR-0003 revisada: com Firebase Authentication, o app não implementa nem gerencia Authorization Code Flow/PKCE — esse handshake OAuth com o Google fica inteiramente dentro do SDK do Firebase/Google Identity Services. A obrigação equivalente que o projeto de fato controla é RN-AUTH-08/09 (verificação server-side do Firebase ID Token) | 🟢 (não aplicável no desenho atual; requisito coberto por RN-AUTH-08) |
+| RNF-24 🆕 | Segurança | **(Reescrita v1.8.1)** Sob Firebase Authentication não existe `CLIENT_SECRET` de OAuth manuseado pelo projeto. A credencial sensível equivalente é a **Service Account do Firebase Admin** (`FIREBASE_CLIENT_EMAIL`/`FIREBASE_PRIVATE_KEY`): nunca é exposta ao frontend, existe só como variável de ambiente do backend (Railway) e nunca é commitada — confirmado em `firebaseAdmin.ts` (comentário do próprio arquivo já citava essa revisão, mas o documento não estava atualizado até agora) | 🟢 |
+| RNF-25 🆕 | Segurança | **(Reescrita v1.8.1)** A mitigação de CSRF na etapa de redirecionamento OAuth (parâmetro `state`) é responsabilidade interna do SDK do Firebase/Google Identity Services, não código do projeto — não há implementação própria a auditar aqui | 🟢 (delegado ao Firebase; sem ação pendente do lado do projeto) |
 | RNF-26 🆕 | Segurança | O projeto **não possui controle de acesso em camada de banco (RLS)** — toda autorização é responsabilidade exclusiva da camada de aplicação (Express). Este é um **risco aceito conscientemente** enquanto o projeto for single-tenant sobre PostgreSQL puro via Prisma (não Supabase/Firebase); ver Seção 6.11 para a análise completa e o plano de mitigação compensatório | 🟢 (documentado) |
 | RNF-27 🆕 | Segurança | Envio de e-mails transacionais (ex.: redefinição de senha) deve usar provedor dedicado (ex.: Resend), nunca SMTP com credenciais hardcoded no código-fonte | 🟡 (código correto em `resendEmail.service.ts`, API key só via `process.env`; pendência operacional de domínio não verificado no Resend registrada anteriormente, não é bug de código) |
 
@@ -352,7 +352,7 @@ E posso alterar um pedido de "READY" para "DELIVERED"
 E NÃO posso alterar para nenhum outro status
 ```
 
-### US-11 — Login via Google 🔵 🆕
+### US-11 — Login via Google 🟢 🆕
 
 **Como** visitante, **eu quero** entrar com minha conta Google, **para que** eu não precise criar nem lembrar de mais uma senha.
 
@@ -387,11 +387,11 @@ Então o vínculo automático NÃO ocorre, e o sistema orienta o usuário a conf
 | RN-AUTH-05 🔵 | Deve existir um **refresh token** de vida longa, também `httpOnly`, para renovar o access token sem exigir novo login — rotação de token a cada uso (evita replay) |
 | RN-AUTH-06 🟢 | Logout invalida o cookie no cliente; se o refresh token existir, deve haver blacklist/revogação no servidor |
 | RN-AUTH-07 🟢 | Toda rota protegida passa pelo middleware `requireAuth`, que decodifica e valida o JWT antes de liberar acesso ao `req.user` |
-| RN-AUTH-08 🔵 🆕 | Login externo (Google) usa **Authorization Code Flow + PKCE**; o backend troca o `code` por `id_token` e o verifica com biblioteca oficial (ex.: `google-auth-library`), validando assinatura, `aud` (`CLIENT_ID`) e `iss` (`accounts.google.com`) |
-| RN-AUTH-09 🔵 🆕 | O `id_token`/`access_token` do Google **nunca** é usado como sessão da aplicação — serve apenas para comprovar identidade. A sessão continua sendo o JWT próprio (RN-AUTH-02), emitido pelo backend somente após a verificação |
-| RN-AUTH-10 🔵 🆕 | O campo `User.password` torna-se **opcional** (nullable); contas com `provider=GOOGLE` não possuem senha local e não podem autenticar pelo fluxo de e-mail/senha |
-| RN-AUTH-11 🔵 🆕 | Vínculo automático de conta (conta local existente + login Google no mesmo e-mail) só ocorre se `email_verified=true` no token do Google; caso contrário, o sistema rejeita o vínculo automático, para evitar *account takeover* |
-| RN-AUTH-12 🔵 🆕 | A rota `/auth/google` deve estar sob o mesmo rate limiter já aplicado às demais rotas de autenticação (RNF-06) |
+| RN-AUTH-08 🟢 🆕 | **(Reescrita v1.8.1 — mecanismo real difere do proposto na v1.2.0)** Login externo (Google) usa **Firebase Authentication** (`GoogleAuthProvider` + `signInWithPopup`) no frontend; o Firebase já entrega ao client um **Firebase ID Token** pronto (o app nunca manuseia `code`/`CLIENT_SECRET`/PKCE). O backend verifica esse token com o **Firebase Admin SDK** (`verifyFirebaseIdToken`, `back-end/src/config/firebaseAdmin.ts`), que confere assinatura, `aud` (Project ID do Firebase), `iss` e `exp` antes de qualquer criação de sessão — ver ADR-0003 revisada (27/08/2026), Opção D |
+| RN-AUTH-09 🟢 🆕 | **(Reescrita v1.8.1)** O Firebase ID Token **nunca** é usado como sessão da aplicação — serve só para comprovar identidade perante o Firebase Admin. A sessão continua sendo o JWT próprio (RN-AUTH-02, `jose`), emitido pelo backend somente após `verifyFirebaseIdToken` resolver com sucesso (`googleAuth.service.ts`, função `signSessionJwt`, reaproveita `toJwtPayloadDTO` — mesmo formato do login local) |
+| RN-AUTH-10 🟢 🆕 | O campo `User.password` é **opcional** (nullable); contas com `provider=GOOGLE` não possuem senha local e não podem autenticar pelo fluxo de e-mail/senha — confirmado em `schema.prisma` (`password String?`) |
+| RN-AUTH-11 🟢 🆕 | Vínculo automático de conta (conta local existente + login Google no mesmo e-mail) só ocorre se `email_verified=true` no token do Google; caso contrário, o sistema rejeita o vínculo automático (`AppError 409`), para evitar *account takeover* — gate confirmado em `googleAuthService.loginWithGoogle` (`decoded.email_verified === true` antes de setar `firebaseUid` no `upsert`) |
+| RN-AUTH-12 🟢 🆕 | A rota `/auth/google` está sob rate limiting dual camada: `googleAuthBroadLimiter` (por IP, 20/15min, aplicado como middleware da rota) + `googleAuthTargetedStore` (por UID do Google, 5/15min, aplicado dentro do service após decodificar o token). **Nota:** a regra original previa reuso do *mesmo* limiter das demais rotas de auth (RNF-06); o que foi construído é um limiter **dedicado** para `/auth/google` — cumpre o espírito da regra (rota protegida contra brute-force) mas com uma store própria, não compartilhada |
 | RN-AUTH-13 🟡 🆕 | Token de redefinição de senha é opaco, gerado com `crypto.randomBytes(32)` (256 bits de entropia); apenas seu hash SHA-256 é persistido no banco — o valor em texto puro nunca é armazenado, só existe no e-mail enviado uma única vez |
 | RN-AUTH-14 🟡 🆕 | Token de redefinição expira em 30 minutos e é de uso único (`usedAt` marcado no momento do consumo); expirado ou já usado, o token é rejeitado e uma nova solicitação é obrigatória. Emitir um novo token invalida qualquer token anterior ainda válido do mesmo usuário. ⚠️ **Bug (v1.7.0):** `markAsUsed` roda em `Promise.all` junto com a troca de senha (`updatePasswordHash`); se a troca falhar por causa do bug de campo inexistente (ver Changelog 1.7.0), o token ainda pode ser marcado como usado — violação sutil da regra "uso único só depois de sucesso real" |
 | RN-AUTH-15 🟢 🆕 | A resposta de `POST /auth/forgot-password` é **sempre genérica** (200, mesma mensagem), independentemente de o e-mail existir na base — mesma diretriz anti-enumeração já corrigida em US-02/RF-12 (v1.3.0). Confirmado em código (`passwordReset.controller.ts`, `ForgotPassword.tsx`) e coberto por 2 dos 7 testes de integração |
@@ -405,7 +405,7 @@ Então o vínculo automático NÃO ocorre, e o sistema orienta o usuário a conf
 | RN-CRYPT-02 🟢 | Comparação de senha usa `bcrypt.compare`, nunca comparação manual de hash |
 | RN-CRYPT-03 🟢 | Senha nunca é incluída em nenhum payload de resposta da API (ver DTOs, Seção 6.5) |
 | RN-CRYPT-04 🟢 | Política de senha mínima: 9+ caracteres, ao menos 1 número, ao menos 1 caractere especial e ao menos uma letra maiúscula — validada via Zod tanto no client quanto no server |
-| RN-CRYPT-05 🔵 🆕 | A política de senha (RN-CRYPT-04) aplica-se somente a contas `provider=LOCAL`; contas `provider=GOOGLE` não possuem senha e são isentas dessa validação |
+| RN-CRYPT-05 🟢 🆕 | A política de senha (RN-CRYPT-04) aplica-se somente a contas `provider=LOCAL`; contas `provider=GOOGLE` não possuem senha e são isentas dessa validação — o caminho de criação via Google (`googleAuthService`) nunca grava/valida `password`, então a exigência simplesmente não se aplica a essas contas |
 
 ### 6.3 Gerenciamento de Roles (RBAC) 🟢 (atual) + 🔵 (futuro)
 
@@ -575,10 +575,11 @@ erDiagram
         string id PK
         string name
         string email UK
-        string passwordHash "opcional (nulo se provider=GOOGLE)"
-        enum provider "LOCAL | GOOGLE (proposto)"
-        string providerId "sub do Google; nulo se provider=LOCAL (proposto)"
-        boolean emailVerified "proposto"
+        string passwordHash "campo real no banco chama-se password, nao passwordHash - ver nota de drift abaixo"
+        enum provider "LOCAL | GOOGLE (implementado, enum AuthProviders)"
+        string googleId "uid do Google; nulo se provider=LOCAL (implementado)"
+        string firebaseUid "uid do Firebase, unique; nulo se provider=LOCAL (implementado)"
+        boolean emailVerified "implementado"
         enum role "USER | ADMIN | ATTEND(futuro) | DELIVER(futuro)"
         datetime createdAt
     }
@@ -652,8 +653,8 @@ erDiagram
 > - `PAYMENT` é a entidade nova do Módulo de Pagamento (Seção 3.6/6.9) — hoje só o status `SIMULATED` é usado na prática.
 > - `ORDER_ITEM` **não** tem foreign key "viva" para os campos exibidos — são colunas de snapshot, mesmo mantendo `productId` como referência de rastreabilidade.
 > - `CART_ITEM` mantém a constraint `@@unique([userId, productId])` (RN-CART-02).
-> - 🆕 `USER.provider`/`providerId`/`emailVerified` são **propostos** (🔵) para suportar login via Google (RN-AUTH-08 a 12) — `passwordHash` deixa de ser obrigatório.
-> - ⚠️ **v1.7.0 — divergência ERD × schema real:** este ERD já descreve o campo como `passwordHash` desde a v1.2.0, mas `schema.prisma` nunca foi migrado — o campo real no banco continua `password` (String, não opcional). `provider` e `emailVerified`/`emailVerifiedAt` **já existem** de fato no banco (não são mais só propostos), mas `providerId` ainda não existe. É esse *drift* entre este ERD e o schema real que causou o bug de RN-AUTH-16 (Seção 6.1) no `reset-password`.
+> - 🆕 `USER.provider`/`googleId`/`firebaseUid`/`emailVerified` estão **implementados** (🟢) desde a PR #24 (login via Google, RN-AUTH-08 a 12) — `password` deixa de ser obrigatório.
+> - ⚠️ **v1.7.0/v1.8.1 — divergência ERD × schema real (parcialmente corrigida):** este ERD descreve o campo como `passwordHash` desde a v1.2.0, mas `schema.prisma` nunca foi migrado — o campo real no banco continua `password` (String, opcional desde a PR #24). Essa parte do *drift* **ainda não foi corrigida no schema real** e segue sendo a causa do bug de RN-AUTH-16 (Seção 6.1) no `reset-password`. Já corrigido nesta versão: `provider`/`emailVerified`/`emailVerifiedAt` **já existiam** de fato no banco desde a v1.7.0 (não eram mais só propostos, mas o ERD ainda dizia "proposto"); e o campo antes chamado de `providerId` (que nunca existiu) foi substituído neste diagrama por `googleId`/`firebaseUid` — os campos que a PR #24 de fato criou em `schema.prisma`. Referência de verdade fora deste documento: `back-end/docs/architecture/ERD.md` (gerado automaticamente pelo Prisma), que já refletia os campos corretos.
 > - 🆕 `PASSWORD_RESET_TOKEN` é a entidade nova da RF-09 (🟡, Sprint 2) — só guarda o hash do token (RN-AUTH-13), nunca o valor cru.
 > - 🆕 `EMAIL_VERIFICATION_TOKEN` (v1.7.0): model e repositório existem no banco desde a branch de RF-09, mas **nenhuma rota/controller os consome** hoje — não é uma entidade "proposta" nem "implementada" no sentido funcional, é scaffolding não conectado a nenhum fluxo. Não incluído no diagrama acima até virar feature real (ou ser removido).
 
@@ -740,36 +741,48 @@ sequenceDiagram
     F-->>C: Exibe confirmação do pedido
 ```
 
-### 9.3 Fluxo de Login via Google 🔵 🆕
+### 9.3 Fluxo de Login via Google 🟢 (reescrito v1.8.1 — mecanismo real é Firebase, não OAuth 2.0 direto)
 
 ```mermaid
 sequenceDiagram
     actor C as Cliente
     participant F as Frontend (React)
+    participant FB as Firebase Authentication (SDK client + Google)
     participant A as API (Express)
-    participant G as Google (OAuth 2.0)
+    participant FA as Firebase Admin SDK (backend)
     participant DB as PostgreSQL
 
     C->>F: Clica em "Entrar com Google"
-    F->>G: Authorization Code Flow + PKCE (redirect)
-    G-->>F: redirect com authorization code + state
-    F->>A: POST /auth/google { code }
-    A->>G: troca code por id_token (com CLIENT_SECRET, só no backend)
-    G-->>A: id_token (JWT assinado pelo Google)
-    A->>A: verifica assinatura, aud (CLIENT_ID), iss, exp
-    A->>DB: findUnique({ email }) ou findUnique({ providerId })
-    alt usuário não existe
-        A->>DB: create User (provider=GOOGLE, password=null, emailVerified)
-    else e-mail já existe como conta LOCAL e email_verified=true
-        A->>DB: vincula automaticamente (RN-AUTH-11)
+    F->>FB: signInWithPopup(GoogleAuthProvider)
+    FB-->>F: UserCredential (Firebase cuida do handshake OAuth com o Google internamente)
+    F->>F: result.user.getIdToken() -> Firebase ID Token
+    F->>A: POST /auth/google { idToken }
+    A->>FA: verifyFirebaseIdToken(idToken) — checkRevoked=true
+    FA-->>A: claims decodificadas (uid, email, email_verified, name)
+    Note over A,FA: assinatura, aud (Project ID), iss e exp são validados aqui dentro (RN-AUTH-08/09)
+    A->>DB: findByFirebaseUid(uid)
+    alt já vinculado a esse Firebase UID
+        DB-->>A: User existente
+    else não vinculado ainda
+        A->>DB: upsert User by email (atômico, evita corrida)
+        alt e-mail não existia
+            DB-->>A: cria User (provider=GOOGLE, password=null, firebaseUid, emailVerified)
+        else e-mail já existia como conta LOCAL
+            alt email_verified=true no token
+                DB-->>A: vincula firebaseUid automaticamente (RN-AUTH-11)
+            else email_verified=false
+                A-->>F: 409 — rejeita vínculo automático (RN-AUTH-11)
+            end
+        end
     end
-    A->>A: Gera JWT próprio (jose) com { sub, role } — igual ao login local
-    A-->>F: 200 OK + Set-Cookie httpOnly (mesmo mecanismo do RF-04)
-    F->>F: Zustand: seta usuário autenticado
+    A->>A: Gera JWT próprio (jose) com toJwtPayloadDTO — mesmo formato do login local (RF-55)
+    A-->>F: 200 OK + Set-Cookie httpOnly (mesmo mecanismo do RF-04/RN-DTO-06)
+    F->>FB: signOut() — encerra a sessão local do Firebase (sessão real é o cookie do backend)
+    F->>F: React Query: seta usuário autenticado no cache de "me"
     F-->>C: Redireciona para área logada
 ```
 
-> 🔒 Nota: a partir do passo "Gera JWT próprio", o fluxo é **idêntico** ao login local (Seção 9.1) — é por isso que nenhum middleware (`requireAuth`/`requiredAdmin`) precisa mudar.
+> 🔒 Nota: a partir do passo "Gera JWT próprio", o fluxo é **idêntico** ao login local (Seção 9.1) — é por isso que nenhum middleware (`requireAuth`/`requiredAdmin`) precisa mudar. O Google nunca troca informações diretamente com o backend do projeto — o Firebase é o intermediário completo do handshake OAuth (ver ADR-0003 revisada, Opção D).
 
 ---
 
@@ -794,7 +807,7 @@ sequenceDiagram
 | --- | --- | --- |
 | **Fase 2 — Fechar o MVP** | Finalizar fluxo de criação de pedido, máquina de estados validada no service | **Alta — próxima sprint** |
 | **Fase 3 — Robustez** | Refresh token + rotação, rate limiting, Helmet, testes automatizados (ver Seção 14) | Alta |
-| **Fase 4 — Experiência** | Notificações de status, histórico de pedidos, ~~recuperação de senha~~ (em desenvolvimento, RF-09 🟡 — ver Sprint 2 no Trello), login via Google (RF-51 a 55, ver ADR-0003) | Média |
+| **Fase 4 — Experiência** | Notificações de status, histórico de pedidos, ~~recuperação de senha~~ (em desenvolvimento, RF-09 🟡 — ver Sprint 2 no Trello), ~~login via Google~~ (🟢 entregue, PR #24, ver ADR-0003 e Changelog 1.8.1) | Média |
 | **Fase 5 — Operação** | Roles `ATTEND`/`DELIVER`, painel de métricas admin, soft delete, auditoria | Média |
 | **Fase 6 — Pagamento real** | Integração Stripe/Mercado Pago em modo live, webhooks | Média |
 | **Fase 7 — Escala** | Extração do domínio de Pedidos para microsserviço dedicado (ver 10.3) | Baixa (só se necessário) |
@@ -835,7 +848,7 @@ graph LR
 | A03 — Injection | Prisma (queries parametrizadas) + Zod na entrada | 🟢 |
 | A04 — Insecure Design | Snapshot Pattern em pedidos; total recalculado no backend | 🔵 |
 | A05 — Security Misconfiguration | Variáveis de ambiente sem hardcode (🟢); Helmet aplicado globalmente em `app.ts` (RNF-08, 🟢 confirmado em código na v1.7.0, PR #21) | 🟢 |
-| A07 — Identification/Auth Failures | Mensagens de erro genéricas no login (🟢); rate limiting em rotas de autenticação (🟢, RNF-06); verificação de `id_token` no login via Google (🔵, RN-AUTH-08/09) | 🟡 |
+| A07 — Identification/Auth Failures | Mensagens de erro genéricas no login (🟢); rate limiting em rotas de autenticação (🟢, RNF-06) e em `/auth/google` (🟢, RN-AUTH-12); verificação server-side do Firebase ID Token no login via Google (🟢, RN-AUTH-08/09) | 🟢 |
 | A08 — Software and Data Integrity | Magic bytes na validação de upload | 🟢 |
 | A09 — Logging & Monitoring Failures | Logs estruturados de erro de API | 🔵 |
 | A10 — SSRF | N/A no escopo atual (sem fetch de URLs arbitrárias do usuário) | — |
