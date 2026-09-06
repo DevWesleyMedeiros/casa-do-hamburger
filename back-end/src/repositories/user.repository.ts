@@ -57,6 +57,7 @@ export const userRepository = {
         name: data.name,
         email: data.email,
         firebaseUid: data.firebaseUid,
+        emailVerified: data.emailVerified,
         emailVerifiedAt: data.emailVerified ? new Date() : null,
         provider: 'GOOGLE',
         // password fica null (RN-AUTH-10) — cep também não existe para contas Google; ver nota no README sobre esse campo.

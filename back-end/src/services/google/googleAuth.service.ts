@@ -15,7 +15,23 @@ import { verifyFirebaseIdToken } from '../../config/firebaseAdmin.js'
 import { getJwtSecret } from '../../config/jwt.js'
 import { toJwtPayloadDTO } from '../../dtos/toJwtPayloadDTO.js'
 import { AppError } from '../../errors/AppError.js'
+import { googleAuthTargetedStore } from '../../middlewares/rateLimiter.js'
 import { userRepository } from '../../repositories/user.repository.js'
+import { prisma } from '../../db.js'
+
+// Aplica rate limiting direcionado por UID do Google após decodificar o token
+async function checkGoogleTargetedRateLimit(uid: string): Promise<void> {
+  const key = uid
+  const { totalHits, resetTime } = await googleAuthTargetedStore.increment(key)
+
+  if (totalHits > 5) {
+    const retryAfter = Math.ceil((resetTime?.getTime() || 0 - Date.now()) / 1000)
+    throw new AppError(
+      429,
+      `Muitas tentativas de login para esta conta. Tente novamente em ${retryAfter} segundos.`,
+    )
+  }
+}
 
 export const googleAuthService = {
   loginWithGoogle: async (idToken: string) => {
@@ -34,55 +50,49 @@ export const googleAuthService = {
     // O código valida o token do usuário e salva o resultado na variável decoded. Graças à tipagem utilizada, se você digitar decoded. no seu editor de código, o autocomplete mostrará exatamente as propriedades que existem dentro do token (como uid, email, name, etc.), mantendo seu código seguro e livre de erros de digitação.
     try {
       decoded = await verifyFirebaseIdToken(idToken)
-      console.log(
-        '[GoogleAuth] Token verificado com sucesso. UID:',
-        decoded.uid,
-        'Email:',
-        decoded.email,
-        'Email verificado:',
-        decoded.email_verified,
-      )
+      console.log('[GoogleAuth] Token Firebase verificado com sucesso')
+
+      // Aplica rate limiting direcionado por UID (RN-AUTH-12)
+      await checkGoogleTargetedRateLimit(decoded.uid)
     } catch (error) {
-      console.error('[GoogleAuth] Erro ao verificar token Firebase:', error)
-      // Token expirado, assinatura inválida, revogado, ou malformado — todos os casos viram a mesma resposta genérica pro cliente (não vale a pena diferenciar: não é dado sensível de conta, é sempre "tenta de novo o login com Google").
+      if (error instanceof AppError) throw error
+      console.error('[GoogleAuth] Erro ao verificar token Firebase')
       throw new AppError(401, 'Autenticação com Google inválida ou expirada')
     }
 
     if (!decoded.email) {
-      // Contas Google sem e-mail associado existem (raro, mas existem) —
-      // o sistema depende de e-mail como identificador único (User.email), então não há como prosseguir.
       throw new AppError(400, 'Conta Google sem e-mail associado')
     }
 
-    // Já existe usuário vinculado a esse firebaseUid? → login direto,
-    // não passa pelo RN-AUTH-11 de novo (o vínculo já foi decidido antes).
+    // Verifica se usuário já tem vínculo com esse Firebase UID
     const byFirebaseUid = await userRepository.findByFirebaseUid(decoded.uid)
-    console.log('[GoogleAuth] Usuário encontrado por firebaseUid:', !!byFirebaseUid)
     if (byFirebaseUid) {
-      console.log('[GoogleAuth] Login direto para usuário existente:', byFirebaseUid.id)
+      console.log('[GoogleAuth] Login realizado para usuário vinculado existente')
       return { user: byFirebaseUid, token: await signSessionJwt(byFirebaseUid) }
     }
 
-    // Primeira vez desse firebaseUid — procura por e-mail para decidir
-    // entre "criar conta nova" (RF-53) e "vincular a existente" (RF-54).
-    const byEmail = await userRepository.findByEmail(decoded.email)
-    console.log('[GoogleAuth] Usuário encontrado por e-mail:', !!byEmail)
-
-    if (!byEmail) {
-      console.log('[GoogleAuth] Criando novo usuário Google:', decoded.email)
-      const newUser = await userRepository.createFromGoogle({
+    // Usa upsert atômico para evitar condições de corrida na criação/vinculação de contas, uma vez que nesse repositório, eu atualizo ou crio novo user.
+    // O fluxo findByEmail + create pode causar duplicatas se duas requisições chegarem ao mesmo tempo
+    const user = await prisma.user.upsert({
+      where: { email: decoded.email },
+      update: {
+        // Se já existir a conta (local), vincula o firebaseUid apenas se o e-mail estiver verificado
+        ...(decoded.email_verified === true ? { firebaseUid: decoded.uid } : {}),
+      },
+      create: {
+        // Se não existir, cria a conta Google diretamente
         name: decoded['name'] ?? decoded.email.split('@')[0] ?? 'Usuário Google',
         email: decoded.email,
         firebaseUid: decoded.uid,
         emailVerified: decoded.email_verified ?? false,
-      })
-      console.log('[GoogleAuth] Novo usuário criado com ID:', newUser.id)
-      return { user: newUser, token: await signSessionJwt(newUser) }
-    }
+        emailVerifiedAt: decoded.email_verified ? new Date() : null,
+        provider: 'GOOGLE',
+        cep: '',
+      },
+    })
 
-    // Já existe conta LOCAL com esse e-mail — RN-AUTH-11: só vincula automaticamente se o Google confirmar que o e-mail é verificado.
-    // Sem esse gate, alguém poderia criar uma conta Google com um e-mail que não controla e sequestrar a conta local existente (account takeover) — é exatamente o achado da auditoria de arquitetura no Miro (frame "8. Auditoria de Arquitetura").
-    if (decoded.email_verified !== true) {
+    // Se a conta já existia e tentamos vincular sem que o e-mail estivesse verificado
+    if (user.firebaseUid !== decoded.uid && decoded.email_verified !== true) {
       throw new AppError(
         409,
         'Já existe uma conta com este e-mail. Faça login pela senha local ' +
@@ -90,9 +100,8 @@ export const googleAuthService = {
       )
     }
 
-    const linkedUser = await userRepository.linkGoogleIdentity(byEmail.id, decoded.uid)
-    console.log('[GoogleAuth] Conta local vinculada ao Google. ID:', linkedUser.id)
-    return { user: linkedUser, token: await signSessionJwt(linkedUser) }
+    console.log('[GoogleAuth] Autenticação Google processada com sucesso')
+    return { user, token: await signSessionJwt(user) }
   },
 }
 
