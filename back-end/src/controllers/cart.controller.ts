@@ -7,7 +7,7 @@ import { asyncHandler } from '../utils/asyncHandler.js'
 
 export const cartController = {
   createCartItem: asyncHandler(async (req: Request, res: Response) => {
-    const user = req.user?.id as string
+    const user = req.user?.['id'] as string
     const { productId } = req.body
     if (!productId) {
       throw new AppError(400, 'produto é obrigatório')
@@ -21,7 +21,7 @@ export const cartController = {
 
   updateCartItemQuantity: asyncHandler(async (req: Request, res: Response) => {
     const { cartItemId } = req.params
-    const userId = req.user?.id as string
+    const userId = req.user?.['id'] as string
     const { quantity } = req.body
 
     if (!cartItemId || Array.isArray(cartItemId)) {
@@ -32,7 +32,7 @@ export const cartController = {
   }),
 
   productFindInCartItem: asyncHandler(async (req: Request, res: Response) => {
-    const user = req.user?.id as string
+    const user = req.user?.['id'] as string
     if (!user) {
       throw new AppError(404, 'Usuário não encontrado')
     }
@@ -42,7 +42,7 @@ export const cartController = {
 
   deleteCartItemById: asyncHandler(async (req: Request, res: Response) => {
     const { cartItemId } = req.params
-    const userId = req.user?.id as string
+    const userId = req.user?.['id'] as string
     if (!cartItemId || Array.isArray(cartItemId)) {
       throw new AppError(400, 'ID inválido')
     }

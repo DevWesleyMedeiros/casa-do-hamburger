@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { NonBackendResources } from "../../components/NonBackendResources";
 import { Products } from "../../components/products/Products";
 import { queryKeys } from "../../constant/queryKeys";
 import { getProductsData } from "../../shared/services/api/products/Products";
@@ -7,7 +8,6 @@ import {
   getItemSelectedClass,
   toUpperCaseDate,
 } from "../../shared/utils/Utils";
-import { NonBackendResources } from "../../components/NonBackendResources";
 
 const FILTER_PRODUCTS = toUpperCaseDate([
   "Hamburguer",

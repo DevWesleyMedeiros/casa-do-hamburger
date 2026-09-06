@@ -1,7 +1,7 @@
+import type { NextFunction, Request, Response } from 'express'
+import { fileTypeFromBuffer } from 'file-type'
 import multer from 'multer'
 import { AppError } from '../errors/AppError.js'
-import { fileTypeFromBuffer } from 'file-type'
-import { Request, Response, NextFunction } from 'express'
 
 const ACCEPTED_MIME_TYPES = new Set<string>(['image/png', 'image/jpeg', 'image/webp'])
 const MAX_FILE_SIZE = 1024 * 1024 * 5

@@ -1,3 +1,14 @@
 .vscode/
 .claude/agents/settings.json
 .vscode/settings.json
+
+# mudulos
+node_modules
+
+# arquivos de ambiente
+.DS_Store
+.env
+.env.local
+.env.*.local
+firebase-debug.log
+firebase-error.log

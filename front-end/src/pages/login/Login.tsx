@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { Eye, EyeOff } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -8,15 +9,22 @@ import { toast } from "sonner";
 import { Button } from "../../components/button/Button";
 import { Input } from "../../components/input/Input";
 import { ICON_CONFIG } from "../../constant/iconConfig";
+import { queryKeys } from "../../constant/queryKeys";
 import { loginSchema, type loginInput } from "../../shared/schemas/authSchemas";
 import { ApiError } from "../../shared/services/api/ApiExceptions";
 import { LoginDate } from "../../shared/services/api/login/Login";
-import { queryKeys } from "../../constant/queryKeys";
-import { useQueryClient } from "@tanstack/react-query";
+
+// import login firebase
+import {
+  firebaseAuthSignOut,
+  signInWithGooglePopup,
+} from "../../shared/config/firebase";
+import { GoogleLoginDate } from "../../shared/services/api/login/googleLogin";
 
 export const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [backendError, setBackendError] = useState<string | null>(null);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -68,6 +76,47 @@ export const Login = () => {
     },
     [navigate, reset, queryClient],
   );
+
+  // Fluxo de login com Google (popup)
+  const handleGoogleLogin = useCallback(async () => {
+    setIsGoogleLoading(true);
+    setBackendError(null);
+    try {
+      const googleCredential = await signInWithGooglePopup();
+      const idToken =
+        typeof googleCredential === "string"
+          ? googleCredential
+          : await googleCredential.user.getIdToken();
+      const result = await GoogleLoginDate.create({ idToken });
+
+      if (result instanceof ApiError) {
+        if (result.statusCode === 409) {
+          setBackendError("Usuário já cadastrado");
+          return;
+        } else if (result.statusCode === 401) {
+          setBackendError(
+            "Não foi possível confirmar sua conta Google. Tente novamente",
+          );
+          return;
+        } else {
+          setBackendError(result.message);
+          return;
+        }
+      }
+
+      toast("Login realizado");
+      queryClient.setQueryData(queryKeys.me, result.user);
+      reset();
+      navigate("/home");
+    } catch (err) {
+      console.error("[GoogleLogin] Erro no fluxo de popup:", err);
+      setBackendError("Ocorreu um erro inesperado. Tente novamente.");
+    } finally {
+      // Limpa sessão do Firebase no cliente — sessão real é o cookie do backend
+      await firebaseAuthSignOut();
+      setIsGoogleLoading(false);
+    }
+  }, [navigate, reset, queryClient]);
 
   const togglePasswordVisibility = useCallback(() => {
     setShowPassword((prev) => !prev);
@@ -162,7 +211,6 @@ export const Login = () => {
                   {errors.password.message}
                 </p>
               )}
-              {/* erro vindo do backend (401/404/500) — desacoplado dos erros de validação do Zod */}
               {backendError && (
                 <p
                   role="alert"
@@ -172,9 +220,6 @@ export const Login = () => {
                 </p>
               )}
 
-              {/* Links de recuperação de senha: "Esqueceu senha" dispara o fluxo por e-mail (RF-09);
-                "Redefinir senha" leva direto para a tela de nova senha — só funciona com um token
-                válido na URL (?token=...), então é útil sobretudo em ambiente de dev/QA. */}
               <div className="mt-1 flex items-center justify-end gap-3 text-xs">
                 <Link className="text-brand-amber" to="/forgot-password">
                   Esqueceu senha
@@ -201,9 +246,10 @@ export const Login = () => {
 
             <Button
               type="button"
-              title="Cadastrar com Google"
+              title={isGoogleLoading ? "Conectando..." : "Entrar com Google"}
               colorVariation="bgGoogleVariation"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isGoogleLoading}
+              onClick={handleGoogleLogin}
             >
               <FcGoogle size={ICON_CONFIG.mxSize} />
             </Button>

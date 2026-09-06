@@ -16,7 +16,9 @@ function emailKey(req: Request): string {
   const email = req.body?.email?.toLowerCase?.().trim?.() ?? 'unknown'
   return email
 }
-
+// MemoryStore - (ou armazenamento em memória) em bibliotecas de rate limiting para Node.js (como express-rate-limit ou conceitos similares em rate-limiter-flexible) é o mecanismo padrão que guarda a contagem de requisições de cada usuário diretamente na memória RAM do processo do servidor Node.js
+// FUNCIONAMENTO: Armazenamento interno: Utiliza estruturas nativas do JavaScript (como objetos ou mapas Map) para associar um identificador (geralmente o endereço IP do cliente) à quantidade de acessos feitos.
+// Controle de tempo: Mantém o registro do tempo limite (windowMs ou duration) para zerar as contagens assim que o período expirar.
 export const loginLimiterBroadStore = new MemoryStore()
 export const loginLimiterBroad = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -122,4 +124,38 @@ export const resetPasswordBroadLimiter = rateLimit({
   keyGenerator: broadKey,
   standardHeaders: true,
   legacyHeaders: false,
+})
+
+// rate-limiter para google auth RN-AUTH-12: Camada broad (por IP) aplicada no middleware
+// A camada targeted (por UID) é aplicada no serviço, após verificar o token (pois email/UID só estão disponíveis depois da decodificação)
+export const googleAuthBroadLimiterStore = new MemoryStore()
+export const googleAuthBroadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  store: googleAuthBroadLimiterStore,
+  keyGenerator: broadKey,
+  legacyHeaders: false,
+  message: {
+    error: 'Muitas tentativas de login com Google detectadas nesta origem. Aguarde 15 minutos',
+  },
+  statusCode: 429,
+  standardHeaders: 'draft-8',
+  handler: (_req, res, _next, options) => {
+    res.status(options.statusCode).json({
+      message: (options.message as { error: string }).error,
+      status: options.statusCode,
+    })
+  },
+})
+
+// Store compartilhado para o rate limiter direcionado por UID do Google
+// Importado de arquivo separado para evitar referência circular
+// Store compartilhado para o rate limiter direcionado por UID do Google
+// Importado de arquivo separado para evitar referência circular
+import { googleAuthTargetedStore } from '../middlewares/stores/googleAuthTargetStore.js'
+export { googleAuthTargetedStore }
+export const googleAuthTargetedLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5, // Mesmo limite direcionado das outras rotas de login
+  store: googleAuthTargetedStore,
 })

@@ -1,5 +1,6 @@
 // Isso garante que saibamos exatamente o formato dos dados que transitam na aplicação.
 // usados aqui somente para payloads da nossa api
+// payload para login
 export interface LoginPayloadInterface {
   email: string;
   password: string;
@@ -13,25 +14,26 @@ export interface RegisterPayloadInterface {
   cep: string;
 }
 
-// UserLogin pega a interface RegisterPayloadInterface, omit duas propriedades: "password" e "confirmPassword" e cria mais um id e admin
-// UserLogin = { id: string, name: string, email: string, cep: string}
-export type UserLogin = Omit<
-  RegisterPayloadInterface,
-  "password" | "confirmPassword"
-> & {
+// UserLogin bate exatamente com o UserDTO retornado pelo backend: id, name, email, admin
+// O backend não retorna mais 'cep' no DTO de perfil do usuário
+export type UserLogin = {
   id: string;
+  name: string;
+  email: string;
   admin: boolean;
 };
 
-export type UserDate = Pick<LoginPayloadInterface, "email"> &
-  Pick<RegisterPayloadInterface, "name"> &
-  Pick<UserLogin, "admin">;
 
 export type UserContextTypes = {
-  user: UserDate | null;
+  user: UserLogin | null;
   logout: () => void;
   isLoading: boolean;
-  setUser: React.Dispatch<React.SetStateAction<UserDate | null>>; // Esta propriedade é uma função para atualizar o estado user usado no contexto
+  setUser: React.Dispatch<React.SetStateAction<UserLogin | null>>; // Esta propriedade é uma função para atualizar o estado user usado no contexto
   // O setUser não é uma função qualquer — ela é um Dispatch, ou seja, uma função que despacha uma atualização de estado para o React processar.
   //Basicamente quando você passa o setter do useState como prop ou dentro de um contexto.
 };
+
+// GoogleAuthRequest é o tipo do payload do POST /auth/google
+export interface GoogleLoginPayloadInterface {
+  idToken: string;
+}

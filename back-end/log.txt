@@ -1,0 +1,33 @@
+
+ RUN  v4.1.10 C:/Users/Wesley/Documents/ESTUDOS_PROGRAMACAO/projetos-fullstack/casa-do-hamburger/back-end
+
+stdout | src/tests/integration/googleAuth.test.ts
+errorHandler no momento do use: undefined undefined
+
+stderr | src/tests/integration/googleAuth.test.ts
+Conectado com o meu Banco de Dados
+
+ ❯ src/tests/integration/googleAuth.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/tests/integration/googleAuth.test.ts [ src/tests/integration/googleAuth.test.ts ]
+TypeError: app.use() requires a middleware function
+ ❯ app.use node_modules/express/lib/application.js:213:11
+ ❯ src/app.ts:45:5
+     43| console.log('errorHandler no momento do use:', typeof errorHandler, er…
+     44|
+     45| app.use(errorHandler)
+       |     ^
+     46| // middleware que vai sempre por último — Express só invoca middleware…
+     47|
+ ❯ src/tests/integration/googleAuth.test.ts:24:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  17:35:00
+   Duration  8.70s (transform 1.93s, setup 0ms, import 0ms, tests 0ms, environment 0ms)
+

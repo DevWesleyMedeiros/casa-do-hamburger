@@ -16,7 +16,7 @@ export const brazilinaCurrencyFormat = (currencyValue: number): string => {
   if (Number.isNaN(currencyValue)) {
     throw new TypeError("Valor não é moeda");
   }
-  const intToFloatValue = currencyValue / 10000;
+  const intToFloatValue = currencyValue / 1000000;
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL",

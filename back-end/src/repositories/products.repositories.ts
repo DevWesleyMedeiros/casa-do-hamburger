@@ -1,5 +1,5 @@
 import { prisma } from '../db.js'
-import { CreateProductInput } from '../schemas/products.schemas.js'
+import type { CreateProductInput } from '../schemas/products.schemas.js'
 import { handlePrismaError } from '../utils/handlePrismaError.js'
 
 interface CreateProductWithImageParams {

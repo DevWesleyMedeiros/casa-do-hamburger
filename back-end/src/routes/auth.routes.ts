@@ -1,18 +1,18 @@
 import { Router } from 'express'
 import { authController } from '../controllers/auth.controller.js'
+import { passwordResetController } from '../controllers/passwordReset.controller.js'
 import { requireAuth } from '../middlewares/authMiddlewares.js'
 import { clearAuthCookie } from '../middlewares/clearAuthCookie.js'
 import {
   forgotPasswordBroadLimiter,
   forgotPasswordEmailLimiter,
-  resetPasswordBroadLimiter,
   loginLimiter,
   registerLimiter,
+  resetPasswordBroadLimiter,
 } from '../middlewares/rateLimiter.js'
 import { validateBody } from '../middlewares/validateBody.js'
 import { loginSchema, registerSchema } from '../schemas/authSchemas.js'
 import { forgotPasswordSchema, resetPasswordSchema } from '../schemas/passwordReset.schema.js'
-import { passwordResetController } from '../controllers/passwordReset.controller.js'
 
 const router = Router()
 
@@ -40,3 +40,4 @@ router.post(
 )
 
 export default router
+

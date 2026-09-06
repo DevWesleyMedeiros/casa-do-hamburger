@@ -5,6 +5,7 @@
  * - login: delega a validação de credenciais ao authService, seta o JWT
  *   (só dado de sessão) no cookie httpOnly, e responde com o PERFIL do
  *   usuário (toUserDTO) — nunca o token nem o User completo do Prisma.
+ *
  * - register: cria o usuário via authService e responde com o perfil
  *   (toUserDTO) — nunca o User cru, que ainda carrega o hash da senha.
  * - userAuth (rota /me): NÃO confia em req.user para montar a resposta —
@@ -29,11 +30,15 @@ export const authController = {
       return
     }
     const { token, user } = await authService.login(email, password)
+    // na response, eu seto o cookie de sessão com o token
+    // user_section é o nome da sessão e token vem do authService
+    const isProduction = process.env['NODE_ENV'] === 'production'
     res.cookie('user_section', token, {
       httpOnly: true,
-      secure: process.env['NODE_ENV'] === 'production',
-      sameSite: 'lax',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/',
     })
     res.status(200).json({ user: toUserDTO(user) })
   }),
@@ -46,8 +51,13 @@ export const authController = {
 
   // quando acesso a rota "/me" o payload jwt separado do perfil
   userAuth: asyncHandler(async (req: Request, res: Response) => {
-    const jwtPayload = req.user // vem do token: só { id, admin }
-    const user = await userRepository.findById(jwtPayload.id)
+    const jwtPayload = req.user as { id: string; admin: boolean } // vem do token: só { id, admin }
+
+    if (!jwtPayload || typeof jwtPayload !== 'object' || !('id' in jwtPayload)) {
+      res.status(401).json({ message: 'Usuário não autenticado' })
+      return
+    }
+    const user = await userRepository.findById(String(jwtPayload['id']))
     if (!user) {
       res.status(404).json({ message: 'Usuário não encontrado' })
       return
