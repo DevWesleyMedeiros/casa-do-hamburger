@@ -136,7 +136,7 @@ export const googleAuthBroadLimiter = rateLimit({
   keyGenerator: broadKey,
   legacyHeaders: false,
   message: {
-    error: "Muitas tentativas de login com Google detectadas nesta origem. Aguarde 15 minutos",
+    error: 'Muitas tentativas de login com Google detectadas nesta origem. Aguarde 15 minutos',
   },
   statusCode: 429,
   standardHeaders: 'draft-8',
@@ -145,15 +145,17 @@ export const googleAuthBroadLimiter = rateLimit({
       message: (options.message as { error: string }).error,
       status: options.statusCode,
     })
-  }
+  },
 })
 
 // Store compartilhado para o rate limiter direcionado por UID do Google
-export const googleAuthTargetedStore = new MemoryStore()
+// Importado de arquivo separado para evitar referência circular
+// Store compartilhado para o rate limiter direcionado por UID do Google
+// Importado de arquivo separado para evitar referência circular
+import { googleAuthTargetedStore } from '../middlewares/stores/googleAuthTargetStore.js'
+export { googleAuthTargetedStore }
 export const googleAuthTargetedLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5, // Mesmo limite direcionado das outras rotas de login
   store: googleAuthTargetedStore,
-  legacyHeaders: false,
-  standardHeaders: 'draft-8'
 })

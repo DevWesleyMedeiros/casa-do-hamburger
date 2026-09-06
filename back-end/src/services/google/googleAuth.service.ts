@@ -13,11 +13,11 @@ import * as jose from 'jose'
 import type { User } from '../../../generated/prisma/index.js'
 import { verifyFirebaseIdToken } from '../../config/firebaseAdmin.js'
 import { getJwtSecret } from '../../config/jwt.js'
+import { prisma } from '../../db.js'
 import { toJwtPayloadDTO } from '../../dtos/toJwtPayloadDTO.js'
 import { AppError } from '../../errors/AppError.js'
-import { googleAuthTargetedStore } from '../../middlewares/rateLimiter.js'
+import { googleAuthTargetedStore } from '../../middlewares/stores/googleAuthTargetStore.js'
 import { userRepository } from '../../repositories/user.repository.js'
-import { prisma } from '../../db.js'
 
 // Aplica rate limiting direcionado por UID do Google após decodificar o token
 async function checkGoogleTargetedRateLimit(uid: string): Promise<void> {
