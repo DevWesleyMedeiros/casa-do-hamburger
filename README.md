@@ -209,23 +209,23 @@ bun run test             # Testes frontend
 flowchart TB
     subgraph Frontend[Frontend Layer]
         UI[React 19 + Vite]
-        RQ[React Query (Cache)]
-        ZST[Zustand (UI State)]
+        RQ["React Query (Cache)"]
+        ZST["Zustand (UI State)"]
         RT[React Router]
     end
     
     subgraph Backend[Backend Layer]
         CT[Controllers]
-        SV[Services (Regras de Negócio)]
-        RP[Repositories (Dados)]
+        SV["Services (Regras de Negócio)"]
+        RP["Repositories (Dados)"]
         MW[Middlewares]
     end
     
     subgraph Infra[Infraestrutura & Serviços]
         DB[(PostgreSQL + Prisma)]
-        CLD[Cloudinary (Imagens)]
+        CLD["Cloudinary (Imagens)"]
         RSM[Resend (Emails)]
-        FBA[Firebase Admin (Google OAuth)]
+        FBA["Firebase Admin (Google OAuth)"]
     end
     
     UI --> RQ --> AX[Axios Interceptor] --> CT
