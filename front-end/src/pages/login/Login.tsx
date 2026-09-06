@@ -77,48 +77,16 @@ export const Login = () => {
     [navigate, reset, queryClient],
   );
 
-  // Fecha o ciclo do login Google: manda o idToken pro backend e trata a resposta. Extraído do handler de clique porque agora também é chamado pelo useEffect (retorno do redirect), não só por interação direta.
-  // const finishGoogleLogin = useCallback(
-  //   async (idToken: string) => {
-  //     setIsGoogleLoading(true);
-  //     setBackendError(null);
-  //     try {
-  //       const result = await GoogleLoginDate.create({ idToken });
-
-  //       if (result instanceof ApiError) {
-  //         if (result.statusCode === 409) {
-  //           setBackendError("Usuário já cadastrado");
-  //           return;
-  //         } else if (result.statusCode === 401) {
-  //           setBackendError(
-  //             "Não foi possível confirmar sua conta Google. Tente novamente",
-  //           );
-  //           return;
-  //         } else {
-  //           setBackendError(result.message);
-  //           return;
-  //         }
-  //       }
-
-  //       toast("Login realizado");
-  //       queryClient.setQueryData(queryKeys.me, result.user);
-  //       reset();
-  //       navigate("/home");
-  //     } catch (err) {
-  //       setBackendError("Ocorreu um erro inesperado. Tente novamente." + err);
-  //     } finally {
-  //       setIsGoogleLoading(false);
-  //     }
-  //   },
-  //   [navigate, reset, queryClient],
-  // );
-
-  // Fluxo de login com popup — resolve o redirect_uri_mismatch e o COOP
+  // Fluxo de login com Google (popup)
   const handleGoogleLogin = useCallback(async () => {
     setIsGoogleLoading(true);
     setBackendError(null);
     try {
-      const idToken = await signInWithGooglePopup();
+      const googleCredential = await signInWithGooglePopup();
+      const idToken =
+        typeof googleCredential === "string"
+          ? googleCredential
+          : await googleCredential.user.getIdToken();
       const result = await GoogleLoginDate.create({ idToken });
 
       if (result instanceof ApiError) {
@@ -149,71 +117,6 @@ export const Login = () => {
       setIsGoogleLoading(false);
     }
   }, [navigate, reset, queryClient]);
-
-  // --- Versão anterior (signInWithPopup) — mantida comentada de propósito.
-  // Volta a ser a versão ativa quando o popup for reabilitado (também exige
-  // trocar de volta o import lá em cima, de signInWithGoogleRedirect/
-  // getGoogleRedirectResult pra signInWithGooglePopup, e descomentar o
-  // export correspondente em firebase.ts). Até lá, o fluxo em uso é o de
-  // cima (signInWithGoogleRedirect + useEffect).
-  // const handleGoogleLogin = useCallback(async () => {
-  //   setIsGoogleLoading(true);
-  //   setBackendError(null);
-  //   try {
-  //     const idToken = await signInWithGooglePopup(); // ← nome corrigido, bate com o import
-  //     const result = await GoogleLoginDate.create({ idToken });
-
-  //     if (result instanceof ApiError) {
-  //       if (result.statusCode === 409) {
-  //         setBackendError("Usuário já cadastrado");
-  //         return;
-  //       } else if (result.statusCode === 401) {
-  //         setBackendError(
-  //           "Não foi possível confirmar sua conta Google. Tente novamente",
-  //         );
-  //         return;
-  //       } else {
-  //         setBackendError(result.message);
-  //         return;
-  //       }
-  //     }
-
-  //     toast("Login realizado");
-  //     queryClient.setQueryData(queryKeys.me, result.user);
-  //     reset();
-  //     navigate("/home");
-  //   } catch {
-  //     setBackendError("Ocorreu um erro inesperado. Tente novamente.");
-  //   } finally {
-  //     setIsGoogleLoading(false);
-  //   }
-  // }, [navigate, reset, queryClient]);
-
-  // const handleGoogleLogin = useCallback(async () => {
-  //   setIsGoogleLoading(true);
-  //   setBackendError(null);
-  //   try {
-  //     const idToken = await handleRedirectResult();
-  //     if (!idToken) return;
-  //     const result = await GoogleLoginDate.create({ idToken });
-  //     if (result instanceof ApiError) {
-  //       if (result.statusCode === 409) {
-  //         setBackendError("Usuário já cadastrado");
-  //         return;
-  //       } else if (result.statusCode === 401) {
-  //         setBackendError(
-  //           "Não foi possível confirmar sua conta Google. Tente novamente",
-  //         );
-  //         return;
-  //       } else {
-  //         setBackendError(result.message);
-  //         return;
-  //       } catch {
-  //         setBackendError("Ocorreu um erro inesperado. Tente novamente.");
-  //       } finally {
-  //         setBackendError(false)
-  //       }
-  //   })
 
   const togglePasswordVisibility = useCallback(() => {
     setShowPassword((prev) => !prev);
