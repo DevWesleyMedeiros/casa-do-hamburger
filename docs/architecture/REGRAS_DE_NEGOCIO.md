@@ -27,6 +27,7 @@ Selos de status:
 
 | Versão | Data | Mudança |
 | --- | --- | --- |
+| 2.1.0 | *(data do merge)* | Implementado o Módulo de Pedidos completo (RF-32 a RF-40): checkout com Snapshot Pattern (nome, preço e imagem), máquina de estados de 5 status (`PENDING\|PREPARING\|READY\|DELIVERED\|CANCELLED`), entidade `Payment` (simulada, RF-46 continua roadmap), checagem de posse (RN-ORDER-06, mitigação IDOR) e cancelamento com janela de tempo (RF-40). RF-39 (notificação por e-mail via Resend) implementado nesta mesma rodada. |
 | 1.8.1 | 06/09/2026 | **Auditoria pós-merge da branch `feat/RF051-055-login-google-firebase` → `develop`** (PR #24, commit único `904710e`, squash merge em 05/09/2026 — o nome real da branch e o nome citado na v1.8.0 (`feat/google-oauth-implementation`) divergem; o histórico do repositório confirma `feat/RF051-055-login-google-firebase (#24)`). **Confirmado no código:** RF-51 a RF-55 estão de fato implementados — `googleAuth.service.ts` verifica o Firebase ID Token via `firebase-admin` (`verifyFirebaseIdToken`), `schema.prisma` tem `password` opcional + enum `AuthProviders (LOCAL\|GOOGLE)` + `googleId`/`firebaseUid`, o vínculo automático de conta usa `prisma.user.upsert` (atômico) com gate por `email_verified` (RN-AUTH-11), e a sessão é emitida com o mesmo `signSessionJwt`/cookie do login local (RF-55), inclusive `sameSite`/`secure` agora alinhados também com `clearAuthCookie.ts`. Rate limiting dual camada confirmado (IP via `googleAuthBroadLimiter` na rota + UID via `googleAuthTargetedStore` no service). Nenhum PII (e-mail, uid, token) aparece nos `console.log`/`console.error` do fluxo. **Porém a v1.8.0 só girou o selo das 5 linhas de RF-51 a RF-55 — as regras de suporte não foram atualizadas junto**, o que é a causa da inconsistência de selos apontada pelo mantenedor: **RN-AUTH-10, RN-AUTH-11, RN-AUTH-12 e RN-CRYPT-05** permaneciam 🔵 mesmo com a regra já implementada e verificada no código — promovidas a 🟢 nesta versão. **RN-AUTH-08 e RN-AUTH-09, e RNF-23/24/25, não foram apenas re-selados: o *texto* delas ainda descrevia a Opção A rejeitada pela ADR-0003 (Authorization Code Flow + PKCE, `google-auth-library`, troca de `code` por `id_token` com `CLIENT_SECRET`)** — mecanismo que nunca chegou a ser construído; o que existe de fato é Firebase Authentication no client + Firebase Admin SDK no backend. Texto reescrito para refletir a Opção D (já formalizada na ADR-0003 revisada) e diagrama de sequência 9.3 redesenhado (não usava mais `code`/PKCE/CLIENT_SECRET, e sim `idToken` do Firebase). ERD (Seção 7) corrigido: `providerId` (nunca existiu) trocado por `googleId`/`firebaseUid` (campos reais), `provider`/`emailVerified` deixam de ser "proposto". OWASP A07 (Seção 11) atualizado. **Achados não bloqueantes, registrados como dívida técnica leve:** (1) `back-end/.env.example` e `front-end/.env.example` ainda têm o Project ID do Firebase com o mesmo typo já corrigido no `.env` real (`hambuguer` em vez de `hamburguer`) — não afeta produção, mas induz erro em quem copiar o exemplo; (2) `googleAuth.test.ts` não está mais com `describe.skip` (o bug #47 de dependência circular parece ter sido resolvido pelo commit que extraiu `googleAuthTargetStore.ts` para arquivo próprio), mas o comentário `TODO(#47)` no arquivo ainda descreve o bug como não resolvido — não executei a suíte, então não posso confirmar se ela passa, só que estruturalmente ela roda; (3) `googleAuthController.loginWithGoogle` lança `Error` genérico (não `AppError`) se `idToken` vier vazio — inconsistente com o padrão do resto do projeto, embora `validateBody(googleAuthSchema)` já bloqueie essa entrada antes de chegar ao controller. |
 | 1.7.0 | 27/08/2026 | **Auditoria pós-merge da branch `feat/RF09-recuperacao-senha` → `develop`** (PR #22, + 2 commits de correção: `ac176ea`, `8b99ebd`). Confirmado no código: `forgot-password` está correto e completo (token opaco SHA-256, resposta genérica anti-enumeração RN-AUTH-15, rate limit dedicado, e-mail via Resend). **Bug crítico encontrado em `reset-password`**: `userRepository.updatePasswordHash` grava no campo `passwordHash`, mas `schema.prisma` nunca foi migrado de `password` para `passwordHash` — o campo não existe no model `User`. A causa raiz é *drift* entre este documento (que já descrevia `passwordHash` no ERD desde a v1.2.0) e o schema real, que ficou para trás. Resultado previsto: `prisma.user.update` lança erro de validação no caminho feliz do reset. Agrava o problema o fato de `passwordReset.controller.ts` ser o único controller do projeto que **não** usa o wrapper `asyncHandler` — logo esse erro não chega ao `errorHandler` global e a requisição trava sem resposta (a rota de token inválido/expirado, que não toca nesse campo, responde normalmente). Como efeito colateral, `passwordResetTokenRepository.markAsUsed` roda em paralelo (`Promise.all`) e pode marcar o token como usado mesmo com a senha não alterada — token "queimado" sem a troca ter ocorrido. **RF-56** (uso único/expiração) mantido 🟡 por causa desse efeito colateral. **RF-57** (bloqueio de contas Google) tem a regra de negócio implementada em `passwordReset.service.ts` (`user.provider === 'GOOGLE'`), mas o cadastro real grava `provider: 'local'` (minúsculo, sem enum) — convenção de capitalização ainda não formalizada, mantido 🟡. Primeira suíte de testes de integração do projeto para este fluxo foi adicionada (`back-end/src/tests/integration/passwordReset.test.ts`, 7 casos) — porém **3 dos 7 casos referenciam campos inexistentes** (`user.passwordHash` em vez de `user.password`; `providerId`, que não existe no schema) e tendem a falhar se executados contra o Prisma Client real, não apenas contra o schema. Identificado também scaffolding não-documentado e não-consumido: model `EmailVerificationToken` + `emailVerificationTokenRepository` + `userRepository.markEmailAsVerified` foram adicionados ao schema/repositórios nesta mesma branch, mas **nenhuma rota/controller os usa** — dívida técnica sem RF correspondente, registrada aqui até virar feature real ou ser removida. Nenhuma mudança de escopo no `forgot-password`; RF-09 permanece 🟡 (não promovido a 🟢) até o bug de `reset-password` ser corrigido e a suíte de testes rodar verde |
 | 1.6.0 | 19/08/2026 | **RF-09** (recuperação de senha via e-mail) entra em desenvolvimento na Sprint 2 (🔵→🟡): fluxo `forgot-password`/`reset-password` com token opaco (hash SHA-256, expira em 30min, uso único). Novos requisitos que a feature arrasta, ainda não previstos no documento: **RF-56** (uso único/expiração do token), **RF-57** (bloqueio do fluxo para contas `provider=GOOGLE`, que não possuem `passwordHash` local — RN-AUTH-10), **RNF-27** (provedor de e-mail transacional dedicado, ex. Resend, nunca SMTP hardcoded), **RN-AUTH-13/14/15** (Seção 6.1: token opaco+hash, expiração/uso único, resposta genérica anti-enumeração — mesma diretriz de US-02/RF-12). Novo model `PasswordResetToken` adicionado ao ERD (Seção 7). Backlog e Sprint 2 abertos no Trello (board `projeto-casa-do-hamburguer`) |
@@ -150,15 +151,15 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 
 | ID | Requisito | Status |
 | --- | --- | --- |
-| RF-32 | O sistema deve permitir converter um carrinho em um pedido (`Order`) | 🔵 |
-| RF-33 | Cada item do pedido (`OrderItem`) deve gravar uma **cópia (snapshot)** dos dados do produto no momento da compra (nome, preço, imagem) — *Snapshot Pattern* | 🔵 |
-| RF-34 | Pedidos devem ter um campo de status: `PENDING`, `PREPARING`, `READY`, `DELIVERED`, `CANCELLED` | 🔵 |
-| RF-35 | Administradores devem poder visualizar todos os pedidos e alterar seu status | 🔵 |
-| RF-36 | Usuário deve poder visualizar apenas o histórico de seus próprios pedidos | 🔵 |
+| RF-32 | O sistema deve permitir converter um carrinho em um pedido (`Order`) | 🟡 |
+| RF-33 | Cada item do pedido (`OrderItem`) deve gravar uma **cópia (snapshot)** dos dados do produto no momento da compra (nome, preço, imagem) — *Snapshot Pattern* | 🟡 |
+| RF-34 | Pedidos devem ter um campo de status: `PENDING`, `PREPARING`, `READY`, `DELIVERED`, `CANCELLED` | 🟡 |
+| RF-35 | Administradores devem poder visualizar todos os pedidos e alterar seu status | 🟡 |
+| RF-36 | Usuário deve poder visualizar apenas o histórico de seus próprios pedidos | 🟡 |
 | RF-37 | Preço deve ser tratado como inteiro (centavos) para evitar erros de ponto flutuante | 🟢 |
-| RF-38 | Deve haver validação de transição de status (máquina de estados — ver Seção 8) | 🔵 |
-| RF-39 | Sistema deve notificar o cliente (e-mail/push/websocket) em mudanças de status do pedido | 🔵 |
-| RF-40 | Sistema deve suportar cancelamento de pedido pelo cliente, respeitando janela de tempo/status | 🔵 |
+| RF-38 | Deve haver validação de transição de status (máquina de estados — ver Seção 8) | 🟡 |
+| RF-39 | Sistema deve notificar o cliente (e-mail/push/websocket) em mudanças de status do pedido | 🟡 |
+| RF-40 | Sistema deve suportar cancelamento de pedido pelo cliente, respeitando janela de tempo/status | 🟡 |
 
 > ✅ **Confirmado (Seção 12, pergunta 3):** os cinco status permanecem exatamente `PENDING/PREPARING/READY/DELIVERED/CANCELLED`,
 > `ATTEND`/`DELIVER` roles futuras.
@@ -520,12 +521,12 @@ type UserResponseDTO = {
 
 | Regra | Descrição |
 | --- | --- |
-| RN-ORDER-01 🔵 | Ao criar um pedido, cada `CartItem` gera um `OrderItem` com **cópia imutável** dos dados do produto (nome, preço unitário, URL de imagem) no momento da compra |
-| RN-ORDER-02 🔵 | Justificativa do Snapshot Pattern: se o preço ou nome do produto mudar no catálogo depois, o histórico do pedido **não pode ser afetado retroativamente** — nota fiscal/histórico é imutável |
-| RN-ORDER-03 🔵 | `Order` referencia `productId` apenas para rastreabilidade (ex.: link "ver produto"), mas os dados exibidos no pedido vêm do snapshot, nunca de um `JOIN` ao vivo com `Product` |
-| RN-ORDER-04 🔵 | Preço é armazenado como inteiro em centavos em todo o fluxo (evita erro de ponto flutuante em somas) |
-| RN-ORDER-05 🔵 | Status do pedido segue máquina de estados finita (ver Seção 8) — transições inválidas são rejeitadas no service layer |
-| RN-ORDER-06 🔵 | Um usuário só pode visualizar/cancelar os próprios pedidos (`Order.userId === req.user.id`), exceto administradores. ⚠️ **Não é opcional nem posterior ao checkout**: a checagem de posse deve nascer na mesma PR que implementa `GET /orders/:id`, nunca como ajuste "depois" — é a mitigação de IDOR (OWASP A01) para este módulo |
+| RN-ORDER-01 🟡 | Ao criar um pedido, cada `CartItem` gera um `OrderItem` com **cópia imutável** dos dados do produto (nome, preço unitário, URL de imagem) no momento da compra |
+| RN-ORDER-02 🟡 | Justificativa do Snapshot Pattern: se o preço ou nome do produto mudar no catálogo depois, o histórico do pedido **não pode ser afetado retroativamente** — nota fiscal/histórico é imutável |
+| RN-ORDER-03 🟡 | `Order` referencia `productId` apenas para rastreabilidade (ex.: link "ver produto"), mas os dados exibidos no pedido vêm do snapshot, nunca de um `JOIN` ao vivo com `Product` |
+| RN-ORDER-04 🟡 | Preço é armazenado como inteiro em centavos em todo o fluxo (evita erro de ponto flutuante em somas) |
+| RN-ORDER-05 🟡 | Status do pedido segue máquina de estados finita (ver Seção 8) — transições inválidas são rejeitadas no service layer |
+| RN-ORDER-06 🟡 | Um usuário só pode visualizar/cancelar os próprios pedidos (`Order.userId === req.user.id`), exceto administradores. ⚠️ **Não é opcional nem posterior ao checkout**: a checagem de posse deve nascer na mesma PR que implementa `GET /orders/:id`, nunca como ajuste "depois" — é a mitigação de IDOR (OWASP A01) para este módulo |
 | RN-ORDER-07 🔵 | Quando `ATTEND`/`DELIVER` existirem, a transição de status deve checar não só o papel (role), mas se o papel tem permissão para **aquela transição específica** (ver RN-RBAC-07/08) |
 
 ### 6.9 Pagamento (Simulado hoje, Gateway real no futuro) 🆕
@@ -648,7 +649,15 @@ erDiagram
 ```
 
 > 🔒 Notas do ERD:
->
+
+🆕 v2.1.0: ORDER, ORDER_ITEM e PAYMENT estão implementados
+(🟢) desde a feature RF-32 a 40. Divergência de nomenclatura assumida
+conscientemente (não é drift silencioso): o campo total em ORDER
+não foi renomeado para totalInCents como este ERD sugeria, para não
+introduzir uma migration de rename sem ganho funcional em cima de um
+campo que já era Int em centavos desde RF-37. O mesmo vale para
+unitPrice/subtotal em ORDER_ITEM. Fonte de verdade dos nomes reais:
+back-end/docs/architecture/ERD.md (gerado pelo Prisma).
 > - `category` agora é um **atributo direto** de `PRODUCT` (confirmado, Seção 12), não mais uma FK "futura".
 > - `PAYMENT` é a entidade nova do Módulo de Pagamento (Seção 3.6/6.9) — hoje só o status `SIMULATED` é usado na prática.
 > - `ORDER_ITEM` **não** tem foreign key "viva" para os campos exibidos — são colunas de snapshot, mesmo mantendo `productId` como referência de rastreabilidade.
@@ -799,7 +808,8 @@ sequenceDiagram
 | Pagamento | Simulação de checkout (sem gateway real obrigatório para o MVP) |
 | Infra | CI/CD funcional (Vercel + Railway + Neon), migrations versionadas |
 
-> 🟢 O MVP será fechado quando as lacunas mais importantes estiverem  **finalizadas:a criação de pedido de ponta a ponta (RF-32/33/34/35, hoje 🟡)** e **validar a máquina de estados no service (RF-38)**.
+> 🟢 ✅ MVP fechado nesta rodada — criação de pedido de ponta a ponta (RF-32/33/34/35) e validação da máquina de estados no service (RF-38) concluídas e testadas (ver Seção 14 — testes de integração e unitários do
+módulo de pedidos).**.
 
 ### 10.2 Roadmap Pós-MVP
 
@@ -843,7 +853,8 @@ graph LR
 
 | Risco OWASP Top 10 | Mitigação no projeto | Status |
 | --- | --- | --- |
-| A01 — Broken Access Control | `requireAuth`/`requiredAdmin` middlewares; RN-RBAC-04 | 🟢 |
+| --- | --- | --- |
+| A01 — Broken Access Control | `RN-ORDER-06`: checagem de posse em `GET/PATCH/POST /orders/:id*`, retorna 404 (não 403) para não confirmar existência do recurso a quem não é dono | 🟢 |
 | A02 — Cryptographic Failures | bcrypt para senha; JWT assinado; cookies httpOnly/secure | 🟢 |
 | A03 — Injection | Prisma (queries parametrizadas) + Zod na entrada | 🟢 |
 | A04 — Insecure Design | Snapshot Pattern em pedidos; total recalculado no backend | 🔵 |
