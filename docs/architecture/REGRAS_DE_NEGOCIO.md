@@ -658,6 +658,7 @@ introduzir uma migration de rename sem ganho funcional em cima de um
 campo que já era Int em centavos desde RF-37. O mesmo vale para
 unitPrice/subtotal em ORDER_ITEM. Fonte de verdade dos nomes reais:
 back-end/docs/architecture/ERD.md (gerado pelo Prisma).
+>
 > - `category` agora é um **atributo direto** de `PRODUCT` (confirmado, Seção 12), não mais uma FK "futura".
 > - `PAYMENT` é a entidade nova do Módulo de Pagamento (Seção 3.6/6.9) — hoje só o status `SIMULATED` é usado na prática.
 > - `ORDER_ITEM` **não** tem foreign key "viva" para os campos exibidos — são colunas de snapshot, mesmo mantendo `productId` como referência de rastreabilidade.
@@ -854,10 +855,10 @@ graph LR
 | Risco OWASP Top 10 | Mitigação no projeto | Status |
 | --- | --- | --- |
 | --- | --- | --- |
-| A01 — Broken Access Control | `RN-ORDER-06`: checagem de posse em `GET/PATCH/POST /orders/:id*`, retorna 404 (não 403) para não confirmar existência do recurso a quem não é dono | 🟢 |
+| A01 — Broken Access Control | `RN-ORDER-06`: checagem de posse em `GET/PATCH/POST /orders/:id*`, retorna 404 (não 403) para não confirmar existência do recurso a quem não é dono (recursos de terceiros) | 🟢 |
 | A02 — Cryptographic Failures | bcrypt para senha; JWT assinado; cookies httpOnly/secure | 🟢 |
 | A03 — Injection | Prisma (queries parametrizadas) + Zod na entrada | 🟢 |
-| A04 — Insecure Design | Snapshot Pattern em pedidos; total recalculado no backend | 🔵 |
+| A04 — Insecure Design | Snapshot Pattern em pedidos; total recalculado no backend | 🟢 |
 | A05 — Security Misconfiguration | Variáveis de ambiente sem hardcode (🟢); Helmet aplicado globalmente em `app.ts` (RNF-08, 🟢 confirmado em código na v1.7.0, PR #21) | 🟢 |
 | A07 — Identification/Auth Failures | Mensagens de erro genéricas no login (🟢); rate limiting em rotas de autenticação (🟢, RNF-06) e em `/auth/google` (🟢, RN-AUTH-12); verificação server-side do Firebase ID Token no login via Google (🟢, RN-AUTH-08/09) | 🟢 |
 | A08 — Software and Data Integrity | Magic bytes na validação de upload | 🟢 |
