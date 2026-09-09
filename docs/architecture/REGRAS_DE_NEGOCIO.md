@@ -157,7 +157,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | RF-35 | Administradores devem poder visualizar todos os pedidos e alterar seu status | 🟡 |
 | RF-36 | Usuário deve poder visualizar apenas o histórico de seus próprios pedidos | 🟡 |
 | RF-37 | Preço deve ser tratado como inteiro (centavos) para evitar erros de ponto flutuante | 🟢 |
-| RF-38 | Deve haver validação de transição de status (máquina de estados — ver Seção 8) | 🟡 |
+| RF-38 | Deve haver validação de transição de status (máquina de estados — ver Seção 8) | 🟢 |
 | RF-39 | Sistema deve notificar o cliente (e-mail/push/websocket) em mudanças de status do pedido | 🟡 |
 | RF-40 | Sistema deve suportar cancelamento de pedido pelo cliente, respeitando janela de tempo/status | 🟡 |
 
@@ -525,7 +525,7 @@ type UserResponseDTO = {
 | RN-ORDER-02 🟡 | Justificativa do Snapshot Pattern: se o preço ou nome do produto mudar no catálogo depois, o histórico do pedido **não pode ser afetado retroativamente** — nota fiscal/histórico é imutável |
 | RN-ORDER-03 🟡 | `Order` referencia `productId` apenas para rastreabilidade (ex.: link "ver produto"), mas os dados exibidos no pedido vêm do snapshot, nunca de um `JOIN` ao vivo com `Product` |
 | RN-ORDER-04 🟡 | Preço é armazenado como inteiro em centavos em todo o fluxo (evita erro de ponto flutuante em somas) |
-| RN-ORDER-05 🟡 | Status do pedido segue máquina de estados finita (ver Seção 8) — transições inválidas são rejeitadas no service layer |
+| RN-ORDER-05 🟢 | Status do pedido segue máquina de estados finita (ver Seção 8) — transições inválidas são rejeitadas no service layer |
 | RN-ORDER-06 🟡 | Um usuário só pode visualizar/cancelar os próprios pedidos (`Order.userId === req.user.id`), exceto administradores. ⚠️ **Não é opcional nem posterior ao checkout**: a checagem de posse deve nascer na mesma PR que implementa `GET /orders/:id`, nunca como ajuste "depois" — é a mitigação de IDOR (OWASP A01) para este módulo |
 | RN-ORDER-07 🔵 | Quando `ATTEND`/`DELIVER` existirem, a transição de status deve checar não só o papel (role), mas se o papel tem permissão para **aquela transição específica** (ver RN-RBAC-07/08) |
 
