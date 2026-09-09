@@ -37,7 +37,7 @@ export const OrderService = {
    */
   isValidTransition: (from: OrderStatus, to: OrderStatus): boolean => {
     if (from === to) return false
-    // ficar no mesmo status não é uma transição — é um no-op, e é rejeitado explicitamente
+    // ficar no mesmo status não é uma transição — é um no-op (não transacionar de um state para outro. Ex.: um PREPARING para outro PREPARING), e é rejeitado explicitamente
     return ALLOWED_TRANSITIONS[from].includes(to)
   },
 
@@ -60,9 +60,9 @@ export const OrderService = {
    *
    * Nota: essa função responde "o estado permite isso?" — ela NÃO checa
    * se quem está pedindo é de fato o cliente dono do pedido. Isso é
-   * responsabilidade de autorização, feita em outra camada.
+   * responsabilidade de autorização, feita em outra camada
    */
-  canCostumerCancel: (orderStatus: OrderStatus): boolean => {
+  canCustomerCancel: (orderStatus: OrderStatus): boolean => {
     return orderStatus === 'PENDING'
   },
 }
