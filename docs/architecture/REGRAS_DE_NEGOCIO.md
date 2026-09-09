@@ -153,7 +153,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | --- | --- | --- |
 | RF-32 | O sistema deve permitir converter um carrinho em um pedido (`Order`) | 🟡 |
 | RF-33 | Cada item do pedido (`OrderItem`) deve gravar uma **cópia (snapshot)** dos dados do produto no momento da compra (nome, preço, imagem) — *Snapshot Pattern* | 🟡 |
-| RF-34 | Pedidos devem ter um campo de status: `PENDING`, `PREPARING`, `READY`, `DELIVERED`, `CANCELLED` | 🟡 |
+| RF-34 | Pedidos devem ter um campo de status: `PENDING`, `PREPARING`, `READY`, `DELIVERED`, `CANCELLED` | 🟢 |
 | RF-35 | Administradores devem poder visualizar todos os pedidos e alterar seu status | 🟡 |
 | RF-36 | Usuário deve poder visualizar apenas o histórico de seus próprios pedidos | 🟡 |
 | RF-37 | Preço deve ser tratado como inteiro (centavos) para evitar erros de ponto flutuante | 🟢 |
