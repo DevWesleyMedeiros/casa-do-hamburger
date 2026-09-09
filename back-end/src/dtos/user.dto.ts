@@ -11,6 +11,7 @@ import type { User } from '../../generated/prisma/index.js'
  * resposta de API: login, register, /me. NÃO é usado para montar o JWT
  * — para isso existe o toJwtPayloadDTO (ver toJwtPayloadDTO.ts)
  */
+// só o que é necessário para a sessão é extraído de User e passado para UserDTO
 export type UserDTO = Pick<User, 'id' | 'name' | 'email' | 'admin'>
 
 export const toUserDTO = (user: User): UserDTO => {
