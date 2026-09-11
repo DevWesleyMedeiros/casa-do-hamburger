@@ -159,7 +159,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | RF-37 | Preço deve ser tratado como inteiro (centavos) para evitar erros de ponto flutuante | 🟢 |
 | RF-38 | Deve haver validação de transição de status (máquina de estados — ver Seção 8) | 🟢 |
 | RF-39 | Sistema deve notificar o cliente (e-mail/push/websocket) em mudanças de status do pedido | 🟡 |
-| RF-40 | Sistema deve suportar cancelamento de pedido pelo cliente, respeitando janela de tempo/status | 🟡 |
+| RF-40 | Sistema deve suportar cancelamento de pedido pelo cliente, respeitando janela de tempo/status | 🟢 |
 
 > ✅ **Confirmado (Seção 12, pergunta 3):** os cinco status permanecem exatamente `PENDING/PREPARING/READY/DELIVERED/CANCELLED`,
 > `ATTEND`/`DELIVER` roles futuras.
