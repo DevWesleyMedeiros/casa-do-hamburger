@@ -9,7 +9,7 @@ import type { Order, OrderItem, Payment } from '../../generated/prisma/index.js'
  * Campos INTENCIONALMENTE OMITIDOS:
  * - orderId: é FK de relacionamento. Este DTO só é consumido aninhado dentro
  *   de OrderResponseDTO.items[], então o front já sabe a qual pedido pertence.
- *   Devolvê-lo de novo seria dado redundante inflando o payload sem uso real.
+ *   Devolvê-lo de novo seria dado redundante inflando o payload sem uso real
  */
 export interface OrderItemDTO {
   id: string
