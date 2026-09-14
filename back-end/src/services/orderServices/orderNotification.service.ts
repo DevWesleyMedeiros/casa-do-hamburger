@@ -1,13 +1,7 @@
-// Arquivo NOVO — backend/src/services/orderNotification.service.ts
-//
-// RF-39: notifica o cliente por e-mail em toda mudança de status.
-// Reaproveita o EmailService (Resend) já criado na feature RF-09
-// (RNF-27) — NÃO cria um novo client Resend aqui.
-//
-// ⚠️ Ajuste o import abaixo para o caminho real do EmailService da RF-09
-// no seu repositório (ex.: "./email.service.ts" ou "../shared/email/...").
+// src/services/orders/orderNotification.service.ts
+
 import type { OrderStatus } from '../../../generated/prisma/index.js'
-import { EmailService } from '../email.service.js'
+import type { EmailService } from '../email/email.service.js'
 
 const STATUS_LABEL: Record<OrderStatus, string> = {
   PENDING: 'recebido',
@@ -25,20 +19,27 @@ interface NotifyParams {
 
 /**
  * Envio "best-effort": uma falha no envio de e-mail NUNCA deve derrubar a
- * atualização de status do pedido em si (o e-mail é um efeito colateral,
- * não parte da transação de negócio). Por isso o service de Order chama
- * esta função fora da transação do Prisma e apenas loga a falha.
+ * atualização de status do pedido (efeito colateral, não parte da transação).
+ *
+ * Recebe o EmailService por injeção (DIP) — o chamador passa a MESMA
+ * instância já usada na RF-09, sem criar um novo client Resend aqui.
  */
-export async function notifyOrderStatusChanged({
-  to,
-  orderId,
-  status,
-}: NotifyParams): Promise<void> {
+export async function notifyOrderStatusChanged(
+  emailService: EmailService,
+  { to, orderId, status }: NotifyParams,
+): Promise<void> {
   const label = STATUS_LABEL[status]
+  const shortId = orderId.slice(0, 8)
 
-  await EmailService.send({
-    to,
-    subject: `Seu pedido está ${label}`,
-    html: `<p>Seu pedido <strong>#${orderId.slice(0, 8)}</strong> agora está: <strong>${label}</strong>.</p>`,
-  })
+  try {
+    await emailService.sendGenericEmail({
+      to,
+      subject: `Pedido #${shortId} atualizado: ${label}`,
+      html: `<p>Olá! Seu pedido <strong>#${shortId}</strong> agora está: <strong>${label}</strong>.</p>
+             <p>Agradecemos pela preferência!</p>`,
+    })
+    console.log(`Notificação de status enviada com sucesso para pedido #${shortId}`)
+  } catch (error) {
+    console.error(`Falha ao enviar notificação para pedido #${shortId}:`, error)
+  }
 }

@@ -1,4 +1,4 @@
-import type { OrderStatus } from '../../generated/prisma/index.js'
+import type { OrderStatus } from '../../../generated/prisma/index.js'
 
 /**
  * O "mapa oficial" da máquina de estados.
@@ -29,7 +29,7 @@ export class InvalidOrderTransitionError extends Error {
   }
 }
 
-export const OrderService = {
+export const OrderServiceMachine = {
   /**
    * A "pergunta" central: essa transição é permitida?
    * Função PURA — mesmo from/to sempre devolve o mesmo boolean, sem lançar erro
@@ -47,7 +47,7 @@ export const OrderService = {
    * então é testada com expect(() => ...).toThrow(...).
    */
   assertValidTransition: (from: OrderStatus, to: OrderStatus): void => {
-    if (!OrderService.isValidTransition(from, to)) {
+    if (!OrderServiceMachine.isValidTransition(from, to)) {
       throw new InvalidOrderTransitionError(from, to)
     }
   },
