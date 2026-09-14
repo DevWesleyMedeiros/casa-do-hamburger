@@ -1,27 +1,27 @@
 import { Router } from 'express'
+import { orderController } from '../controllers/order.controller.js'
 import { requireAuth } from '../middlewares/authMiddlewares.js'
 import { requiredAdmin } from '../middlewares/requiredAdmin.js'
 import { asyncHandler } from '../utils/asyncHandler.js'
-import { orderController } from '../controllers/order.controller.js'
 
 const router = Router()
 
 // rota que cria uma ordem
-router.post('/', requireAuth, asyncHandler(orderController.createOrder))
+router.post('/create-order', requireAuth, asyncHandler(orderController.createOrder))
 // rota que lista todas as ordens seja elas minha ou não
-router.get('/', requiredAdmin, asyncHandler(orderController.listOrders))
+router.get('/list-order', requireAuth, asyncHandler(orderController.listOrders))
 // rota que lista uma ordem por id
-router.get('/:id', requireAuth, asyncHandler(orderController.getOrderById))
+router.get('/get-order/:id', requireAuth, asyncHandler(orderController.getOrderById))
 // rota que atualiza o status de uma ordem
-router.patch('/:id', requireAuth, asyncHandler(orderController.updateOrderStatus))
+router.patch('/update-order/:id', requireAuth, asyncHandler(orderController.updateOrderStatus))
 // rota que atualiza o status de uma ordem por admin
 router.patch(
-  '/:id/status',
+  '/update-order/:id/status',
   requireAuth,
   requiredAdmin,
   asyncHandler(orderController.updateOrderStatus),
 )
 // rota que cancela uma ordem
-router.post('/:id/cancel', requireAuth, asyncHandler(orderController.cancelOrder))
+router.post('/cancel-order/:id/cancel', requireAuth, asyncHandler(orderController.cancelOrder))
 
 export default router

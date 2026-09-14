@@ -80,7 +80,7 @@ export const OrderRepository = {
       include: ORDER_INCLUDE,
     })
   },
-  /** Busca os CartItems do usuário já com o produto e a imagem primária (para snapshot) */
+  /** Busca os CartItems do usuário já com o produto e a imagem primária (para snapshot) para só então eu validar um pedido */
   async findCartItemsForCheckout(userId: string) {
     return prisma.cartItem.findMany({
       where: { userId },

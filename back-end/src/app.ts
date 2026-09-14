@@ -54,7 +54,7 @@ app.use('/auth', googleAuthRoutes)
 app.use('/auth', cartRoutes)
 
 // registro da rota de order
-app.use('auth', orderRoutes)
+app.use('/auth', orderRoutes)
 
 app.use(errorHandler)
 // middleware que vai sempre por último — Express só invoca middleware de 4 parâmetros depois de todas as rotas

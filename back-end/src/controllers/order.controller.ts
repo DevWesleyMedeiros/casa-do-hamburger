@@ -17,12 +17,18 @@ export const orderController = {
   },
   // GET /orders — RF-36 (usuário comum) ou RF-35 (admin, com ?status=)
   listOrders: async (req: Request, res: Response) => {
-    if (req.user!['admin']) {
+    const userAdmin = req.body!['admin'] as boolean
+    const userId = req.body!['id'] as string
+    if (userAdmin) {
       const { status } = listOrdersQuerySchema.parse(req.query)
       const orders = await OrderServiceItems.listAllOrders(status)
       return res.status(200).json(orders)
     }
-    const orders = await OrderServiceItems.listMyorders(req.user!['id'] as string)
+    if (!userId) {
+      res.status(400).json({ message: 'ID do usuário inválido' })
+      return
+    }
+    const orders = await OrderServiceItems.listMyOrders(userId)
     return res.status(200).json(orders)
   },
   // GET /orders/:id — RN-ORDER-06 (ownership/IDOR)

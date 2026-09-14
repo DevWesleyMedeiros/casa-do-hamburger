@@ -15,7 +15,7 @@ interface RequesterContext {
 export const OrderServiceItems = {
   /**
    * RF-32/33 + US-05 — converte o carrinho do usuário em um Order. Todo o cálculo de total acontece aqui, no backend (RN-CART-06)
-   * O valor enviado pelo cliente (se algum) é sempre ignorado.
+   * O valor enviado pelo cliente (se algum) é sempre ignorado
    */
   createOrder: async (userId: string): Promise<OrderResponseDTO> => {
     const cartItems = await OrderRepository.findCartItemsForCheckout(userId)
@@ -47,7 +47,7 @@ export const OrderServiceItems = {
     })
   },
   /** RF-36 — histórico do próprio usuário */
-  listMyorders: async (userId: string): Promise<OrderResponseDTO[]> => {
+  listMyOrders: async (userId: string): Promise<OrderResponseDTO[]> => {
     const orders = await OrderRepository.findOrdersByUser(userId)
     return orders.map((order) =>
       toOrderDTO({
@@ -91,7 +91,7 @@ export const OrderServiceItems = {
   },
   /**
    * RF-35/38 — transição de status pelo admin (hoje só ADMIN existe; a checagem de papel↔transição de RN-ORDER-07 fica pronta para plugar
-   * ATTEND/DELIVER no futuro sem reescrever esta função).
+   * ATTEND/DELIVER no futuro sem reescrever esta função)
    */
   updateStatus: async (
     orderId: string,
