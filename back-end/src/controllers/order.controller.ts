@@ -4,7 +4,7 @@ import { OrderServiceItems } from '../services/orderServices/order.service.js'
 
 // POST /orders — RF-32/33, US-05
 export const orderController = {
-  create: async (req: Request, res: Response) => {
+  createOrder: async (req: Request, res: Response) => {
     const userId = req.user!['id'] as string
     // (!req.user) é chamado de Operador de Asserção de Não-Nulo (Non-null Assertion Operator) do TypeScript. Ele serve para dizer explicitamente ao compilador do TypeScript que a variável req.user não é null nem undefined naquele momento do código.
     if (!req.user) {

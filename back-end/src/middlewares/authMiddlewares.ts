@@ -27,14 +27,13 @@ export const requireAuth = async (
   next: NextFunction,
 ): Promise<Response | void> => {
   const token = req.cookies?.['user_section']
-  console.log(
-    '[requireAuth] Rota acessada:',
-    req.path,
-    'Cookies recebidos:',
-    Object.keys(req.cookies || {}),
-    'Token presente:',
-    !!token,
-  )
+  // console.log(
+  //   '[requireAuth] Rota acessada:',
+  //   req.path,
+  //   'Cookies recebidos:',
+  //   Object.keys(req.cookies || {}),
+  //   'Token presente:',
+  //    token
 
   if (!token) {
     console.error('[requireAuth] Cookie user_section não encontrado na requisição')
@@ -42,14 +41,13 @@ export const requireAuth = async (
   }
 
   try {
-    console.log('[requireAuth] Verificando assinatura do JWT...')
+    // console.log('[requireAuth] Verificando assinatura do JWT...')
     const { payload } = await jose.jwtVerify(token, getJwtSecret())
-    console.log(
-      '[requireAuth] JWT verificado com sucesso. User ID:',
-      payload['id'],
-      'Admin:',
-      payload['admin'],
-    )
+    // console.log(
+    //   '[requireAuth] JWT verificado com sucesso. User ID:',
+    //   payload['id'],
+    //   'Admin:',
+    //   payload['admin']),
 
     req['user'] = {
       id: payload['id'],
