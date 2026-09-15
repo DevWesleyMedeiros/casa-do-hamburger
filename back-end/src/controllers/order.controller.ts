@@ -7,7 +7,7 @@ export const orderController = {
   createOrder: async (req: Request, res: Response) => {
     const userId = req.user!['id'] as string
     // (!req.user) é chamado de Operador de Asserção de Não-Nulo (Non-null Assertion Operator) do TypeScript. Ele serve para dizer explicitamente ao compilador do TypeScript que a variável req.user não é null nem undefined naquele momento do código.
-    if (!req.user) {
+    if (!userId) {
       res.status(401).json({ message: 'Usuário não autenticado' })
       return
     }
@@ -17,17 +17,15 @@ export const orderController = {
   },
   // GET /orders — RF-36 (usuário comum) ou RF-35 (admin, com ?status=)
   listOrders: async (req: Request, res: Response) => {
-    const userAdmin = req.body!['admin'] as boolean
-    const userId = req.body!['id'] as string
-    if (userAdmin) {
+    const isAdmin = req.user!['admin'] as boolean
+    const userId = req.user!['id'] as string
+
+    if (isAdmin) {
       const { status } = listOrdersQuerySchema.parse(req.query)
       const orders = await OrderServiceItems.listAllOrders(status)
       return res.status(200).json(orders)
     }
-    if (!userId) {
-      res.status(400).json({ message: 'ID do usuário inválido' })
-      return
-    }
+
     const orders = await OrderServiceItems.listMyOrders(userId)
     return res.status(200).json(orders)
   },
@@ -48,6 +46,10 @@ export const orderController = {
   // PATCH /orders/:id/status — RF-35/38 (admin-only, ver rota)
   updateOrderStatus: async (req: Request, res: Response) => {
     const { status } = UserUpdateOrderStatusSchema.parse(req.body)
+    if (!status) {
+      res.status(400).json({ message: 'Status do pedido é obrigatório' })
+      return
+    }
     const orderId = req.params['id']
     if (typeof orderId !== 'string') {
       res.status(400).json({ message: 'ID do pedido inválido' })
@@ -55,7 +57,7 @@ export const orderController = {
     }
     const order = await OrderServiceItems.updateStatus(orderId, status, {
       id: req.user!['id'] as string,
-      admin: req.user!['id'] as boolean,
+      admin: req.user!['admin'] as boolean,
     })
     return res.status(200).json(order)
   },

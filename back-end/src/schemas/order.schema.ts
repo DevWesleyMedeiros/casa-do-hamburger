@@ -5,5 +5,5 @@ export const UserUpdateOrderStatusSchema = z.object({
 })
 // RF-35 — filtro opcional de status na listagem admin (GET /orders?status=...)
 export const listOrdersQuerySchema = z.object({
-  status: z.enum(['PENDING', 'PREPARING', 'READY', 'DELIVERED', 'CANCELLED']),
+  status: z.enum(['PENDING', 'PREPARING', 'READY', 'DELIVERED', 'CANCELLED']).optional(),
 })
