@@ -12,5 +12,5 @@ export const useMe = () => {
 
   return user;
 };
-// chamada desse hoook será const { dat: user } = useMe()
+// chamada desse hoook será const { data: user } = useMe()
 // user.admin;

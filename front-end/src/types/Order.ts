@@ -1,4 +1,4 @@
-// Espelha exatamente OrderResponseDTO do backend (backend/src/dtos/order.dto.ts)
+// Espelha OrderResponseDTO do backend (backend/src/dtos/order.dto.ts)
 export type OrderStatus =
   | "PENDING"
   | "PREPARING"
