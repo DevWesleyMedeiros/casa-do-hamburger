@@ -1,9 +1,9 @@
 import { useMe } from "../../hook/useMe";
 import { getCartItemsList } from "../../shared/services/api/cartItems/getCartItems";
+import { useCartUIStore } from "../../shared/stores";
 import { brazilinaCurrencyFormat } from "../../shared/utils/Utils";
 import { Button } from "../button/Button";
 import { CartItem } from "../cartItem/CartItem";
-import { useCartUIStore } from "../../shared/stores";
 
 import {
   Sheet,
@@ -14,10 +14,10 @@ import {
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { queryKeys } from "../../constant/queryKeys.js";
-import { orderSeriviceApi } from "../../shared/services/api/orders/ordersServiceApi";
 import { toast } from "sonner";
+import { queryKeys } from "../../constant/queryKeys.js";
 import { ApiError } from "../../shared/services/api/ApiExceptions.js";
+import { orderSeriviceApi } from "../../shared/services/api/orders/ordersServiceApi";
 import { resolveApiErrorMessage } from "../../shared/utils/apiErrorMessage.js";
 
 export const Cart = () => {
@@ -45,7 +45,7 @@ export const Cart = () => {
   const createOrderMutation = useMutation({
     mutationFn: orderSeriviceApi.createOrder,
 
-    onSuccess: (order) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.orders,
       });
@@ -54,7 +54,7 @@ export const Cart = () => {
         queryKey: queryKeys.cartItems,
       });
 
-      toast.success(`Pedido #${order.id} criado com sucesso`);
+      toast.success(`Pedido criado com sucesso`);
 
       closeCart();
     },

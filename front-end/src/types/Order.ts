@@ -22,10 +22,11 @@ export interface OrderItem {
 export interface Order {
   id: string;
   status: OrderStatus;
+  total: number;
   items: OrderItem[];
   payment: OrderPayment | null;
   createdAt: string;
-  updateAt: string;
+  updatedAt: string;
 }
 
 // para toPaymentDTO

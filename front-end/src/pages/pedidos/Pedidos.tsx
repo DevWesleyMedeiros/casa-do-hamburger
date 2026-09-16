@@ -149,14 +149,20 @@ export const Pedidos = () => {
       </div>
 
       <div className="grid grid-cols-3 gap-3">
-        {filteredOrders.map((order) => (
-          <CardPedidos
-            key={order.id}
-            order={order}
-            isAdmin={isAdmin}
-            onStatusChange={handleStatusChange}
-          />
-        ))}
+        {filteredOrders.length === 0 ? (
+          <div className="justify-ccenter flex items-center">
+            Nenhum pedido encontrado.
+          </div>
+        ) : (
+          filteredOrders.map((order) => (
+            <CardPedidos
+              key={order.id}
+              order={order}
+              isAdmin={isAdmin}
+              onStatusChange={handleStatusChange}
+            />
+          ))
+        )}
       </div>
     </div>
   );

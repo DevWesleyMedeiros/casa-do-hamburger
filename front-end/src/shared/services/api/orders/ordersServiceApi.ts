@@ -15,7 +15,7 @@ export const orderSeriviceApi = {
   getAllOrder: async (status?: OrderStatus): Promise<Order[]> => {
     const { data } = await api.get<Order[]>("/orders/list-order", {
       params: {
-        status: status ? `status=${status}` : undefined,
+        status: status ? { status } : undefined,
       },
     });
     return data;
