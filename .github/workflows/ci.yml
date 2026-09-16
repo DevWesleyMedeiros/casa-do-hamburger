@@ -1,0 +1,36 @@
+on: 
+    pull_request:
+        branches: [develop, main]
+    push:
+        branches: [develop, main]
+
+jobs:
+    backend:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: back-end
+        steps:
+            - uses: actions/checkout@v4
+            - uses: oven-sh/setup-bun@v2
+            - run: bun install
+            - run: bun run lint
+            - run: bun test
+            - run: bun run build
+            - run: bun run start
+            - run: bun run stop
+    
+    frontend:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: front-end
+        steps:
+            - uses: actions/checkout@v4
+            - uses: oven-sh/setup-bun@v2
+            - run: bun install
+            - run: bun run lint
+            - run: bun test
+            - run: bun run build
+            - run: bun run start
+            - run: bun run stop
