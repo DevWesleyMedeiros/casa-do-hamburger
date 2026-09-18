@@ -2,9 +2,9 @@ import type { OrderStatus } from '../../../generated/prisma/index.js'
 import { toOrderDTO, type OrderResponseDTO } from '../../dtos/order.dto.js'
 import { AppError } from '../../errors/AppError.js'
 import { OrderRepository } from '../../repositories/order.respository.js'
+import { resendEmailService } from '../email/resendEmail.service.js'
 import { notifyOrderStatusChanged } from '../orderServices/orderNotification.service.js'
 import { OrderServiceMachine } from './orderStateMachine.service.js'
-import { resendEmailService } from '../email/resendEmail.service.js'
 
 // Note: só id/admin são necessários aqui — o e-mail de notificação (RF-39) vem sempre de order.user.email (o DONO do pedido), nunca de quem chama.
 interface RequesterContext {
@@ -165,7 +165,7 @@ export const OrderServiceItems = {
       console.error(`[order.service] falha ao notificar cancelamento do pedido ${orderId}, ${err})`)
     })
     return toOrderDTO({
-      ...order,
+      ...update,
       payment: update.payment[0] ?? null,
     })
   },

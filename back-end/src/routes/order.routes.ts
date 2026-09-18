@@ -6,24 +6,25 @@ import { asyncHandler } from '../utils/asyncHandler.js'
 
 const router = Router()
 
-// rota que cria uma ordem
-router.post('/create-order', requireAuth, asyncHandler(orderController.createOrder))
+// Padrão REST: todas as rotas de pedidos seguem o namespace /orders
+// Cria um novo pedido
+router.post('/orders', requireAuth, asyncHandler(orderController.createOrder))
 
-// rota que lista as ordens (comum: só as próprias; admin: todas, com ?status= opcional)
-router.get('/list-order', requireAuth, asyncHandler(orderController.listOrders))
+// Lista pedidos (comum: só as próprias; admin: todas, com ?status= opcional)
+router.get('/orders', requireAuth, asyncHandler(orderController.listOrders))
 
-// rota que lista uma ordem por id
-router.get('/get-order/:id', requireAuth, asyncHandler(orderController.getOrderById))
+// Busca um pedido específico por ID
+router.get('/orders/:id', requireAuth, asyncHandler(orderController.getOrderById))
 
-// rota que atualiza o status de uma ordem — admin-only (RF-35/38)
+// Atualiza o status de um pedido — admin-only (RF-35/38)
 router.patch(
-  '/update-order/:id/status',
+  '/orders/:id/status',
   requireAuth,
   requiredAdmin,
   asyncHandler(orderController.updateOrderStatus),
 )
 
-// rota que cancela uma ordem
-router.post('/cancel-order/:id/cancel', requireAuth, asyncHandler(orderController.cancelOrder))
+// Cancela um pedido
+router.post('/orders/:id/cancel', requireAuth, asyncHandler(orderController.cancelOrder))
 
 export default router

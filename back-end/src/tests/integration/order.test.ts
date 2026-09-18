@@ -86,7 +86,6 @@ describe('Order — checkout, IDOR e máquina de estados (RF-32 a 40)', () => {
     await prisma.user.deleteMany()
   })
 
-  
   it('cria um pedido a partir do carrinho, com snapshot e total recalculado no backend (RN-ORDER-01/04, RN-CART-06)', async () => {
     const { cookie } = await createAuthedUser()
     await seedProductAndCartItem(cookie)
@@ -120,13 +119,11 @@ describe('Order — checkout, IDOR e máquina de estados (RF-32 a 40)', () => {
   it('RN-ORDER-06 — impede que um usuário veja o pedido de outro (IDOR/OWASP A01)', async () => {
     const owner = await createAuthedUser()
     await seedProductAndCartItem(owner.cookie)
-    const orderRes = await request(app).post('/orders/create-order').set('Cookie', owner.cookie)
+    const orderRes = await request(app).post('/orders').set('Cookie', owner.cookie)
     const orderId = orderRes.body.id
 
     const stranger = await createAuthedUser()
-    const res = await request(app)
-      .get(`/orders/get-order/${orderId}`)
-      .set('Cookie', stranger.cookie)
+    const res = await request(app).get(`/orders/${orderId}`).set('Cookie', stranger.cookie)
 
     expect(res.status).toBe(404) // 404, não 403 — não confirma existência do recurso
   })
@@ -134,12 +131,10 @@ describe('Order — checkout, IDOR e máquina de estados (RF-32 a 40)', () => {
   it('admin consegue ver o pedido de qualquer usuário', async () => {
     const owner = await createAuthedUser()
     await seedProductAndCartItem(owner.cookie)
-    const orderRes = await request(app).post('/orders/create-order').set('Cookie', owner.cookie)
+    const orderRes = await request(app).post('/orders').set('Cookie', owner.cookie)
 
     const admin = await createAuthedUser(true)
-    const res = await request(app)
-      .get(`/orders/get-order/${orderRes.body.id}`)
-      .set('Cookie', admin.cookie)
+    const res = await request(app).get(`/orders/${orderRes.body.id}`).set('Cookie', admin.cookie)
 
     expect(res.status).toBe(200)
   })
@@ -147,11 +142,11 @@ describe('Order — checkout, IDOR e máquina de estados (RF-32 a 40)', () => {
   it('RN-ORDER-05 — rejeita transição de status inválida com 422', async () => {
     const owner = await createAuthedUser()
     await seedProductAndCartItem(owner.cookie)
-    const orderRes = await request(app).post('/orders/create-order').set('Cookie', owner.cookie)
+    const orderRes = await request(app).post('/orders').set('Cookie', owner.cookie)
 
     const admin = await createAuthedUser(true)
     const res = await request(app)
-      .patch(`/orders/update-order/${orderRes.body.id}/status`)
+      .patch(`/orders/${orderRes.body.id}/status`)
       .set('Cookie', admin.cookie)
       .send({ status: 'DELIVERED' }) // PENDING → DELIVERED não é permitido
 
@@ -161,10 +156,10 @@ describe('Order — checkout, IDOR e máquina de estados (RF-32 a 40)', () => {
   it('usuário comum não pode alterar status de pedido (admin-only)', async () => {
     const owner = await createAuthedUser()
     await seedProductAndCartItem(owner.cookie)
-    const orderRes = await request(app).post('/orders/create-order').set('Cookie', owner.cookie)
+    const orderRes = await request(app).post('/orders').set('Cookie', owner.cookie)
 
     const res = await request(app)
-      .patch(`/orders/update-order/${orderRes.body.id}/status`)
+      .patch(`/orders/${orderRes.body.id}/status`)
       .set('Cookie', owner.cookie)
       .send({ status: 'PREPARING' })
 
@@ -174,7 +169,7 @@ describe('Order — checkout, IDOR e máquina de estados (RF-32 a 40)', () => {
   it('RF-40 — cliente pode cancelar o próprio pedido apenas em PENDING', async () => {
     const owner = await createAuthedUser()
     await seedProductAndCartItem(owner.cookie)
-    const orderRes = await request(app).post('/orders/create-order').set('Cookie', owner.cookie)
+    const orderRes = await request(app).post('/orders').set('Cookie', owner.cookie)
 
     const res = await request(app)
       .post(`/orders/${orderRes.body.id}/cancel`)
@@ -187,7 +182,7 @@ describe('Order — checkout, IDOR e máquina de estados (RF-32 a 40)', () => {
   it('RF-40 — cliente NÃO pode cancelar um pedido já em preparo', async () => {
     const owner = await createAuthedUser()
     await seedProductAndCartItem(owner.cookie)
-    const orderRes = await request(app).post('/orders/create-order').set('Cookie', owner.cookie)
+    const orderRes = await request(app).post('/orders').set('Cookie', owner.cookie)
 
     const admin = await createAuthedUser(true)
     await request(app)
