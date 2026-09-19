@@ -10,6 +10,9 @@ CREATE TYPE "PaymentStatus" AS ENUM ('SIMULATED', 'PENDING', 'PAID', 'FAILED');
 -- AlterEnum
 BEGIN;
 CREATE TYPE "OrderStatus_new" AS ENUM ('PENDING', 'PREPARING', 'READY', 'CANCELLED', 'DELIVERED');
+UPDATE "Order"
+SET "status" = 'DELIVERED'
+WHERE "status"::text = 'PICKED_UP';
 ALTER TABLE "public"."Order" ALTER COLUMN "status" DROP DEFAULT;
 ALTER TABLE "Order" ALTER COLUMN "status" TYPE "OrderStatus_new" USING ("status"::text::"OrderStatus_new");
 ALTER TYPE "OrderStatus" RENAME TO "OrderStatus_old";
