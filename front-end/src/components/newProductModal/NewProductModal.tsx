@@ -28,14 +28,13 @@ const ACCEPTED_IMAGE_TYPES = new Set<string>([
 export const NewProductModal = () => {
   const closeModal = useNewProductUIModalStore((state) => state.closeModal);
   const { mutateAsync, isPending } = useCreateProduct();
-  // isPending -> trocar pelo isSubmitting do RHF, pois o isPending reflete o estado real da aplicação
 
   // estados de UI local
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
-  // A interface File fornece informações sobre arquivos e permite que o JavaScript em uma página da web acesse o conteúdo deles.
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
 
   const {
     register,
@@ -52,14 +51,25 @@ export const NewProductModal = () => {
       closeModal();
     };
 
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dialogRef.current && !dialogRef.current.contains(e.target as Node)) {
+        closeModal();
+      }
+    };
+
     document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("mousedown", handleClickOutside);
     document.body.style.overflow = "hidden";
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handleClickOutside);
       document.body.style.overflow = "";
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
     };
-  }, [closeModal]);
+  }, [closeModal, imagePreview]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -85,14 +95,6 @@ export const NewProductModal = () => {
       return;
     }
 
-    // Necessário no Front e no Backend que deve revalidar tudo (tipo, tamanho, magic bytes) — nunca confiar só no client
-    const formData = new FormData();
-    formData.append("name", data.name);
-    formData.append("description", data.description);
-    formData.append("category", data.category);
-    formData.append("price", data.price.replace(",", "."));
-    formData.append("image", imageFile);
-
     await mutateAsync({
       name: data.name,
       description: data.description,
@@ -104,17 +106,14 @@ export const NewProductModal = () => {
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
-      onClick={closeModal}
-      role="presentation"
-    >
-      <div
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+      <dialog
+        ref={dialogRef}
         className="relative flex w-full max-w-sm flex-col items-center rounded-lg bg-[#24201A] p-6 shadow-xl sm:max-w-xl sm:p-8"
-        onClick={(e) => e.stopPropagation()} // impede que o fechamento da modal se espalhe para dentro dela
-        role="dialog"
         aria-modal="true"
         aria-labelledby="new-product-title"
+        open={true}
+        onClose={closeModal}
       >
         <h2
           id="new-product-title"
@@ -264,7 +263,7 @@ export const NewProductModal = () => {
         >
           <OctagonX size={ICON_CONFIG.mxSize} />
         </button>
-      </div>
+      </dialog>
     </div>
   );
 };
