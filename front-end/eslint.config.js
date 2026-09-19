@@ -38,6 +38,12 @@ export default defineConfig([
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
 
+      // React Compiler não está ativo neste projeto (sem plugin no vite.config.ts).
+      // Esta regra só avisa sobre padrões que impediriam memoização automática no
+      // futuro; react-hook-form (watch/useWatch) é biblioteca conhecidamente
+      // incompatível por design. Não é bug — reavaliar se/quando o Compiler entrar.
+      "react-hooks/incompatible-library": "off",
+
       "react-refresh/only-export-components": [
         "warn",
         { allowConstantExport: true },
