@@ -103,7 +103,7 @@ describe('Order — checkout, IDOR e máquina de estados (RF-32 a 40)', () => {
     const { cookie } = await createAuthedUser()
     await seedProductAndCartItem(cookie)
     await request(app).post('/orders').set('Cookie', cookie)
-    const cartRes = await request(app).get('/cart-items').set('Cookie', cookie)
+    const cartRes = await request(app).get('/get-cart-items').set('Cookie', cookie)
     expect(cartRes.body).toHaveLength(0)
   })
 
