@@ -7,16 +7,16 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Button } from "../../components/button/Button";
 import { Input } from "../../components/input/Input";
+import { PasswordSuggestionPopover } from "../../components/PasswordSuggestionPopover";
 import { ICON_CONFIG } from "../../constant/iconConfig";
 import {
   registerSchema,
   type registerInput,
 } from "../../shared/schemas/authSchemas";
-import { RegisterDate } from "../../shared/services/api/register/Register";
-import { displayStrongPassword } from "../../shared/utils/Utils";
 import { ApiError } from "../../shared/services/api/ApiExceptions";
-import { PasswordSuggestionPopover } from "../../components/PasswordSuggestionPopover";
+import { RegisterDate } from "../../shared/services/api/register/Register";
 import { resolveApiErrorMessage } from "../../shared/utils/apiErrorMessage";
+import { displayStrongPassword } from "../../shared/utils/Utils";
 
 export const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -35,41 +35,40 @@ export const Register = () => {
   } = useForm<registerInput>({
     resolver: zodResolver(registerSchema),
   });
+  // watch() não pode ser usado dentro de useCallback
   const passwordValue = watch("password") ?? "";
   const strength = displayStrongPassword(passwordValue);
-  const onSubmit: SubmitHandler<registerInput> = useCallback(
-    async (data) => {
-      setIsLoading(true);
-      try {
-        await RegisterDate.create({
-          name: data.name,
-          email: data.email,
-          password: data.password,
-          cep: data.cep,
-        });
-        reset();
-        toast.success("Usuário criado com sucesso");
-        navigate("/login");
-      } catch (error) {
-        const finalError =
-          error instanceof ApiError
-            ? error
-            : new ApiError(500, "Erro inesperado");
 
-        if (finalError instanceof ApiError) {
-          toast.error(
-            resolveApiErrorMessage(finalError, {
-              404: "Usuário não foi encontrado ou já foi deletado",
-            }),
-          );
-          return;
-        }
-      } finally {
-        setIsLoading(false);
+  const onSubmit: SubmitHandler<registerInput> = async (data) => {
+    setIsLoading(true);
+    try {
+      await RegisterDate.create({
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        cep: data.cep,
+      });
+      reset();
+      toast.success("Usuário criado com sucesso");
+      navigate("/login");
+    } catch (error) {
+      const finalError =
+        error instanceof ApiError
+          ? error
+          : new ApiError(500, "Erro inesperado");
+
+      if (finalError instanceof ApiError) {
+        toast.error(
+          resolveApiErrorMessage(finalError, {
+            404: "Usuário não foi encontrado ou já foi deletado",
+          }),
+        );
+        return;
       }
-    },
-    [navigate, reset],
-  );
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // manipula os views da senha e confirmar senha
   const togglePasswordVisibility = useCallback(() => {
