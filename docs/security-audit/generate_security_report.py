@@ -177,7 +177,8 @@ def main():
         ['Ponto forte', 'back-end/src/repositories/cart.repository.ts:31-44', 'Deleção/atualização do carrinho filtram por `where: { id: cartItemId, userId }`.'],
         ['Ponto forte', 'back-end/src/config/env.ts:3-10', 'Validação de ambiente no bootstrap protege carregamento de segredos ausentes.'],
     ]
-    detail_table = Table(details, colWidths=[30 * mm, 60 * mm, 90 * mm])
+    detail_rows = [[Paragraph(str(cell), small) for cell in row] for row in details]
+    detail_table = Table(detail_rows, colWidths=[25 * mm, 55 * mm, 90 * mm])
     detail_table.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#E5E7EB')),
         ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#D1D5DB')),

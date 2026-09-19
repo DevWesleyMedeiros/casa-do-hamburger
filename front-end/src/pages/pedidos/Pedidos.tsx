@@ -1,15 +1,15 @@
-import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { CardPedidos } from "../../components/cardPedidos/CardPedidos";
-import { getItemSelectedClass } from "../../shared/utils/Utils";
-import { orderSeriviceApi } from "../../shared/services/api/orders/ordersServiceApi";
-import type { Order, OrderStatus } from "../../types/Order";
-import { resolveApiErrorMessage } from "../../shared/utils/apiErrorMessage.js";
-import { useMe } from "../../hook/useMe";
 import { queryKeys } from "../../constant/queryKeys.js";
+import { useMe } from "../../hook/useMe";
 import { ApiError } from "../../shared/services/api/ApiExceptions.js";
+import { orderSeriviceApi } from "../../shared/services/api/orders/ordersServiceApi";
+import { resolveApiErrorMessage } from "../../shared/utils/apiErrorMessage.js";
+import { getItemSelectedClass } from "../../shared/utils/Utils";
+import type { Order, OrderStatus } from "../../types/Order";
 
 const FILTER_ITEMS = [
   "Pendentes",
@@ -113,6 +113,11 @@ export const Pedidos = () => {
   });
 
   const handleStatusChange = (orderId: string, status: OrderStatus) => {
+    if (status === "CANCELLED") {
+      cancelMutation.mutate(orderId);
+      return;
+    }
+
     statusMutation.mutate({
       orderId,
       status,

@@ -90,10 +90,7 @@ describe('Order — checkout, IDOR e máquina de estados (RF-32 a 40)', () => {
     const { cookie } = await createAuthedUser()
     await seedProductAndCartItem(cookie)
 
-    const res = await request(app)
-      .post('/orders/create-order')
-      .set('Cookie', cookie)
-      .send({ total: 1 }) // valor forjado pelo cliente — deve ser ignorado
+    const res = await request(app).post('/orders').set('Cookie', cookie).send({ total: 1 }) // valor forjado pelo cliente — deve ser ignorado
 
     expect(res.statusCode).toBe(201)
     expect(res.body.status).toBe('PENDING')
@@ -105,14 +102,14 @@ describe('Order — checkout, IDOR e máquina de estados (RF-32 a 40)', () => {
   it('esvazia o carrinho após criar o pedido', async () => {
     const { cookie } = await createAuthedUser()
     await seedProductAndCartItem(cookie)
-    await request(app).post('/orders/create-order').set('Cookie', cookie)
+    await request(app).post('/orders').set('Cookie', cookie)
     const cartRes = await request(app).get('/get-cart-item').set('Cookie', cookie)
     expect(cartRes.body).toHaveLength(0)
   })
 
   it('rejeita checkout com carrinho vazio', async () => {
     const { cookie } = await createAuthedUser()
-    const res = await request(app).post('/orders/create-order').set('Cookie', cookie)
+    const res = await request(app).post('/orders').set('Cookie', cookie)
     expect(res.status).toBe(400)
   })
 

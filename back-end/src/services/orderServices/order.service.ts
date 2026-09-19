@@ -26,7 +26,6 @@ export const OrderServiceItems = {
     const snapshotItems = cartItems.map((item) => {
       const subtotal = item.product.price * item.quantity
       return {
-        id: item.id,
         productId: item.productId,
         productName: item.product.name, // snapshot — RN-ORDER-01
         productImageUrl: item.product.images[0]?.url ?? null, // snapshot — RF-33

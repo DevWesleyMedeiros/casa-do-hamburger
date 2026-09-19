@@ -5,8 +5,8 @@ import { describe, expect, it } from 'vitest'
 import type { OrderStatus } from '../../../generated/prisma/index.js'
 import {
   InvalidOrderTransitionError,
-  OrderService,
-} from '../../services/orderStateMachine.service.js'
+  OrderServiceMachine as OrderService,
+} from '../../services/orderServices/orderStateMachine.service.js'
 
 describe('orderStateMachine — RN-ORDER-05', () => {
   it.each<[OrderStatus, OrderStatus, boolean]>([
