@@ -7,6 +7,7 @@ import { errorHandler } from './middlewares/errorHandler.js'
 import authRoutes from './routes/auth.routes.js'
 import cartRoutes from './routes/cart.routes.js'
 import googleAuthRoutes from './routes/googleAuth.routes.js'
+import orderRoutes from './routes/order.routes.js'
 import productsRoutes from './routes/products.routes.js'
 
 // conection linka o backend com o banco de dados. Deve ser a primeira linha
@@ -52,8 +53,11 @@ app.use('/auth', productsRoutes)
 app.use('/auth', googleAuthRoutes)
 app.use('/auth', cartRoutes)
 
+// registro da rota de order
+app.use('/orders', orderRoutes)
+
+// middleware que vai sempre por último — Express só invoca middleware de 4 parâmetros depois de todas as rotas; Serve para tratamento de erros
 app.use(errorHandler)
-// middleware que vai sempre por último — Express só invoca middleware de 4 parâmetros depois de todas as rotas
 
 // app.use(cors())
 // app.use(cookieParser())

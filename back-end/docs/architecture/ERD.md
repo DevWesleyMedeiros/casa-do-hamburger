@@ -10,8 +10,19 @@ GOOGLE GOOGLE
 
         OrderStatus {
             PENDING PENDING
-PICKED_UP PICKED_UP
+PREPARING PREPARING
+READY READY
 CANCELLED CANCELLED
+DELIVERED DELIVERED
+        }
+    
+
+
+        PaymentStatus {
+            SIMULATED SIMULATED
+PENDING PENDING
+PAID PAID
+FAILED FAILED
         }
     
   "User" {
@@ -73,6 +84,7 @@ CANCELLED CANCELLED
     String id "🗝️"
     OrderStatus status 
     Int total 
+    DateTime deletedAt "❓"
     DateTime createdAt 
     DateTime updatedAt 
     }
@@ -81,9 +93,19 @@ CANCELLED CANCELLED
   "OrderItem" {
     String id "🗝️"
     String productName 
+    String productImageUrl "❓"
     Int unitPrice 
     Int quantity 
     Int subtotal 
+    }
+  
+
+  "Payment" {
+    String id "🗝️"
+    PaymentStatus status 
+    String gatewayProvider "❓"
+    String gatewayId "❓"
+    DateTime createdAt 
     }
   
 
@@ -104,5 +126,7 @@ CANCELLED CANCELLED
     "Order" |o--|| "OrderStatus" : "enum:status"
     "OrderItem" }o--|| "Order" : "order"
     "OrderItem" }o--|o "Products" : "product"
+    "Payment" }o--|o "Order" : "order"
+    "Payment" |o--|| "PaymentStatus" : "enum:status"
     "password_reset_tokens" }o--|| "User" : "user"
 ```

@@ -27,7 +27,7 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
 
   // 4) Regras de segurança — relevante porque o Express recebe input
-  //    externo direto (body, params, headers) em toda rota
+  // externo direto (body, params, headers) em toda rota
   security.configs.recommended,
 
   // 5) Configuração específica do projeto

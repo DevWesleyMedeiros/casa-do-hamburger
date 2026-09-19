@@ -1,0 +1,148 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [develop, main]
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: back-end
+
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: casa_do_hamburguer_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      # Banco temporário exclusivo do CI
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/casa_do_hamburguer_test?schema=public
+
+      # Chave exclusiva para testes do CI
+      JWT_SECRET: ci-test-secret-nao-usar-em-producao
+
+      # Valores fictícios para permitir a inicialização do backend
+      CLOUDINARY_CLOUD_NAME: ci-test-cloud
+      CLOUDINARY_API_KEY: ci-test-key
+      CLOUDINARY_API_SECRET: ci-test-secret
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v6
+
+      - name: Instalar Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Instalar dependências
+        run: bun install --frozen-lockfile
+
+      - name: Gerar Prisma Client
+        run: bunx --bun prisma generate
+
+      - name: Validar schema Prisma
+        run: bunx --bun prisma validate
+
+      - name: Aplicar migrations no banco de teste
+        run: bunx --bun prisma migrate deploy
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Checar formatação (Prettier)
+        run: bunx prettier --check .
+
+      - name: Testes
+        run: bun run test
+
+      - name: Build
+        run: bun run build
+
+  frontend:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: front-end
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v6
+
+      - name: Instalar Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Instalar dependências
+        run: bun install --frozen-lockfile
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Checar formatação (Prettier)
+        run: bunx prettier --check .
+
+      - name: Testes
+        run: bun run test:run
+
+      - name: Build
+        run: bun run build
+
+  # e2e:
+  #   Ativar quando a suíte Playwright existir.
+  #   Pode ser mantido como workflow separado.
+
+  # code-review:
+  #   needs: [backend, frontend]
+  #   runs-on: ubuntu-latest
+  #
+  #   permissions:
+  #     contents: read
+  #     pull-requests: write
+  #
+  #   steps:
+  #     - name: Checkout do código
+  #       uses: actions/checkout@v6
+  #       with:
+  #         fetch-depth: 0
+  #
+  #     - name: Rodar agente de code-review
+  #       uses: anthropics/claude-code-action@v1
+  #       with:
+  #         anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+  #         prompt: |
+  #           REPO: ${{ github.repository }}
+  #           PR NUMBER: ${{ github.event.pull_request.number }}
+  #
+  #           Leia:
+  #           .claude/agents/code-review-agent.md
+  #
+  #           Leia também:
+  #           docs/architecture/REGRAS_DE_NEGOCIO.md
+  #
+  #           Revise as mudanças deste PR contra a branch base.
+  #
+  #           Verifique:
+  #           - regras de negócio
+  #           - segurança
+  #           - testes
+  #           - performance
+  #           - contrato de API
+  #           - arquitetura
+  #           - documentação
+  #
+  #           Poste o resultado como comentário no PR.

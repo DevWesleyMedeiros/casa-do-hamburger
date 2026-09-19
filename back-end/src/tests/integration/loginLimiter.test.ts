@@ -1,13 +1,14 @@
-import { describe, expect, it, beforeEach } from 'vitest'
-import request from 'supertest'
 import { faker } from '@faker-js/faker'
-import { app } from '../../app.js'
+import request from 'supertest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import {
   loginLimiterBroadStore,
+  // loginLimiterStore,
   loginLimiterTargetedStore,
   registerLimiterBroadStore,
   registerLimiterTargetedStore,
 } from '../../../src/middlewares/rateLimiter.js'
+import { app } from '../../app.js'
 
 beforeEach(() => {
   // Garantia de estado zero (Isolamento total)
@@ -16,6 +17,9 @@ beforeEach(() => {
   registerLimiterBroadStore.resetAll()
   registerLimiterTargetedStore.resetAll()
 })
+// afterAll(() => {
+//   loginLimiterStore.resetAll()
+// })
 
 // teste para requisições dentro da janela e tentativas (loginLimiter)
 describe('Rate limiter - POST /auth/login (RF-12 / RNF-06)', () => {
@@ -111,7 +115,7 @@ describe('Rate limiter - POST /auth/register (RF-12 / RNF-06)', () => {
     expect(res.body.status).toBe(429)
   })
 
-  // Teste do BROAD de registro 
+  // Teste do BROAD de registro
   it('deve bloquear (Broad) com 429 a partir da 11ª tentativa de registro, e-mails DIFERENTES, mesma origem', async () => {
     const dadosBase = { password: 'SenhaForte123!', name: 'Teste', cep: '12345-678' }
 
@@ -136,7 +140,7 @@ describe('Rate limiter - POST /auth/register (RF-12 / RNF-06)', () => {
 // Confirma que rate limit é só em /login e /register, NÃO no resto de /auth
 describe('Rate limiter — escopo correto: APENAS /login e /register (RNF-06)', () => {
   it('NÃO aplica rate limiter em /auth/products mesmo após 25 requisições da mesma origem', async () => {
-    // Passa do limite Broad de login (20) para garantir que se o limiter estivesse aplicado globalmente retornaria 429. 
+    // Passa do limite Broad de login (20) para garantir que se o limiter estivesse aplicado globalmente retornaria 429.
     // Se a rota estiver fora do limiter, vai retornar o status de negócio dela (404/200 — o que vier do controller) e NUNCA 429.
     for (let i = 0; i < 25; i++) {
       const res = await request(app).get('/auth/products')

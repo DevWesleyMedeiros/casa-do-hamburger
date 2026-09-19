@@ -1,3 +1,4 @@
+// middleware que valida o body da requisição com um schema do zod criado
 import type { NextFunction, Request, Response } from 'express'
 import type { ZodType } from 'zod'
 

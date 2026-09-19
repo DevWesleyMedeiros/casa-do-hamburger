@@ -151,15 +151,15 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 
 | ID | Requisito | Status |
 | --- | --- | --- |
-| RF-32 | O sistema deve permitir converter um carrinho em um pedido (`Order`) | 🟡 |
-| RF-33 | Cada item do pedido (`OrderItem`) deve gravar uma **cópia (snapshot)** dos dados do produto no momento da compra (nome, preço, imagem) — *Snapshot Pattern* | 🟡 |
-| RF-34 | Pedidos devem ter um campo de status: `PENDING`, `PREPARING`, `READY`, `DELIVERED`, `CANCELLED` | 🟡 |
-| RF-35 | Administradores devem poder visualizar todos os pedidos e alterar seu status | 🟡 |
-| RF-36 | Usuário deve poder visualizar apenas o histórico de seus próprios pedidos | 🟡 |
+| RF-32 | O sistema deve permitir converter um carrinho em um pedido (`Order`) | 🟢 |
+| RF-33 | Cada item do pedido (`OrderItem`) deve gravar uma **cópia (snapshot)** dos dados do produto no momento da compra (nome, preço, imagem) — *Snapshot Pattern* | 🟢 |
+| RF-34 | Pedidos devem ter um campo de status: `PENDING`, `PREPARING`, `READY`, `DELIVERED`, `CANCELLED` | 🟢 |
+| RF-35 | Administradores devem poder visualizar todos os pedidos e alterar seu status | 🟢 |
+| RF-36 | Usuário deve poder visualizar apenas o histórico de seus próprios pedidos | 🟢 |
 | RF-37 | Preço deve ser tratado como inteiro (centavos) para evitar erros de ponto flutuante | 🟢 |
-| RF-38 | Deve haver validação de transição de status (máquina de estados — ver Seção 8) | 🟡 |
-| RF-39 | Sistema deve notificar o cliente (e-mail/push/websocket) em mudanças de status do pedido | 🟡 |
-| RF-40 | Sistema deve suportar cancelamento de pedido pelo cliente, respeitando janela de tempo/status | 🟡 |
+| RF-38 | Deve haver validação de transição de status (máquina de estados — ver Seção 8) | 🟢 |
+| RF-39 | Sistema deve notificar o cliente (e-mail/push/websocket) em mudanças de status do pedido | 🟢 |
+| RF-40 | Sistema deve suportar cancelamento de pedido pelo cliente, respeitando janela de tempo/status | 🟢 |
 
 > ✅ **Confirmado (Seção 12, pergunta 3):** os cinco status permanecem exatamente `PENDING/PREPARING/READY/DELIVERED/CANCELLED`,
 > `ATTEND`/`DELIVER` roles futuras.
@@ -503,7 +503,7 @@ type UserResponseDTO = {
 | RN-DATA-01 🟢 | ORM: Prisma sobre PostgreSQL (Neon) |
 | RN-DATA-02 🟢 | Alterações de schema **sempre** via `prisma migrate dev` (nunca `db push` fora do ambiente local de prototipagem) — garante histórico auditável de migrations |
 | RN-DATA-03 🟢 | Chaves compostas únicas para evitar duplicidade lógica (ex.: `@@unique([userId, productId])` em `CartItem`) |
-| RN-DATA-04 🔵 | Operações que afetam múltiplas tabelas de forma atômica (ex.: finalizar pedido = criar Order + OrderItems + esvaziar Cart) devem usar `prisma.$transaction([...])` |
+| RN-DATA-04 🟢 | Operações que afetam múltiplas tabelas de forma atômica (ex.: finalizar pedido = criar Order + OrderItems + esvaziar Cart) devem usar `prisma.$transaction([...])` |
 | RN-DATA-05 🔵 | Soft delete (`deletedAt: DateTime?`) para entidades com histórico relevante (Product, User) em vez de `DELETE` físico |
 
 ### 6.7 Carrinho de Compras 🟢
@@ -517,16 +517,16 @@ type UserResponseDTO = {
 | RN-CART-05 🟢 | Rotas de carrinho autenticam por `requireAuth`, **nunca** por `requiredAdmin` — o recurso pertence ao próprio usuário |
 | RN-CART-06 🟢 | O total do carrinho exibido no frontend é apenas informativo — o valor cobrado é sempre recalculado no backend no momento da criação do pedido |
 
-### 6.8 Pedidos (Orders) — Snapshot Pattern 🔵
+### 6.8 Pedidos (Orders) — Snapshot Pattern 🟢
 
 | Regra | Descrição |
 | --- | --- |
-| RN-ORDER-01 🟡 | Ao criar um pedido, cada `CartItem` gera um `OrderItem` com **cópia imutável** dos dados do produto (nome, preço unitário, URL de imagem) no momento da compra |
-| RN-ORDER-02 🟡 | Justificativa do Snapshot Pattern: se o preço ou nome do produto mudar no catálogo depois, o histórico do pedido **não pode ser afetado retroativamente** — nota fiscal/histórico é imutável |
-| RN-ORDER-03 🟡 | `Order` referencia `productId` apenas para rastreabilidade (ex.: link "ver produto"), mas os dados exibidos no pedido vêm do snapshot, nunca de um `JOIN` ao vivo com `Product` |
-| RN-ORDER-04 🟡 | Preço é armazenado como inteiro em centavos em todo o fluxo (evita erro de ponto flutuante em somas) |
-| RN-ORDER-05 🟡 | Status do pedido segue máquina de estados finita (ver Seção 8) — transições inválidas são rejeitadas no service layer |
-| RN-ORDER-06 🟡 | Um usuário só pode visualizar/cancelar os próprios pedidos (`Order.userId === req.user.id`), exceto administradores. ⚠️ **Não é opcional nem posterior ao checkout**: a checagem de posse deve nascer na mesma PR que implementa `GET /orders/:id`, nunca como ajuste "depois" — é a mitigação de IDOR (OWASP A01) para este módulo |
+| RN-ORDER-01 🟢 | Ao criar um pedido, cada `CartItem` gera um `OrderItem` com **cópia imutável** dos dados do produto (nome, preço unitário, URL de imagem) no momento da compra |
+| RN-ORDER-02 🟢 | Justificativa do Snapshot Pattern: se o preço ou nome do produto mudar no catálogo depois, o histórico do pedido **não pode ser afetado retroativamente** — nota fiscal/histórico é imutável |
+| RN-ORDER-03 🟢 | `Order` referencia `productId` apenas para rastreabilidade (ex.: link "ver produto"), mas os dados exibidos no pedido vêm do snapshot, nunca de um `JOIN` ao vivo com `Product` |
+| RN-ORDER-04 🟢 | Preço é armazenado como inteiro em centavos em todo o fluxo (evita erro de ponto flutuante em somas) |
+| RN-ORDER-05 🟢 | Status do pedido segue máquina de estados finita (ver Seção 8) — transições inválidas são rejeitadas no service layer |
+| RN-ORDER-06 🟢 | Um usuário só pode visualizar/cancelar os próprios pedidos (`Order.userId === req.user.id`), exceto administradores. ⚠️ **Não é opcional nem posterior ao checkout**: a checagem de posse deve nascer na mesma PR que implementa `GET /orders/:id`, nunca como ajuste "depois" — é a mitigação de IDOR (OWASP A01) para este módulo |
 | RN-ORDER-07 🔵 | Quando `ATTEND`/`DELIVER` existirem, a transição de status deve checar não só o papel (role), mas se o papel tem permissão para **aquela transição específica** (ver RN-RBAC-07/08) |
 
 ### 6.9 Pagamento (Simulado hoje, Gateway real no futuro) 🆕
@@ -534,7 +534,7 @@ type UserResponseDTO = {
 | Regra | Descrição | Status |
 | --- | --- | --- |
 | RN-PAY-01 | Hoje, "pagamento" é um passo simulado do checkout — nenhuma cobrança real ocorre, nenhum dado de cartão é coletado | 🟢 |
-| RN-PAY-02 | O campo `Order.paymentStatus` (ou entidade `Payment` dedicada) deve existir independentemente do gateway, para já preparar o modelo de dados para a integração futura | 🔵 |
+| RN-PAY-02 | O campo `Order.paymentStatus` (ou entidade `Payment` dedicada) deve existir independentemente do gateway, para já preparar o modelo de dados para a integração futura | 🟢 |
 | RN-PAY-03 | Quando um gateway real for integrado, o backend **nunca** deve tocar em dados brutos de cartão — apenas em tokens/IDs devolvidos pelo gateway (Stripe Elements, Checkout hospedado, etc.) | 🔵 |
 | RN-PAY-04 | Confirmação de pagamento definitiva deve vir de **webhook assíncrono** do gateway, não apenas da resposta imediata do checkout (evita fraude de "response spoofing" no client) | 🔵 |
 | RN-PAY-05 | Ambiente de desenvolvimento/portfólio deve usar exclusivamente o **modo de teste (sandbox)** do gateway escolhido — nunca chaves de produção em `.env` de exemplo ou repositório público | 🟢 |
@@ -670,7 +670,7 @@ back-end/docs/architecture/ERD.md (gerado pelo Prisma).
 
 ---
 
-## 8. Máquina de Estados — Ciclo de Vida do Pedido 🔵
+## 8. Máquina de Estados — Ciclo de Vida do Pedido 🟢
 
 ```mermaid
 stateDiagram-v2

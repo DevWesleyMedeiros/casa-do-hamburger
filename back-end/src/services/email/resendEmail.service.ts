@@ -8,6 +8,23 @@ const FROM_EMAIL =
   process.env['RESEND_FROM_EMAIL'] ?? 'Casa do Hambúrguer <no-reply@casadohamburguer.com>'
 
 export const resendEmailService: EmailService = {
+  async sendGenericEmail({ to, subject, html }) {
+    const { error } = await resend.emails.send(
+      {
+        from: FROM_EMAIL,
+        to: [to],
+        subject,
+        html,
+      },
+      { idempotencyKey: `generic-email/${to}/${Date.now()}` },
+    )
+
+    if (error) {
+      console.error('[EmailService] Falha ao enviar e-mail', error)
+      throw new Error('EMAIL_SEND_FAILED')
+    }
+  },
+
   async sendPasswordResetEmail({ to, name, resetUrl }) {
     const { error } = await resend.emails.send(
       {
