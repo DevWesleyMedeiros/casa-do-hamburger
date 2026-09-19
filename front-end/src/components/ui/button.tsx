@@ -55,4 +55,7 @@ function Button({
   );
 }
 
-export { Button, buttonVariants };
+// buttonVariants movido para um arquivo separado para manter compatibilidade com React Refresh
+// Para usar em outros componentes, importe de '@/components/ui/button-variants'
+export { Button };
+
