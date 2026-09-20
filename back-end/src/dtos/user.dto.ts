@@ -1,4 +1,4 @@
-import type { User } from '../../generated/prisma/index.js'
+import type { User } from '../../generated/prisma/index.js';
 
 /**
  * DTO de PERFIL do usuário.
@@ -12,7 +12,7 @@ import type { User } from '../../generated/prisma/index.js'
  * — para isso existe o toJwtPayloadDTO (ver toJwtPayloadDTO.ts)
  */
 // só o que é necessário para a sessão é extraído de User e passado para UserDTO
-export type UserDTO = Pick<User, 'id' | 'name' | 'email' | 'admin'>
+export type UserDTO = Pick<User, 'id' | 'name' | 'email' | 'admin'>;
 
 export const toUserDTO = (user: User): UserDTO => {
   return {
@@ -20,5 +20,5 @@ export const toUserDTO = (user: User): UserDTO => {
     name: user.name,
     email: user.email,
     admin: user.admin,
-  }
-}
+  };
+};

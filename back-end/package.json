@@ -45,7 +45,7 @@
     "lint:fix": "eslint . --fix",
     "pretest": "bun run lint",
     "format": "prettier --write .",
-    "format:check":"prettier --check ."
+    "format:check": "prettier --check ."
   },
   "peerDependencies": {
     "typescript": "^6.0.3"

@@ -1,4 +1,4 @@
-import type { OrderStatus } from '../../../generated/prisma/index.js'
+import type { OrderStatus } from '../../../generated/prisma/index.js';
 
 /**
  * O "mapa oficial" da máquina de estados.
@@ -13,7 +13,7 @@ const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   READY: ['DELIVERED'], // pronto: só pode ser entregue, nada mais
   DELIVERED: [], // estado terminal = "não existe transição válida a partir daqui"
   CANCELLED: [], // outro estado terminal — mesma lógica
-}
+};
 
 /**
  * Erro de domínio específico para transição de status inválida.
@@ -21,11 +21,11 @@ const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
  * só repassar na resposta, sem precisar traduzir o tipo de erro manualmente.
  */
 export class InvalidOrderTransitionError extends Error {
-  readonly statusCode = 422 // Unprocessable Entity (entendido como os estados), conforme RN-ORDER-05
+  readonly statusCode = 422; // Unprocessable Entity (entendido como os estados), conforme RN-ORDER-05
 
   constructor(from: OrderStatus, to: OrderStatus) {
-    super(`Transição inválida de status de pedido: ${from} -> ${to}`)
-    this.name = 'InvalidOrderTransitionError' // facilita checar o tipo do erro em catch()
+    super(`Transição inválida de status de pedido: ${from} -> ${to}`);
+    this.name = 'InvalidOrderTransitionError'; // facilita checar o tipo do erro em catch()
   }
 }
 
@@ -36,9 +36,9 @@ export const OrderServiceMachine = {
    * e sem efeito colateral. Pode ser testada sem try/catch.
    */
   isValidTransition: (from: OrderStatus, to: OrderStatus): boolean => {
-    if (from === to) return false
+    if (from === to) return false;
     // ficar no mesmo status não é uma transição — é um no-op (não transacionar de um state para outro. Ex.: um PREPARING para outro PREPARING), e é rejeitado explicitamente
-    return ALLOWED_TRANSITIONS[from].includes(to)
+    return ALLOWED_TRANSITIONS[from].includes(to);
   },
 
   /**
@@ -48,7 +48,7 @@ export const OrderServiceMachine = {
    */
   assertValidTransition: (from: OrderStatus, to: OrderStatus): void => {
     if (!OrderServiceMachine.isValidTransition(from, to)) {
-      throw new InvalidOrderTransitionError(from, to)
+      throw new InvalidOrderTransitionError(from, to);
     }
   },
 
@@ -63,6 +63,6 @@ export const OrderServiceMachine = {
    * responsabilidade de autorização, feita em outra camada
    */
   canCustomerCancel: (orderStatus: OrderStatus): boolean => {
-    return orderStatus === 'PENDING'
+    return orderStatus === 'PENDING';
   },
-}
+};

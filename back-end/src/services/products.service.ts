@@ -1,32 +1,32 @@
-import { productsRepository } from '../repositories/products.repositories.js'
-import { uploadImageToCloudinary } from './uploads/cloudinary.service.js'
-import { AppError } from '../errors/AppError.js'
-import type { CreateProductInput } from '../schemas/products.schemas.js'
+import { productsRepository } from '../repositories/products.repositories.js';
+import { uploadImageToCloudinary } from './uploads/cloudinary.service.js';
+import { AppError } from '../errors/AppError.js';
+import type { CreateProductInput } from '../schemas/products.schemas.js';
 
 export const productService = {
   async createProduct(data: CreateProductInput, file?: Express.Multer.File) {
-    if (!file) throw new AppError(400, 'Imagem do produto obrigatório')
-    const image = await uploadImageToCloudinary(file)
-    return productsRepository.createWithImage({ data, image })
+    if (!file) throw new AppError(400, 'Imagem do produto obrigatório');
+    const image = await uploadImageToCloudinary(file);
+    return productsRepository.createWithImage({ data, image });
   },
 
   list: async () => {
-    const products = await productsRepository.findManyProducts()
+    const products = await productsRepository.findManyProducts();
     if (products.length === 0) {
-      throw new AppError(404, 'Nenhum produto cadastrado no sistema')
+      throw new AppError(404, 'Nenhum produto cadastrado no sistema');
     }
-    return products
+    return products;
   },
 
   // delete product pelo id dele
   deleteById: async (id: string) => {
-    return productsRepository.findProductAndDelete(id)
+    return productsRepository.findProductAndDelete(id);
   },
   products: async () => {
-    const productsDate = await productsRepository.findManyProducts()
+    const productsDate = await productsRepository.findManyProducts();
     if (productsDate.length === 0) {
-      throw new AppError(404, 'Nenhum produto cadastrado no sistema')
+      throw new AppError(404, 'Nenhum produto cadastrado no sistema');
     }
-    return productsDate
+    return productsDate;
   },
-}
+};

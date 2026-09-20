@@ -1,5 +1,5 @@
 // segue o mesmo schema do frontend para este backend
-import { z } from 'zod'
+import { z } from 'zod';
 
 // schema para register
 export const registerSchema = z.object({
@@ -26,14 +26,14 @@ export const registerSchema = z.object({
     .string()
     .min(1, 'CEP é obrigatório')
     .regex(/^\d{5}-?\d{3}$/, 'CEP inválido — formato: 00000-000'),
-})
+});
 
 // schema para login
 export const loginSchema = z.object({
   email: z.string().min(1, 'E-mail é obrigatório').email('Formato de email inválido').trim(),
   password: z.string().min(1, 'Senha é obrigatória').trim(),
   // aqui não colocamos regra de força de senha, pois já temos ela ao registrar
-})
+});
 
-export type RegisterInput = z.infer<typeof registerSchema>
-export type LoginInput = z.infer<typeof loginSchema>
+export type RegisterInput = z.infer<typeof registerSchema>;
+export type LoginInput = z.infer<typeof loginSchema>;

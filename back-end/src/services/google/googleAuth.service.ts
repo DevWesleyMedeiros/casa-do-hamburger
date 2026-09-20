@@ -9,27 +9,27 @@
  usada em auth.service.ts, para garantir que os dois fluxos nunca divirjam no formato do payload de sessão.
  
  */
-import * as jose from 'jose'
-import type { User } from '../../../generated/prisma/index.js'
-import { verifyFirebaseIdToken } from '../../config/firebaseAdmin.js'
-import { getJwtSecret } from '../../config/jwt.js'
-import { prisma } from '../../db.js'
-import { toJwtPayloadDTO } from '../../dtos/toJwtPayloadDTO.js'
-import { AppError } from '../../errors/AppError.js'
-import { googleAuthTargetedStore } from '../../middlewares/stores/googleAuthTargetStore.js'
-import { userRepository } from '../../repositories/user.repository.js'
+import * as jose from 'jose';
+import type { User } from '../../../generated/prisma/index.js';
+import { verifyFirebaseIdToken } from '../../config/firebaseAdmin.js';
+import { getJwtSecret } from '../../config/jwt.js';
+import { prisma } from '../../db.js';
+import { toJwtPayloadDTO } from '../../dtos/toJwtPayloadDTO.js';
+import { AppError } from '../../errors/AppError.js';
+import { googleAuthTargetedStore } from '../../middlewares/stores/googleAuthTargetStore.js';
+import { userRepository } from '../../repositories/user.repository.js';
 
 // Aplica rate limiting direcionado por UID do Google após decodificar o token
 async function checkGoogleTargetedRateLimit(uid: string): Promise<void> {
-  const key = uid
-  const { totalHits, resetTime } = await googleAuthTargetedStore.increment(key)
+  const key = uid;
+  const { totalHits, resetTime } = await googleAuthTargetedStore.increment(key);
 
   if (totalHits > 5) {
-    const retryAfter = Math.ceil((resetTime?.getTime() || 0 - Date.now()) / 1000)
+    const retryAfter = Math.ceil((resetTime?.getTime() || 0 - Date.now()) / 1000);
     throw new AppError(
       429,
       `Muitas tentativas de login para esta conta. Tente novamente em ${retryAfter} segundos.`,
-    )
+    );
   }
 }
 
@@ -43,32 +43,32 @@ export const googleAuthService = {
     // aud (Audience / Público-alvo): Identifica para quem o token foi emitido. O valor deve ser exatamente o ID do seu projeto Firebase, garantindo que o token não seja usado em outro aplicativo.
     // exp (Expiration Time / Tempo de Expiração): Define o momento exato em que o token deixa de ser válido. No Firebase, os tokens de ID duram exatamente 1 hora após a sua criação.
     // ao firebase-admin, nunca reimplementado à mão aqui).
-    let decoded: Awaited<ReturnType<typeof verifyFirebaseIdToken>>
+    let decoded: Awaited<ReturnType<typeof verifyFirebaseIdToken>>;
     // typeof verifyFirebaseIdToken: Pega a assinatura/tipo da função em si.
     // ReturnType<...>: Extrai o tipo de retorno que essa função entrega. Como a função é assíncrona, o retorno dela é uma Promise<DadosDoUsuario>.
     // Awaited<...>: Desembrulha a Promise. Se o retorno era Promise<DadosDoUsuario>, o Awaited transforma isso apenas em DadosDoUsuario (o valor real que sobra após o await).
     // O código valida o token do usuário e salva o resultado na variável decoded. Graças à tipagem utilizada, se você digitar decoded. no seu editor de código, o autocomplete mostrará exatamente as propriedades que existem dentro do token (como uid, email, name, etc.), mantendo seu código seguro e livre de erros de digitação.
     try {
-      decoded = await verifyFirebaseIdToken(idToken)
-      console.log('[GoogleAuth] Token Firebase verificado com sucesso')
+      decoded = await verifyFirebaseIdToken(idToken);
+      console.log('[GoogleAuth] Token Firebase verificado com sucesso');
 
       // Aplica rate limiting direcionado por UID (RN-AUTH-12)
-      await checkGoogleTargetedRateLimit(decoded.uid)
+      await checkGoogleTargetedRateLimit(decoded.uid);
     } catch (error) {
-      if (error instanceof AppError) throw error
-      console.error('[GoogleAuth] Erro ao verificar token Firebase')
-      throw new AppError(401, 'Autenticação com Google inválida ou expirada')
+      if (error instanceof AppError) throw error;
+      console.error('[GoogleAuth] Erro ao verificar token Firebase');
+      throw new AppError(401, 'Autenticação com Google inválida ou expirada');
     }
 
     if (!decoded.email) {
-      throw new AppError(400, 'Conta Google sem e-mail associado')
+      throw new AppError(400, 'Conta Google sem e-mail associado');
     }
 
     // Verifica se usuário já tem vínculo com esse Firebase UID
-    const byFirebaseUid = await userRepository.findByFirebaseUid(decoded.uid)
+    const byFirebaseUid = await userRepository.findByFirebaseUid(decoded.uid);
     if (byFirebaseUid) {
-      console.log('[GoogleAuth] Login realizado para usuário vinculado existente')
-      return { user: byFirebaseUid, token: await signSessionJwt(byFirebaseUid) }
+      console.log('[GoogleAuth] Login realizado para usuário vinculado existente');
+      return { user: byFirebaseUid, token: await signSessionJwt(byFirebaseUid) };
     }
 
     // Usa upsert atômico para evitar condições de corrida na criação/vinculação de contas, uma vez que nesse repositório, eu atualizo ou crio novo user.
@@ -89,7 +89,7 @@ export const googleAuthService = {
         provider: 'GOOGLE',
         cep: '',
       },
-    })
+    });
 
     // Se a conta já existia e tentamos vincular sem que o e-mail estivesse verificado
     if (user.firebaseUid !== decoded.uid && decoded.email_verified !== true) {
@@ -97,13 +97,13 @@ export const googleAuthService = {
         409,
         'Já existe uma conta com este e-mail. Faça login pela senha local ' +
           'ou verifique seu e-mail no Google antes de tentar novamente.',
-      )
+      );
     }
 
-    console.log('[GoogleAuth] Autenticação Google processada com sucesso')
-    return { user, token: await signSessionJwt(user) }
+    console.log('[GoogleAuth] Autenticação Google processada com sucesso');
+    return { user, token: await signSessionJwt(user) };
   },
-}
+};
 
 // Extraído porque os 3 branches acima (login direto, criação, vínculo) terminam do mesmo jeito: assinar o MESMO formato de JWT que o login local usa (RF-55) — repetir esse bloco 3x seria a violação de DRY que o que desrespeitaria o Clean Code da skill de arquitetura pede pra evitar
 async function signSessionJwt(user: User): Promise<string> {
@@ -111,5 +111,5 @@ async function signSessionJwt(user: User): Promise<string> {
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('7d')
-    .sign(getJwtSecret())
+    .sign(getJwtSecret());
 }

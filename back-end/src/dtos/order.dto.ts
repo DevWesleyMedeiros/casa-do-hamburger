@@ -1,4 +1,4 @@
-import type { Order, OrderItem, Payment } from '../../generated/prisma/index.js'
+import type { Order, OrderItem, Payment } from '../../generated/prisma/index.js';
 
 /**
  * DTO do item de pedido (OrderItem).
@@ -12,13 +12,13 @@ import type { Order, OrderItem, Payment } from '../../generated/prisma/index.js'
  *   Devolvê-lo de novo seria dado redundante inflando o payload sem uso real
  */
 export interface OrderItemDTO {
-  id: string
-  productId: string | null
-  productName: string
-  productImageUrl: string | null
-  unitPrice: number // em CENTAVOS (inteiro) — RN-ORDER-04, evita erro de arredondamento de float
-  quantity: number
-  subtotal: number // também em centavos, mesma regra do unitPrice
+  id: string;
+  productId: string | null;
+  productName: string;
+  productImageUrl: string | null;
+  unitPrice: number; // em CENTAVOS (inteiro) — RN-ORDER-04, evita erro de arredondamento de float
+  quantity: number;
+  subtotal: number; // também em centavos, mesma regra do unitPrice
 }
 
 /**
@@ -37,8 +37,8 @@ export interface OrderItemDTO {
  *   redundantes porque este DTO só existe aninhado dentro do pedido.
  */
 export interface PaymentDTO {
-  status: Payment['status']
-  gatewayProvider: string | null
+  status: Payment['status'];
+  gatewayProvider: string | null;
 }
 
 /**
@@ -47,13 +47,13 @@ export interface PaymentDTO {
  * evitando 3 requisições separadas (Composite DTO Pattern).
  */
 export interface OrderResponseDTO {
-  id: string
-  status: Order['status']
-  total: number // centavos — mesma regra de unitPrice/subtotal
-  items: OrderItemDTO[]
-  payment: PaymentDTO | null // null quando o pagamento ainda não foi gerado
-  createdAt: Date // Em runtime, após JSON.stringify (res.json), chega ao front como STRING ISO 8601, não como Date. Ver nota de serialização na explicação acima do código.
-  updatedAt: Date
+  id: string;
+  status: Order['status'];
+  total: number; // centavos — mesma regra de unitPrice/subtotal
+  items: OrderItemDTO[];
+  payment: PaymentDTO | null; // null quando o pagamento ainda não foi gerado
+  createdAt: Date; // Em runtime, após JSON.stringify (res.json), chega ao front como STRING ISO 8601, não como Date. Ver nota de serialização na explicação acima do código.
+  updatedAt: Date;
 }
 
 /**
@@ -63,9 +63,9 @@ export interface OrderResponseDTO {
  * interno entre a camada de repository e a de serialização.
  */
 type OrderWithRelation = Order & {
-  items: OrderItem[]
-  payment: Payment | null
-}
+  items: OrderItem[];
+  payment: Payment | null;
+};
 
 /**
  * Serializa um único OrderItem do Prisma para OrderItemDTO.
@@ -82,8 +82,8 @@ export const toOrderItemDTO = (item: OrderItem): OrderItemDTO => {
     unitPrice: item.unitPrice,
     quantity: item.quantity,
     subtotal: item.subtotal,
-  }
-}
+  };
+};
 
 /**
  * Serializa um único Payment do Prisma para PaymentDTO.
@@ -94,8 +94,8 @@ export const toPaymentDTO = (payment: Payment): PaymentDTO => {
   return {
     status: payment.status,
     gatewayProvider: payment.gatewayProvider,
-  }
-}
+  };
+};
 
 /**
  * Ponto de entrada principal: transforma uma Order (com relações carregadas
@@ -115,5 +115,5 @@ export const toOrderDTO = (order: OrderWithRelation): OrderResponseDTO => {
     payment: order.payment ? toPaymentDTO(order.payment) : null,
     createdAt: order.createdAt,
     updatedAt: order.updatedAt,
-  }
-}
+  };
+};

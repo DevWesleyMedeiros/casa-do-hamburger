@@ -1,14 +1,14 @@
-import { prisma } from '../db.js'
-import type { OrderStatus } from '../../generated/prisma/index.js'
+import { prisma } from '../db.js';
+import type { OrderStatus } from '../../generated/prisma/index.js';
 
 // snapshot de order
 interface SnapshotItemInput {
-  productId: string
-  productName: string
-  productImageUrl: string | null
-  unitPrice: number
-  quantity: number
-  subtotal: number
+  productId: string;
+  productName: string;
+  productImageUrl: string | null;
+  unitPrice: number;
+  quantity: number;
+  subtotal: number;
 }
 
 /**
@@ -20,7 +20,7 @@ const ORDER_INCLUDE = {
   payment: true,
   // Necessário para notificar o DONO do pedido (RF-39), não quem está fazendo a chamada (que pode ser um admin alterando o status de outra pessoa) — ver uso em order.service.ts.
   user: { select: { email: true } },
-} as const
+} as const;
 
 export const OrderRepository = {
   /**
@@ -28,9 +28,9 @@ export const OrderRepository = {
    * US-05). Se qualquer etapa falhar, nada é persistido.
    */
   async createOrderWithItems(params: {
-    userId: string
-    total: number
-    items: SnapshotItemInput[]
+    userId: string;
+    total: number;
+    items: SnapshotItemInput[];
   }) {
     return prisma.$transaction(async (tx) => {
       const order = await tx.order.create({
@@ -42,19 +42,19 @@ export const OrderRepository = {
           payment: { create: { status: 'SIMULATED' } },
         },
         include: ORDER_INCLUDE,
-      })
+      });
       // após envio do pedido, vamos deletar o cartItem associado a ele no carrinho. Basicamente, zeramos o carrinho
-      await tx.cartItem.deleteMany({ where: { userId: params.userId } })
+      await tx.cartItem.deleteMany({ where: { userId: params.userId } });
 
-      return order
-    })
+      return order;
+    });
   },
   // retornar uma order atrelada a um id de ordem
   async findOrderById(orderId: string) {
     return prisma.order.findUnique({
       where: { id: orderId },
       include: ORDER_INCLUDE,
-    })
+    });
   },
   // retornar uma order atrelada ao id do usuário
   async findOrdersByUser(userId: string) {
@@ -62,7 +62,7 @@ export const OrderRepository = {
       where: { userId: userId },
       include: ORDER_INCLUDE,
       orderBy: { createdAt: 'desc' },
-    })
+    });
   },
   /** RF-35 — listagem administrativa, com filtro opcional de status */
   async findAllOrders(filter?: { status?: OrderStatus }) {
@@ -70,7 +70,7 @@ export const OrderRepository = {
       where: filter?.status ? { status: filter.status } : undefined,
       include: ORDER_INCLUDE,
       orderBy: { createdAt: 'desc' },
-    })
+    });
   },
 
   async updateOrderStatus(orderId: string, orderStatus: OrderStatus) {
@@ -78,7 +78,7 @@ export const OrderRepository = {
       where: { id: orderId },
       data: { status: orderStatus },
       include: ORDER_INCLUDE,
-    })
+    });
   },
   /** Busca os CartItems do usuário já com o produto e a imagem primária (para snapshot) para só então eu validar um pedido */
   async findCartItemsForCheckout(userId: string) {
@@ -89,6 +89,6 @@ export const OrderRepository = {
           include: { images: { where: { isPrimary: true }, take: 1 } },
         },
       },
-    })
+    });
   },
-}
+};

@@ -1,7 +1,7 @@
-import type { Products, ProductsImage } from '../../generated/prisma/index.js'
-import { buildImageVariants } from '../services/uploads/cloudinaryURLBuilder.service.js'
+import type { Products, ProductsImage } from '../../generated/prisma/index.js';
+import { buildImageVariants } from '../services/uploads/cloudinaryURLBuilder.service.js';
 
-type ProductWithImages = Products & { images: ProductsImage[] }
+type ProductWithImages = Products & { images: ProductsImage[] };
 
 export const toProductDTO = (product: ProductWithImages) => ({
   id: product.id,
@@ -14,4 +14,4 @@ export const toProductDTO = (product: ProductWithImages) => ({
     isPrimary: img.isPrimary,
     variants: buildImageVariants(img.key),
   })),
-})
+});

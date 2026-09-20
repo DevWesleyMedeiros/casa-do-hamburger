@@ -3,11 +3,11 @@
 // Escopo: apenas o backend (Node.js + Express + TypeScript + Bun + Prisma).
 // Simula as regras que um time sênior aplicaria em PR review automatizado.
 
-import js from '@eslint/js'
-import security from 'eslint-plugin-security'
-import { defineConfig } from 'eslint/config'
-import globals from 'globals'
-import tseslint from 'typescript-eslint'
+import js from '@eslint/js';
+import security from 'eslint-plugin-security';
+import { defineConfig } from 'eslint/config';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
 
 export default defineConfig([
   // 1) O que o lint NUNCA deve tocar: gerado por ferramenta, build, deps
@@ -77,4 +77,4 @@ export default defineConfig([
       'no-console': 'off',
     },
   },
-])
+]);

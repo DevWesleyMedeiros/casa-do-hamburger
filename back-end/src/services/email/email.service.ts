@@ -6,7 +6,7 @@
 
 export interface EmailService {
   // Envia e-mail de redefinição de senha
-  sendPasswordResetEmail(params: { to: string; name: string; resetUrl: string }): Promise<void>
+  sendPasswordResetEmail(params: { to: string; name: string; resetUrl: string }): Promise<void>;
   // Envia e-mail genérico (usado para notificações de pedido)
-  sendGenericEmail(params: { to: string; subject: string; html: string }): Promise<void>
+  sendGenericEmail(params: { to: string; subject: string; html: string }): Promise<void>;
 }
