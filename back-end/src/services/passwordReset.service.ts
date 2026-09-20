@@ -18,7 +18,7 @@ export const passwordResetService = {
   async requestPasswordReset(email: string): Promise<void> {
     const user = await userRepository.findByEmail(email);
     // RF-57 / RN-AUTH-10: contas Google não têm passwordHash local — nada a redefinir
-    if (!user || user.provider === 'GOOGLE') {
+    if (!user || user.provider !== 'LOCAL' || !user.password) {
       return;
     }
     await passwordResetTokenRepository.invalidateActiveTokensForUser(user.id);

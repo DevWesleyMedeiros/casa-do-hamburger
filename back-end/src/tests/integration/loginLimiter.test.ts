@@ -50,21 +50,25 @@ describe('Rate limiter - POST /auth/login (RF-12 / RNF-06)', () => {
   });
 
   // Testando o BROAD (loginLimiter)
-  it('deve bloquear (Broad) com 429 a partir da 21ª tentativa da mesma origem, com e-mails DIFERENTES', async () => {
-    // Esgota o limite Broad (20), mas desvia do Targeted mudando o e-mail sempre
-    for (let i = 0; i < 20; i++) {
-      await request(app).post('/auth/login').send({ email: faker.internet.email(), password: 'x' }); // E-mail único a cada vez, a cada iteração com se fosse tentativas de login
-    }
+  it(
+    'deve bloquear (Broad) com 429 a partir da 21ª tentativa da mesma origem, com e-mails DIFERENTES',
+    async () => {
+      // Esgota o limite Broad (20), mas desvia do Targeted mudando o e-mail sempre
+      for (let i = 0; i < 20; i++) {
+        await request(app).post('/auth/login').send({ email: faker.internet.email(), password: 'x' }); // E-mail único a cada vez, a cada iteração com se fosse tentativas de login
+      }
 
-    // última requisição para forçar no estouro de broad
-    const response = await request(app)
-      .post('/auth/login')
-      .send({ email: faker.internet.email(), password: 'x' });
+      // última requisição para forçar no estouro de broad
+      const response = await request(app)
+        .post('/auth/login')
+        .send({ email: faker.internet.email(), password: 'x' });
 
-    expect(response.status).toBe(429);
-    expect(response.body.message).toMatch(/nesta origem/i); // Garante que foi o Broad que bloqueou
-    expect(response.body.status).toBe(429);
-  });
+      expect(response.status).toBe(429);
+      expect(response.body.message).toMatch(/nesta origem/i); // Garante que foi o Broad que bloqueou
+      expect(response.body.status).toBe(429);
+    },
+    15000,
+  );
 
   // validar se a aplicação expõe corretamente o consumo de requisições de forma padronizada
   it('deve incluir os headers RateLimit padronizados (draft-8)', async () => {

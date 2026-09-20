@@ -8,8 +8,12 @@ export const validateBody = (schema: ZodType) => {
 
     if (!result.success) {
       const findFirstError = result.error.issues[0]?.message;
+      const flattened = result.error.flatten?.() ?? { fieldErrors: {} };
 
-      return res.status(400).json({ message: findFirstError });
+      return res.status(400).json({
+        message: findFirstError,
+        errors: flattened.fieldErrors ?? {},
+      });
     }
     req.body = result.data;
     next();

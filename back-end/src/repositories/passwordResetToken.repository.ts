@@ -36,9 +36,8 @@ export const passwordResetTokenRepository = {
    * simultaneamente (reduz superfície de uso indevido de um link antigo).
    */
   async invalidateActiveTokensForUser(userId: string) {
-    return prisma.passwordResetToken.updateMany({
+    return prisma.passwordResetToken.deleteMany({
       where: { userId, usedAt: null, expiresAt: { gt: new Date() } },
-      data: { usedAt: new Date() },
     });
   },
 };

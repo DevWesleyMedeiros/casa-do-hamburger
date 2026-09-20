@@ -43,13 +43,15 @@ async function createAuthedUser(admin = false) {
   }
 
   const loginRes = await request(app).post('/auth/login').send({ email, password });
-  // Junta múltiplos set-cookie em uma única string para o cabeçalho Cookie
   const setCookie = loginRes.headers['set-cookie'];
   if (!setCookie) {
     console.error(`[TEST] Login falhou! Status: ${loginRes.status}, Body:`, loginRes.body);
     throw new Error(`Login falhou com status ${loginRes.status} — cookie não definido`);
   }
-  const cookie = Array.isArray(setCookie) ? setCookie.join('; ') : setCookie;
+
+  const cookie = (Array.isArray(setCookie) ? setCookie : [setCookie])
+    .map((value) => value.split(';', 1)[0])
+    .join('; ');
 
   return { email, cookie };
 }
@@ -60,10 +62,12 @@ async function seedProductAndCartItem(userCookie: string | undefined) {
     data: { name: 'X-Burguer', description: 'Clássico', price: 2500, category: 'Hamburgueres' },
   });
 
-  await request(app)
-    .post('/cart-item')
+  const cartRes = await request(app)
+    .post('/auth/create-cart-item')
     .set('Cookie', userCookie)
     .send({ productId: product.id, quantity: 2 });
+
+  expect(cartRes.status).toBe(200);
 
   return product;
 }
@@ -103,8 +107,8 @@ describe('Order — checkout, IDOR e máquina de estados (RF-32 a 40)', () => {
     const { cookie } = await createAuthedUser();
     await seedProductAndCartItem(cookie);
     await request(app).post('/orders').set('Cookie', cookie);
-    const cartRes = await request(app).get('/get-cart-items').set('Cookie', cookie);
-    expect(cartRes.body).toBe([]);
+    const cartRes = await request(app).get('/auth/get-cart-items').set('Cookie', cookie);
+    expect(cartRes.body).toEqual([]);
   });
 
   it('rejeita checkout com carrinho vazio', async () => {

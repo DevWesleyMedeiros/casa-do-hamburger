@@ -20,17 +20,21 @@ const sendPasswordResetEmailMock = vi.mocked(resendEmailService.sendPasswordRese
 describe('POST /auth/forgot-password e /auth/reset-password (Recuperação de Senha - RF-09)', () => {
   // Limpa o banco de dados antes de cada teste
   beforeEach(async () => {
-    // Limpa tokens de reset primeiro (devido à relação foreign key)
     await prisma.passwordResetToken.deleteMany();
-    // Limpa usuários
+    await prisma.orderItem.deleteMany();
+    await prisma.payment.deleteMany();
+    await prisma.order.deleteMany();
+    await prisma.cartItem.deleteMany();
     await prisma.user.deleteMany();
-    // Resetar todos os mocks
     vi.clearAllMocks();
   });
 
-  // Limpa após cada teste também para garantir isolamento
   afterEach(async () => {
     await prisma.passwordResetToken.deleteMany();
+    await prisma.orderItem.deleteMany();
+    await prisma.payment.deleteMany();
+    await prisma.order.deleteMany();
+    await prisma.cartItem.deleteMany();
     await prisma.user.deleteMany();
   });
 
@@ -112,7 +116,7 @@ describe('POST /auth/forgot-password e /auth/reset-password (Recuperação de Se
       expect(sendPasswordResetEmailMock).not.toHaveBeenCalled();
       // Nenhum token criado
       const tokens = await prisma.passwordResetToken.findMany();
-      expect(tokens.length).toHaveLength(0);
+      expect(tokens).toHaveLength(0);
     });
 
     it('deve invalidar token anterior ao solicitar nova recuperação para o mesmo usuário (RN-AUTH-14)', async () => {
