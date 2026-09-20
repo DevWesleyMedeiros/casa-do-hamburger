@@ -4,14 +4,18 @@ import crypto from 'crypto';
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { app } from '../../app.js';
-import { resendEmailService } from '../../services/email/resendEmail.service.js';
 import { prisma } from '../../db.js';
+import { resendEmailService } from '../../services/email/resendEmail.service.js';
 
 // Mock do serviço de e-mail para evitar envios reais
-const sendPasswordResetEmailMock = resendEmailService.sendPasswordResetEmail as vi.Mock;
 vi.mock('../../services/email/resendEmail.service.js', () => ({
-  sendPasswordResetEmail: vi.fn().mockResolvedValue(true),
+  resendEmailService: {
+    sendGenericEmail: vi.fn().mockResolvedValue(undefined),
+    sendPasswordResetEmail: vi.fn().mockResolvedValue(undefined),
+  },
 }));
+
+const sendPasswordResetEmailMock = vi.mocked(resendEmailService.sendPasswordResetEmail);
 
 describe('POST /auth/forgot-password e /auth/reset-password (Recuperação de Senha - RF-09)', () => {
   // Limpa o banco de dados antes de cada teste
@@ -109,7 +113,7 @@ describe('POST /auth/forgot-password e /auth/reset-password (Recuperação de Se
       expect(sendPasswordResetEmailMock).not.toHaveBeenCalled();
       // Nenhum token criado
       const tokens = await prisma.passwordResetToken.findMany();
-      expect(tokens.length).toBe(0);
+      expect(tokens.length).toHaveLength(0);
     });
 
     it('deve invalidar token anterior ao solicitar nova recuperação para o mesmo usuário (RN-AUTH-14)', async () => {
@@ -188,7 +192,7 @@ describe('POST /auth/forgot-password e /auth/reset-password (Recuperação de Se
 
       // Verifica que a senha foi atualizada no banco
       const updatedUser = await prisma.user.findUnique({ where: { id: user.id } });
-      const passwordChanged = await bcrypt.compare(newValidPassword, updatedUser!.passwordHash);
+      const passwordChanged = await bcrypt.compare(newValidPassword, updatedUser!.password!);
       expect(passwordChanged).toBe(true);
 
       // Verifica que o token foi marcado como usado (usedAt preenchido)
@@ -232,7 +236,7 @@ describe('POST /auth/forgot-password e /auth/reset-password (Recuperação de Se
       expect(response.body.message).toBe(INVALID_TOKEN_MESSAGE);
       // Senha não foi alterada
       const currentUser = await prisma.user.findUnique({ where: { id: user.id } });
-      const passwordStillOld = await bcrypt.compare('Senha123!', currentUser!.passwordHash);
+      const passwordStillOld = await bcrypt.compare('Senha123!', currentUser!.password!);
       expect(passwordStillOld).toBe(true);
     });
 
@@ -323,7 +327,7 @@ describe('POST /auth/forgot-password e /auth/reset-password (Recuperação de Se
       expect(response.body.errors).toBeDefined();
       // Senha não foi alterada
       const currentUser = await prisma.user.findUnique({ where: { id: user.id } });
-      const passwordStillOld = await bcrypt.compare('Senha123!', currentUser!.password);
+      const passwordStillOld = await bcrypt.compare('Senha123!', currentUser!.password!);
       expect(passwordStillOld).toBe(true);
     });
   });

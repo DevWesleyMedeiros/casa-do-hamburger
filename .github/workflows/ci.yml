@@ -42,6 +42,10 @@ jobs:
       CLOUDINARY_API_KEY: ci-test-key
       CLOUDINARY_API_SECRET: ci-test-secret
 
+      # Chave fictícia: só destrava a instanciação do client Resend no import de app.ts.
+      # Nenhum teste faz uma chamada real (a única suíte que envia e-mail mocka o serviço).
+      RESEND_API_KEY: re_ci_test_key
+
     steps:
       - name: Checkout do código
         uses: actions/checkout@v6
