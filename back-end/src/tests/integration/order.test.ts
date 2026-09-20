@@ -104,7 +104,7 @@ describe('Order — checkout, IDOR e máquina de estados (RF-32 a 40)', () => {
     await seedProductAndCartItem(cookie);
     await request(app).post('/orders').set('Cookie', cookie);
     const cartRes = await request(app).get('/get-cart-items').set('Cookie', cookie);
-    expect(cartRes.body).toHaveLength(0);
+    expect(cartRes.body).toBe([]);
   });
 
   it('rejeita checkout com carrinho vazio', async () => {
