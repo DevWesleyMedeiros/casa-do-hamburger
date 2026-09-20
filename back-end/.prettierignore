@@ -3,4 +3,5 @@ dist
 build
 coverage
 generated
+docs/
 *.env
