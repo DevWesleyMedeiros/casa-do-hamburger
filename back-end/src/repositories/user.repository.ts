@@ -30,10 +30,10 @@ export const userRepository = {
       },
     });
   },
-  async updatePasswordHash(userId: string, passwordHash: string) {
+  async updatePasswordHash(userId: string, password: string) {
     return prisma.user.update({
       where: { id: userId },
-      data: { passwordHash },
+      data: { password },
     });
   },
   // parte no repositório resposável por criar um usuário com informações do google
