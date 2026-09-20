@@ -1,15 +1,15 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'sonner';
 import {
   forgotPasswordSchema,
   type ForgotPasswordInput,
-} from "../../shared/schemas/passwordResetSchema";
-import { forgotPassword } from "../../shared/services/api/recovery/forgotPassword";
-import { Input } from "../../components/input/Input";
-import { Button } from "../../components/button/Button";
-import { useCallback } from "react";
-import { Link } from "react-router-dom";
+} from '../../shared/schemas/passwordResetSchema';
+import { forgotPassword } from '../../shared/services/api/recovery/forgotPassword';
+import { Input } from '../../components/input/Input';
+import { Button } from '../../components/button/Button';
+import { useCallback } from 'react';
+import { Link } from 'react-router-dom';
 
 export const ForgotPassword = () => {
   const {
@@ -27,11 +27,11 @@ export const ForgotPassword = () => {
       // RN-AUTH-15: NÃO diferenciamos a mensagem por status code aqui
       // Se checássemos statusCode === 404 pra exibir erro, estaríamos
       // recriando a mesma falha de enumeração de usuário no login. Só registramos para observabilidade interna.
-      console.error("[ForgotPassword] Falha na requisição:", error);
+      console.error('[ForgotPassword] Falha na requisição:', error);
     } finally {
       // RN-AUTH-15: mesma mensagem no front, independentemente do resultado real do backend
       toast.success(
-        "Se o e-mail informado estiver cadastrado, você receberá um link de redefinição em instantes.",
+        'Se o e-mail informado estiver cadastrado, você receberá um link de redefinição em instantes.',
       );
     }
   }, []);
@@ -41,19 +41,13 @@ export const ForgotPassword = () => {
       <div className="rounded-2xl border border-white/10 bg-white/3 p-8 shadow-2xl shadow-black/40">
         {/* Cabeçalho: título + contexto */}
         <div className="mb-6 text-center">
-          <h1 className="text-xl font-semibold text-[#F2DAAC]">
-            Esqueci minha senha
-          </h1>
+          <h1 className="text-xl font-semibold text-[#F2DAAC]">Esqueci minha senha</h1>
           <p className="mt-1.5 text-sm text-[#F2DAAC]/60">
             Informe seu e-mail e enviaremos um link para redefinir sua senha
           </p>
         </div>
 
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col gap-1.5"
-          noValidate
-        >
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-1.5" noValidate>
           <label
             htmlFor="email"
             className="text-xs font-medium tracking-wide text-[#F2DAAC]/80 uppercase"
@@ -62,12 +56,12 @@ export const ForgotPassword = () => {
           </label>
           <Input
             id="email"
-            {...register("email")}
+            {...register('email')}
             placeholder="seu@email.com"
             type="email"
             autoComplete="email"
             aria-invalid={!!errors.email}
-            aria-describedby={errors.email ? "email-error" : undefined}
+            aria-describedby={errors.email ? 'email-error' : undefined}
             className="mb-1 w-full rounded-lg border border-[#F2DAAC]/25 bg-transparent px-3 py-2.5 text-[#F2DAAC] transition-colors focus:border-[#F2DAAC]/60 focus:outline-none"
           />
           {errors.email && (
@@ -82,7 +76,7 @@ export const ForgotPassword = () => {
             colorVariation="bgRedVariation"
             className="mt-5 w-full"
           >
-            {isSubmitting ? "Enviando..." : "Enviar link de redefinição"}
+            {isSubmitting ? 'Enviando...' : 'Enviar link de redefinição'}
           </Button>
         </form>
 

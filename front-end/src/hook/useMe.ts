@@ -1,6 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
-import { queryKeys } from "../constant/queryKeys";
-import { getAuth } from "../shared/services/api/me/Me";
+import { useQuery } from '@tanstack/react-query';
+import { queryKeys } from '../constant/queryKeys';
+import { getAuth } from '../shared/services/api/me/Me';
 
 export const useMe = () => {
   const user = useQuery({

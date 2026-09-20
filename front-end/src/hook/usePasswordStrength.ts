@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback } from 'react';
 export const usePasswordGenerator = (length = 13) => {
   const randomIndex = useCallback((max: number): number => {
     const array = new Uint32Array(1);
@@ -19,10 +19,10 @@ export const usePasswordGenerator = (length = 13) => {
   );
 
   const generateSecurePassword = useCallback((): string => {
-    const lowerChar = "abcdefghijklmnopqrstuvwxyz";
-    const upperChar = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const numbers = "0123456789";
-    const specials = "!@#$%^&*()_+";
+    const lowerChar = 'abcdefghijklmnopqrstuvwxyz';
+    const upperChar = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const numbers = '0123456789';
+    const specials = '!@#$%^&*()_+';
     const allChars = lowerChar + upperChar + numbers + specials;
 
     const mandatory = [
@@ -33,12 +33,9 @@ export const usePasswordGenerator = (length = 13) => {
     ];
 
     const restLength = Math.max(length - mandatory.length, 0);
-    const rest = Array.from(
-      { length: restLength },
-      () => allChars[randomIndex(allChars.length)],
-    );
+    const rest = Array.from({ length: restLength }, () => allChars[randomIndex(allChars.length)]);
 
-    return secureShuffle([...mandatory, ...rest]).join("");
+    return secureShuffle([...mandatory, ...rest]).join('');
   }, [length, secureShuffle, randomIndex]);
 
   return { generateSecurePassword };

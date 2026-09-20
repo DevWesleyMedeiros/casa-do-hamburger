@@ -1,4 +1,4 @@
-import type { ProductImage } from "./ProductImage";
+import type { ProductImage } from './ProductImage';
 
 // Tipo exato correspondente ao DTO do backend (toProductDTO)
 export interface ProductsInterface {
@@ -10,4 +10,4 @@ export interface ProductsInterface {
   images: ProductImage[];
 }
 
-export type ProductCategory = "hamburguer" | "bebidas" | "porções";
+export type ProductCategory = 'hamburguer' | 'bebidas' | 'porções';

@@ -1,6 +1,6 @@
 // vamos definir os schemas padrõa para as validações e uso dos nossos inputs
 
-import { z } from "zod";
+import { z } from 'zod';
 
 // validações para registro Register.tsx
 export const registerSchema = z
@@ -8,35 +8,32 @@ export const registerSchema = z
     // regras para cada nome de input registrado
     name: z
       .string()
-      .min(1, "Nome é obrigatório") // não pode ser vazio, pois no mínimo um caractér
-      .min(2, "mínimo dois caractéres") // nome não pode ser um único carater ou vazio
+      .min(1, 'Nome é obrigatório') // não pode ser vazio, pois no mínimo um caractér
+      .min(2, 'mínimo dois caractéres') // nome não pode ser um único carater ou vazio
       .trim(), // remove os espaços das bordas
 
     email: z
       .string()
-      .min(1, "E-mail é obrigatório")
-      .email("Formato de e-mail inválido") // valida presença do @ e domínio
+      .min(1, 'E-mail é obrigatório')
+      .email('Formato de e-mail inválido') // valida presença do @ e domínio
       .trim(),
 
     password: z
       .string()
-      .min(1, "Senha obrigatória")
-      .min(9, "mínimo 9 caractéres")
-      .regex(/[A-Z]/, "deve conter uma letre maiúscula")
-      .regex(/[a-z]/, "deve conter uma letra minúscula")
-      .regex(/\d/, "deve conter um valor numérico")
-      .regex(/[^a-zA-Z0-9]/, "deve conter um caractér especial")
+      .min(1, 'Senha obrigatória')
+      .min(9, 'mínimo 9 caractéres')
+      .regex(/[A-Z]/, 'deve conter uma letre maiúscula')
+      .regex(/[a-z]/, 'deve conter uma letra minúscula')
+      .regex(/\d/, 'deve conter um valor numérico')
+      .regex(/[^a-zA-Z0-9]/, 'deve conter um caractér especial')
       .trim(),
 
-    confirmPassword: z
-      .string()
-      .min(1, "Confirmação de senha é obrigatória")
-      .trim(),
+    confirmPassword: z.string().min(1, 'Confirmação de senha é obrigatória').trim(),
 
     cep: z
       .string() // no banco de dados é string
-      .min(1, "cep é obrigatório")
-      .regex(/^\d{5}-?\d{3}$/, "CEP inválido. Formato válido: 00000-000")
+      .min(1, 'cep é obrigatório')
+      .regex(/^\d{5}-?\d{3}$/, 'CEP inválido. Formato válido: 00000-000')
       .trim(),
 
     // .refine() serve para validações que cruzam dois campos
@@ -45,18 +42,14 @@ export const registerSchema = z
   })
   // o método refine com (date) itera sobre cada campo do schema e captura suas propriedades, funções etc. e podermos manipularmos. Trata-se de uma regra de validação personalizada
   .refine((date) => date.password === date.confirmPassword, {
-    message: "As senhas não coincidem",
-    path: ["confirmPassword"], // aponta o erro no campo confirmPassword
+    message: 'As senhas não coincidem',
+    path: ['confirmPassword'], // aponta o erro no campo confirmPassword
   });
-  export const googleAuthTokenSchema = z.object({
-    // O Firebase ID Token do usuário do Google
-    idToken: z
-      .string()
-      .nonempty()
-      .min(1, "Token do Google é obrigatório")
-      .trim(),
-  });
-  export type GoogleAuthRequest = z.infer<typeof googleAuthTokenSchema>;
+export const googleAuthTokenSchema = z.object({
+  // O Firebase ID Token do usuário do Google
+  idToken: z.string().nonempty().min(1, 'Token do Google é obrigatório').trim(),
+});
+export type GoogleAuthRequest = z.infer<typeof googleAuthTokenSchema>;
 
 // tipo inferido automaticamente do schema
 // RegisterInput = { name: string, email: string, password: string, confirmPassword: string, cep: string }
@@ -65,13 +58,9 @@ export const registerSchema = z
 
 // definindo um schema para as validações de login
 export const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, "E-mail é obrigatório")
-    .email("Formato de email inválido")
-    .trim(),
+  email: z.string().min(1, 'E-mail é obrigatório').email('Formato de email inválido').trim(),
 
-  password: z.string().min(1, "Senha é obrigatória").trim(),
+  password: z.string().min(1, 'Senha é obrigatória').trim(),
   // aqui não colocamos regra de força de senha, pois já temos ela ao registrar
 });
 

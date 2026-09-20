@@ -1,9 +1,9 @@
-import { CalendarDays, Clock, Timer, UserRound } from "lucide-react";
+import { CalendarDays, Clock, Timer, UserRound } from 'lucide-react';
 
-import { ICON_CONFIG } from "../../constant/iconConfig";
-import { brazilinaCurrencyFormat } from "../../shared/utils/Utils";
-import type { Order, OrderStatus } from "../../types/Order";
-import { ORDER_STATUS_LABELS } from "../../types/Order";
+import { ICON_CONFIG } from '../../constant/iconConfig';
+import { brazilinaCurrencyFormat } from '../../shared/utils/Utils';
+import type { Order, OrderStatus } from '../../types/Order';
+import { ORDER_STATUS_LABELS } from '../../types/Order';
 
 type CardPedidosProps = {
   order: Order;
@@ -18,21 +18,17 @@ const getOrderTotal = (order: Order) => {
 };
 
 const formatOrderDate = (date: string) => {
-  return new Intl.DateTimeFormat("pt-BR").format(new Date(date));
+  return new Intl.DateTimeFormat('pt-BR').format(new Date(date));
 };
 
 const formatOrderTime = (date: string) => {
-  return new Intl.DateTimeFormat("pt-BR", {
-    hour: "2-digit",
-    minute: "2-digit",
+  return new Intl.DateTimeFormat('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
   }).format(new Date(date));
 };
 
-export const CardPedidos = ({
-  order,
-  isAdmin = false,
-  onStatusChange,
-}: CardPedidosProps) => {
+export const CardPedidos = ({ order, isAdmin = false, onStatusChange }: CardPedidosProps) => {
   const total = getOrderTotal(order);
 
   return (
@@ -43,9 +39,7 @@ export const CardPedidos = ({
         {isAdmin ? (
           <select
             value={order.status}
-            onChange={(event) =>
-              onStatusChange?.(order.id, event.target.value as OrderStatus)
-            }
+            onChange={(event) => onStatusChange?.(order.id, event.target.value as OrderStatus)}
             aria-label="Status do pedido"
             className="mr-3 font-bold"
           >
@@ -56,18 +50,14 @@ export const CardPedidos = ({
             ))}
           </select>
         ) : (
-          <span className="mr-3 font-bold">
-            {ORDER_STATUS_LABELS[order.status]}
-          </span>
+          <span className="mr-3 font-bold">{ORDER_STATUS_LABELS[order.status]}</span>
         )}
       </div>
 
       <div className="mt-2 ml-3 flex flex-col">
         <div className="my-0.5 flex items-center gap-1">
           <UserRound size={ICON_CONFIG.mnSize} />
-          <span className="text-sm">
-            {order.items[0]?.productName ?? "Pedido"}
-          </span>
+          <span className="text-sm">{order.items[0]?.productName ?? 'Pedido'}</span>
         </div>
 
         <div className="my-1 flex items-center gap-1">

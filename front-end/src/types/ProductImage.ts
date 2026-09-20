@@ -1,4 +1,4 @@
-export type ImageVariant = "thumbnail" | "card" | "detail";
+export type ImageVariant = 'thumbnail' | 'card' | 'detail';
 
 export type ProductImage = {
   id: string;

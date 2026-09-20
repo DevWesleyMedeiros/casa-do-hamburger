@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 export const useDelayedLoading = (isLoading: boolean, delayMs = 200) => {
   const [elepsed, setElepsed] = useState(false);

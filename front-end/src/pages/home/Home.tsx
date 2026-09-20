@@ -1,22 +1,15 @@
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { NonBackendResources } from "../../components/NonBackendResources";
-import { Products } from "../../components/products/Products";
-import { queryKeys } from "../../constant/queryKeys";
-import { getProductsData } from "../../shared/services/api/products/Products";
-import {
-  getItemSelectedClass,
-  toUpperCaseDate,
-} from "../../shared/utils/Utils";
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { NonBackendResources } from '../../components/NonBackendResources';
+import { Products } from '../../components/products/Products';
+import { queryKeys } from '../../constant/queryKeys';
+import { getProductsData } from '../../shared/services/api/products/Products';
+import { getItemSelectedClass, toUpperCaseDate } from '../../shared/utils/Utils';
 
-const FILTER_PRODUCTS = toUpperCaseDate([
-  "Hamburguer",
-  "Bebidas",
-  "Porções",
-] as const);
+const FILTER_PRODUCTS = toUpperCaseDate(['Hamburguer', 'Bebidas', 'Porções'] as const);
 type FilterProducts = (typeof FILTER_PRODUCTS)[number];
 export const Home = () => {
-  const [category, setCategory] = useState<FilterProducts>("HAMBURGUER");
+  const [category, setCategory] = useState<FilterProducts>('HAMBURGUER');
   const {
     data: products = [],
     isLoading,
@@ -32,11 +25,7 @@ export const Home = () => {
   });
 
   if (isLoading) {
-    return (
-      <p className="text-brand-amber animate-pulse p-6 text-center">
-        Carregando produtos...
-      </p>
-    );
+    return <p className="text-brand-amber animate-pulse p-6 text-center">Carregando produtos...</p>;
   }
 
   // Erro de rede/servidor (ex: backend ainda não deployado) → fallback 404 dedicado

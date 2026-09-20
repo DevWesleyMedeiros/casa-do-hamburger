@@ -20,6 +20,7 @@
     "eslint": "^10.9.1",
     "eslint-plugin-security": "^4.0.1",
     "globals": "^17.11.0",
+    "prettier": "^3.9.8",
     "prisma": "7.10.0",
     "prisma-erd-generator": "^2.4.4",
     "puppeteer": "^25.3.0",
@@ -42,7 +43,9 @@
     "test:integration": "vitest run tests/integration",
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --fix",
-    "pretest": "bun run lint"
+    "pretest": "bun run lint",
+    "format": "prettier --write .",
+    "format:check":"prettier --check ."
   },
   "peerDependencies": {
     "typescript": "^6.0.3"

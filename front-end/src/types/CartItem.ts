@@ -1,6 +1,6 @@
 // tipos somente para CartItem - correspondente ao DTO do backend (toCartItemDTO)
 
-import { type ProductsInterface } from "./Products";
+import { type ProductsInterface } from './Products';
 
 export type CartItemType = {
   id: string;

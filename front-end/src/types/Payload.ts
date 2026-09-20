@@ -23,7 +23,6 @@ export type UserLogin = {
   admin: boolean;
 };
 
-
 export type UserContextTypes = {
   user: UserLogin | null;
   logout: () => void;

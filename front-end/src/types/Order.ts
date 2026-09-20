@@ -1,11 +1,6 @@
 // Espelha OrderResponseDTO do backend (backend/src/dtos/order.dto.ts)
-export type OrderStatus =
-  | "PENDING"
-  | "PREPARING"
-  | "READY"
-  | "DELIVERED"
-  | "CANCELLED";
-export type PaymentStatus = "SIMULATED" | "PENDING" | "PAID" | "FAILED";
+export type OrderStatus = 'PENDING' | 'PREPARING' | 'READY' | 'DELIVERED' | 'CANCELLED';
+export type PaymentStatus = 'SIMULATED' | 'PENDING' | 'PAID' | 'FAILED';
 
 // para toOrderItemDTO
 export interface OrderItem {
@@ -37,9 +32,9 @@ export interface OrderPayment {
 
 // Rótulos em Português-BR para exibição — mantém tradução fora do componente
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
-  PENDING: "Pendente",
-  PREPARING: "Em preparo",
-  READY: "Pronto",
-  DELIVERED: "Entregue",
-  CANCELLED: "Cancelado",
+  PENDING: 'Pendente',
+  PREPARING: 'Em preparo',
+  READY: 'Pronto',
+  DELIVERED: 'Entregue',
+  CANCELLED: 'Cancelado',
 };

@@ -1,5 +1,5 @@
-import { create } from "zustand";
-import { devtools } from "zustand/middleware";
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
 
 // ação no meu Cart.tsx
 interface NewProductModalUIStore {
@@ -11,9 +11,9 @@ export const useNewProductUIModalStore = create<NewProductModalUIStore>()(
   devtools(
     (set) => ({
       isModalOpen: false,
-      openModal: () => set({ isModalOpen: true }, false, "modal/open"),
-      closeModal: () => set({ isModalOpen: false }, false, "modal/close"),
+      openModal: () => set({ isModalOpen: true }, false, 'modal/open'),
+      closeModal: () => set({ isModalOpen: false }, false, 'modal/close'),
     }),
-    { name: "NewProductModalUIStore" },
+    { name: 'NewProductModalUIStore' },
   ),
 );

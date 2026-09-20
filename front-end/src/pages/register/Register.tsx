@@ -1,28 +1,24 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff } from "lucide-react";
-import { useCallback, useState } from "react";
-import { useForm, type SubmitHandler } from "react-hook-form";
-import { FcGoogle } from "react-icons/fc";
-import { Link, useNavigate } from "react-router-dom";
-import { toast } from "sonner";
-import { Button } from "../../components/button/Button";
-import { Input } from "../../components/input/Input";
-import { PasswordSuggestionPopover } from "../../components/PasswordSuggestionPopover";
-import { ICON_CONFIG } from "../../constant/iconConfig";
-import {
-  registerSchema,
-  type registerInput,
-} from "../../shared/schemas/authSchemas";
-import { ApiError } from "../../shared/services/api/ApiExceptions";
-import { RegisterDate } from "../../shared/services/api/register/Register";
-import { resolveApiErrorMessage } from "../../shared/utils/apiErrorMessage";
-import { displayStrongPassword } from "../../shared/utils/Utils";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Eye, EyeOff } from 'lucide-react';
+import { useCallback, useState } from 'react';
+import { useForm, type SubmitHandler } from 'react-hook-form';
+import { FcGoogle } from 'react-icons/fc';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import { Button } from '../../components/button/Button';
+import { Input } from '../../components/input/Input';
+import { PasswordSuggestionPopover } from '../../components/PasswordSuggestionPopover';
+import { ICON_CONFIG } from '../../constant/iconConfig';
+import { registerSchema, type registerInput } from '../../shared/schemas/authSchemas';
+import { ApiError } from '../../shared/services/api/ApiExceptions';
+import { RegisterDate } from '../../shared/services/api/register/Register';
+import { resolveApiErrorMessage } from '../../shared/utils/apiErrorMessage';
+import { displayStrongPassword } from '../../shared/utils/Utils';
 
 export const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [showConfirmPassword, setShowConfirmPassword] =
-    useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
 
   const navigate = useNavigate();
   const {
@@ -36,7 +32,7 @@ export const Register = () => {
     resolver: zodResolver(registerSchema),
   });
   // watch() não pode ser usado dentro de useCallback
-  const passwordValue = watch("password") ?? "";
+  const passwordValue = watch('password') ?? '';
   const strength = displayStrongPassword(passwordValue);
 
   const onSubmit: SubmitHandler<registerInput> = async (data) => {
@@ -49,18 +45,15 @@ export const Register = () => {
         cep: data.cep,
       });
       reset();
-      toast.success("Usuário criado com sucesso");
-      navigate("/login");
+      toast.success('Usuário criado com sucesso');
+      navigate('/login');
     } catch (error) {
-      const finalError =
-        error instanceof ApiError
-          ? error
-          : new ApiError(500, "Erro inesperado");
+      const finalError = error instanceof ApiError ? error : new ApiError(500, 'Erro inesperado');
 
       if (finalError instanceof ApiError) {
         toast.error(
           resolveApiErrorMessage(finalError, {
-            404: "Usuário não foi encontrado ou já foi deletado",
+            404: 'Usuário não foi encontrado ou já foi deletado',
           }),
         );
         return;
@@ -86,25 +79,13 @@ export const Register = () => {
       <div className="flex flex-col items-center justify-center rounded-xl border-[0.5px] border-white/13 px-5 py-3">
         <div className="justify-left third-level flex flex-col gap-1.5 rounded-2xl border-white/13 bg-[#1b1a16] px-5 py-4">
           {/* nome */}
-          <Input
-            placeholder="Seu nome"
-            type="text"
-            {...register("name")}
-            disabled={isSubmitting}
-          />
+          <Input placeholder="Seu nome" type="text" {...register('name')} disabled={isSubmitting} />
           {errors.name && (
-            <p className="text-brand-red mt-1 text-left text-xs font-bold">
-              {errors.name.message}
-            </p>
+            <p className="text-brand-red mt-1 text-left text-xs font-bold">{errors.name.message}</p>
           )}
 
           {/* email */}
-          <Input
-            placeholder="E-mail"
-            type="email"
-            {...register("email")}
-            disabled={isSubmitting}
-          />
+          <Input placeholder="E-mail" type="email" {...register('email')} disabled={isSubmitting} />
           {errors.email && (
             <p className="mt-0.5 text-left text-xs font-bold text-red-500">
               {errors.email.message}
@@ -115,15 +96,15 @@ export const Register = () => {
             {/* password */}
             <Input
               placeholder="Senha"
-              type={showPassword ? "text" : "password"}
-              {...register("password")}
+              type={showPassword ? 'text' : 'password'}
+              {...register('password')}
               disabled={isSubmitting}
             />
             <button
               type="button"
               onClick={togglePasswordVisibility}
               className="absolute top-1/2 right-8 -translate-y-1/2 transform text-gray-500"
-              aria-label={showPassword ? "Mostrar senha" : "Ocultar senha"}
+              aria-label={showPassword ? 'Mostrar senha' : 'Ocultar senha'}
             >
               {showPassword ? (
                 <Eye size={ICON_CONFIG.mnSize} />
@@ -134,8 +115,8 @@ export const Register = () => {
 
             <PasswordSuggestionPopover
               onApplyPassword={(password) => {
-                setValue("password", password, { shouldValidate: true });
-                setValue("confirmPassword", password, { shouldValidate: true });
+                setValue('password', password, { shouldValidate: true });
+                setValue('confirmPassword', password, { shouldValidate: true });
               }}
             />
           </div>
@@ -148,15 +129,11 @@ export const Register = () => {
                   key={i}
                   className="h-0.5 flex-1 rounded-full transition-all duration-300"
                   style={{
-                    background: active
-                      ? strength.color
-                      : "rgba(255,255,255,0.1)",
+                    background: active ? strength.color : 'rgba(255,255,255,0.1)',
                   }}
                 />
               ))}
-              <span className="ml-1.5 text-[11px] text-white/35">
-                {strength.label}
-              </span>
+              <span className="ml-1.5 text-[11px] text-white/35">{strength.label}</span>
             </div>
           )}
 
@@ -170,17 +147,15 @@ export const Register = () => {
             {/* confirmar senha */}
             <Input
               placeholder="Confirme sua senha"
-              type={showConfirmPassword ? "text" : "password"}
-              {...register("confirmPassword")}
+              type={showConfirmPassword ? 'text' : 'password'}
+              {...register('confirmPassword')}
               disabled={isSubmitting}
             />
             <button
               type="button"
               onClick={toggleConfirmPasswordVisibility}
               className="absolute top-5 right-3 -translate-y-1/2 transform text-gray-500"
-              aria-label={
-                showConfirmPassword ? "Mostrar senha" : "Ocultar senha"
-              }
+              aria-label={showConfirmPassword ? 'Mostrar senha' : 'Ocultar senha'}
             >
               {showConfirmPassword ? (
                 <Eye size={ICON_CONFIG.mnSize} />
@@ -195,15 +170,8 @@ export const Register = () => {
             )}
 
             {/* cep */}
-            <Input
-              placeholder="Seu CEP"
-              type="text"
-              {...register("cep")}
-              disabled={isSubmitting}
-            />
-            <p className="mt-0.5 text-left text-xs text-white/30">
-              formato: 00000-000
-            </p>
+            <Input placeholder="Seu CEP" type="text" {...register('cep')} disabled={isSubmitting} />
+            <p className="mt-0.5 text-left text-xs text-white/30">formato: 00000-000</p>
             {errors.cep && (
               <p className="mt-0.5 text-left text-xs font-bold text-red-500">
                 {errors.cep.message}
@@ -212,7 +180,7 @@ export const Register = () => {
 
             <div className="flex flex-col justify-center">
               <Button
-                title={isLoading ? "Cadastrando" : "Cadastrar"}
+                title={isLoading ? 'Cadastrando' : 'Cadastrar'}
                 type="submit"
                 colorVariation="bgDarkVariation"
                 disabled={isLoading}
@@ -237,9 +205,9 @@ export const Register = () => {
 
                 <div className="align-center my-1 flex justify-center gap-1">
                   <p className="font-bold text-[#4c4b48]">Já tenho uma conta</p>
-                  <Link to={isSubmitting ? "#" : "/login"}>
+                  <Link to={isSubmitting ? '#' : '/login'}>
                     <span
-                      className={`text-brand-amber text-right text-sm ${isSubmitting ? "pointer-events-none cursor-not-allowed opacity-50 select-none" : ""}`}
+                      className={`text-brand-amber text-right text-sm ${isSubmitting ? 'pointer-events-none cursor-not-allowed opacity-50 select-none' : ''}`}
                     >
                       Entrar
                     </span>

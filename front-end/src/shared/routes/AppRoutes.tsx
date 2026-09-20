@@ -1,12 +1,12 @@
-import { Navigate, Outlet, Route, Routes } from "react-router-dom";
-import { Header } from "../../components/header/Header";
-import { Home } from "../../pages/home/Home";
-import { Login } from "../../pages/login/Login";
-import { Pedidos } from "../../pages/pedidos/Pedidos";
-import { Register } from "../../pages/register/Register";
-import { PublicRoutes } from "./publicRoutes/PublicRoutes";
-import { ForgotPassword } from "../../pages/forgotPassword/ForgotPassword";
-import { ResetPassword } from "../../pages/forgotPassword/ResetPassword";
+import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
+import { Header } from '../../components/header/Header';
+import { Home } from '../../pages/home/Home';
+import { Login } from '../../pages/login/Login';
+import { Pedidos } from '../../pages/pedidos/Pedidos';
+import { Register } from '../../pages/register/Register';
+import { PublicRoutes } from './publicRoutes/PublicRoutes';
+import { ForgotPassword } from '../../pages/forgotPassword/ForgotPassword';
+import { ResetPassword } from '../../pages/forgotPassword/ResetPassword';
 
 const Layout: React.FC = () => {
   return (

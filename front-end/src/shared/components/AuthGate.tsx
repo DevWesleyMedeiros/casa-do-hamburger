@@ -1,7 +1,7 @@
-import { useEffect, useState, type ReactNode } from "react";
-import { Spinner } from "../../components/ui/spinner";
-import { useDelayedLoading } from "../../hook/useDelayedLoading";
-import { useMe } from "../../hook/useMe";
+import { useEffect, useState, type ReactNode } from 'react';
+import { Spinner } from '../../components/ui/spinner';
+import { useDelayedLoading } from '../../hook/useDelayedLoading';
+import { useMe } from '../../hook/useMe';
 
 export const AuthGate = ({ children }: { children: ReactNode }) => {
   const { isPending } = useMe();

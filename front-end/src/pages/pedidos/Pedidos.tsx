@@ -1,37 +1,30 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { toast } from "sonner";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
-import { CardPedidos } from "../../components/cardPedidos/CardPedidos";
-import { queryKeys } from "../../constant/queryKeys.js";
-import { useMe } from "../../hook/useMe";
-import { ApiError } from "../../shared/services/api/ApiExceptions.js";
-import { orderSeriviceApi } from "../../shared/services/api/orders/ordersServiceApi";
-import { resolveApiErrorMessage } from "../../shared/utils/apiErrorMessage.js";
-import { getItemSelectedClass } from "../../shared/utils/Utils";
-import type { Order, OrderStatus } from "../../types/Order";
+import { CardPedidos } from '../../components/cardPedidos/CardPedidos';
+import { queryKeys } from '../../constant/queryKeys.js';
+import { useMe } from '../../hook/useMe';
+import { ApiError } from '../../shared/services/api/ApiExceptions.js';
+import { orderSeriviceApi } from '../../shared/services/api/orders/ordersServiceApi';
+import { resolveApiErrorMessage } from '../../shared/utils/apiErrorMessage.js';
+import { getItemSelectedClass } from '../../shared/utils/Utils';
+import type { Order, OrderStatus } from '../../types/Order';
 
-const FILTER_ITEMS = [
-  "Pendentes",
-  "Preparando",
-  "Pronto",
-  "Cancelados",
-  "Entregue",
-] as const;
+const FILTER_ITEMS = ['Pendentes', 'Preparando', 'Pronto', 'Cancelados', 'Entregue'] as const;
 
 type FilterItem = (typeof FILTER_ITEMS)[number];
 
 const FILTER_STATUS_MAP: Record<FilterItem, OrderStatus | null> = {
-  Pendentes: "PENDING",
-  Preparando: "PREPARING",
-  Pronto: "READY",
-  Cancelados: "CANCELLED",
-  Entregue: "DELIVERED",
+  Pendentes: 'PENDING',
+  Preparando: 'PREPARING',
+  Pronto: 'READY',
+  Cancelados: 'CANCELLED',
+  Entregue: 'DELIVERED',
 };
 
 export const Pedidos = () => {
-  const [selectedItemClass, setSelectedItemClass] =
-    useState<FilterItem>("Pendentes");
+  const [selectedItemClass, setSelectedItemClass] = useState<FilterItem>('Pendentes');
 
   const queryClient = useQueryClient();
 
@@ -49,32 +42,21 @@ export const Pedidos = () => {
 
   // mutation para atualizar status do order
   const statusMutation = useMutation({
-    mutationFn: ({
-      orderId,
-      status,
-    }: {
-      orderId: string;
-      status: OrderStatus;
-    }) => {
+    mutationFn: ({ orderId, status }: { orderId: string; status: OrderStatus }) => {
       return orderSeriviceApi.updateOrderStatus(orderId, status);
     },
 
     onSuccess: (updatedOrder) => {
-      queryClient.setQueryData(
-        queryKeys.orders,
-        (currentOrders: Order[] = []) => {
-          return currentOrders.map((order) =>
-            order.id === updatedOrder.id ? updatedOrder : order,
-          );
-        },
-      );
+      queryClient.setQueryData(queryKeys.orders, (currentOrders: Order[] = []) => {
+        return currentOrders.map((order) => (order.id === updatedOrder.id ? updatedOrder : order));
+      });
 
-      toast.success("Status atualizado com sucesso");
+      toast.success('Status atualizado com sucesso');
     },
 
     onError: (err: unknown) => {
       if (err instanceof ApiError) {
-        toast.error(resolveApiErrorMessage(err, "Status não atualizado"));
+        toast.error(resolveApiErrorMessage(err, 'Status não atualizado'));
       }
     },
   });
@@ -92,12 +74,12 @@ export const Pedidos = () => {
         );
       });
 
-      toast.success("Pedido cancelado com sucesso");
+      toast.success('Pedido cancelado com sucesso');
     },
 
     onError: (err: unknown) => {
       if (err instanceof ApiError) {
-        toast.error(resolveApiErrorMessage(err, "Pedido não cancelado"));
+        toast.error(resolveApiErrorMessage(err, 'Pedido não cancelado'));
       }
     },
   });
@@ -113,7 +95,7 @@ export const Pedidos = () => {
   });
 
   const handleStatusChange = (orderId: string, status: OrderStatus) => {
-    if (status === "CANCELLED") {
+    if (status === 'CANCELLED') {
       cancelMutation.mutate(orderId);
       return;
     }
@@ -125,17 +107,11 @@ export const Pedidos = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center">Carregando...</div>
-    );
+    return <div className="flex items-center justify-center">Carregando...</div>;
   }
 
   if (isError) {
-    return (
-      <div className="flex items-center justify-center">
-        Erro ao carregar pedidos.
-      </div>
-    );
+    return <div className="flex items-center justify-center">Erro ao carregar pedidos.</div>;
   }
 
   return (
@@ -155,9 +131,7 @@ export const Pedidos = () => {
 
       <div className="grid grid-cols-3 gap-3">
         {filteredOrders.length === 0 ? (
-          <div className="justify-ccenter flex items-center">
-            Nenhum pedido encontrado.
-          </div>
+          <div className="justify-ccenter flex items-center">Nenhum pedido encontrado.</div>
         ) : (
           filteredOrders.map((order) => (
             <CardPedidos

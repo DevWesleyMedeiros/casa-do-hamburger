@@ -1,13 +1,10 @@
-import { api } from "../ApiConfig";
-import { ApiError } from "../ApiExceptions";
-import axios from "axios";
-import { type CartItemType } from "../../../../types/CartItem";
+import { api } from '../ApiConfig';
+import { ApiError } from '../ApiExceptions';
+import axios from 'axios';
+import { type CartItemType } from '../../../../types/CartItem';
 
 export const updateCartItemQuantity = {
-  update: async (
-    cartItemId: string,
-    quantity: number,
-  ): Promise<CartItemType | ApiError> => {
+  update: async (cartItemId: string, quantity: number): Promise<CartItemType | ApiError> => {
     try {
       const { data } = await api.patch(`/auth/cart-item/${cartItemId}`, {
         quantity,
@@ -15,7 +12,7 @@ export const updateCartItemQuantity = {
       return data;
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        const message = error.response?.data?.message ?? "Erro desconhecido";
+        const message = error.response?.data?.message ?? 'Erro desconhecido';
         const statusCode = error.response?.status ?? 500;
         return new ApiError(statusCode, message);
       }
@@ -23,6 +20,6 @@ export const updateCartItemQuantity = {
         return new ApiError(500, error.message);
       }
     }
-    return new ApiError(500, "Erro no servidor");
+    return new ApiError(500, 'Erro no servidor');
   },
 };

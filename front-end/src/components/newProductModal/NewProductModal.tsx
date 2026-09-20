@@ -1,29 +1,22 @@
 // src/components/NewProductModal.tsx
-import { zodResolver } from "@hookform/resolvers/zod";
-import { OctagonX, Upload } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
-import { ICON_CONFIG } from "../../constant/iconConfig";
-import { useCreateProduct } from "../../hook/useCreateProducts";
-import {
-  newProductSchema,
-  type NewProductFormData,
-} from "../../shared/schemas/authProductsSchema";
-import { useNewProductUIModalStore } from "../../shared/stores/useNewProductUIModal";
-import { Button } from "../button/Button";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { OctagonX, Upload } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { ICON_CONFIG } from '../../constant/iconConfig';
+import { useCreateProduct } from '../../hook/useCreateProducts';
+import { newProductSchema, type NewProductFormData } from '../../shared/schemas/authProductsSchema';
+import { useNewProductUIModalStore } from '../../shared/stores/useNewProductUIModal';
+import { Button } from '../button/Button';
 
 const CATEGORIES = [
-  { value: "HAMBURGUER", label: "Hamburguer" },
-  { value: "BEBIDAS", label: "Bebidas" },
-  { value: "PORÇÕES", label: "Porções" },
+  { value: 'HAMBURGUER', label: 'Hamburguer' },
+  { value: 'BEBIDAS', label: 'Bebidas' },
+  { value: 'PORÇÕES', label: 'Porções' },
 ];
 
 const MAX_IMAGE_SIZE_MB = 5; // size
-const ACCEPTED_IMAGE_TYPES = new Set<string>([
-  "image/png",
-  "image/jpeg",
-  "image/webp",
-]); // mimetypes
+const ACCEPTED_IMAGE_TYPES = new Set<string>(['image/png', 'image/jpeg', 'image/webp']); // mimetypes
 
 export const NewProductModal = () => {
   const closeModal = useNewProductUIModalStore((state) => state.closeModal);
@@ -47,7 +40,7 @@ export const NewProductModal = () => {
   // Fecha com Esc e trava o scroll do body enquanto a modal está aberta
   useEffect(() => {
     const handleKeyDown = (e: globalThis.KeyboardEvent) => {
-      if (e.key !== "Escape") return;
+      if (e.key !== 'Escape') return;
       closeModal();
     };
 
@@ -57,14 +50,14 @@ export const NewProductModal = () => {
       }
     };
 
-    document.addEventListener("keydown", handleKeyDown);
-    document.addEventListener("mousedown", handleClickOutside);
-    document.body.style.overflow = "hidden";
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('mousedown', handleClickOutside);
+    document.body.style.overflow = 'hidden';
 
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.body.style.overflow = "";
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.body.style.overflow = '';
       if (imagePreview) {
         URL.revokeObjectURL(imagePreview);
       }
@@ -76,7 +69,7 @@ export const NewProductModal = () => {
     if (!file) return;
 
     if (!ACCEPTED_IMAGE_TYPES.has(file.type)) {
-      setImageError("Formato inválido. Use PNG, JPG ou WEBP.");
+      setImageError('Formato inválido. Use PNG, JPG ou WEBP.');
       return;
     }
     if (file.size > MAX_IMAGE_SIZE_MB * 1024 * 1024) {
@@ -91,7 +84,7 @@ export const NewProductModal = () => {
 
   const onSubmit = async (data: NewProductFormData) => {
     if (!imageFile) {
-      setImageError("Selecione uma imagem para o produto.");
+      setImageError('Selecione uma imagem para o produto.');
       return;
     }
 
@@ -99,7 +92,7 @@ export const NewProductModal = () => {
       name: data.name,
       description: data.description,
       category: data.category,
-      price: data.price.replace(",", "."),
+      price: data.price.replace(',', '.'),
       image: imageFile,
     });
     closeModal();
@@ -115,18 +108,11 @@ export const NewProductModal = () => {
         open={true}
         onClose={closeModal}
       >
-        <h2
-          id="new-product-title"
-          className="mb-4 text-xl font-bold text-[#9D9D94]"
-        >
+        <h2 id="new-product-title" className="mb-4 text-xl font-bold text-[#9D9D94]">
           Adicionar Produto
         </h2>
 
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex w-full flex-col gap-4"
-          noValidate
-        >
+        <form onSubmit={handleSubmit(onSubmit)} className="flex w-full flex-col gap-4" noValidate>
           <div className="flex w-full flex-col items-center gap-4 sm:flex-row sm:items-start">
             {/* Upload de imagem */}
             <div className="flex w-full flex-col items-center gap-1 sm:w-40 sm:shrink-0">
@@ -143,23 +129,18 @@ export const NewProductModal = () => {
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <Upload
-                    size={ICON_CONFIG.mxSize}
-                    className="text-[#9D9D94]"
-                  />
+                  <Upload size={ICON_CONFIG.mxSize} className="text-[#9D9D94]" />
                 )}
               </button>
               <input
                 ref={fileInputRef}
                 type="file"
-                accept={[...ACCEPTED_IMAGE_TYPES].join(",")}
+                accept={[...ACCEPTED_IMAGE_TYPES].join(',')}
                 onChange={handleImageChange}
                 className="hidden"
               />
               {imageError && (
-                <span className="max-w-40 text-center text-xs text-[#C41E00]">
-                  {imageError}
-                </span>
+                <span className="max-w-40 text-center text-xs text-[#C41E00]">{imageError}</span>
               )}
             </div>
 
@@ -174,12 +155,10 @@ export const NewProductModal = () => {
                   type="text"
                   placeholder="Nome do Produto"
                   className="h-9 w-full rounded-md border border-[#9D9D94]/40 bg-transparent px-3 text-sm text-[#9D9D94] outline-none focus:border-[#C41E00]"
-                  {...register("name")}
+                  {...register('name')}
                 />
                 {errors.name && (
-                  <span className="text-xs text-[#C41E00]">
-                    {errors.name.message}
-                  </span>
+                  <span className="text-xs text-[#C41E00]">{errors.name.message}</span>
                 )}
               </div>
 
@@ -192,12 +171,10 @@ export const NewProductModal = () => {
                   type="text"
                   placeholder="Descrição"
                   className="h-9 w-full rounded-md border border-[#9D9D94]/40 bg-transparent px-3 text-sm text-[#9D9D94] outline-none focus:border-[#C41E00]"
-                  {...register("description")}
+                  {...register('description')}
                 />
                 {errors.description && (
-                  <span className="text-xs text-[#C41E00]">
-                    {errors.description.message}
-                  </span>
+                  <span className="text-xs text-[#C41E00]">{errors.description.message}</span>
                 )}
               </div>
 
@@ -209,7 +186,7 @@ export const NewProductModal = () => {
                   id="category"
                   defaultValue=""
                   className="h-9 w-full rounded-md border border-[#9D9D94]/40 bg-[#24201A] px-3 text-sm text-[#9D9D94] outline-none focus:border-[#C41E00]"
-                  {...register("category")}
+                  {...register('category')}
                 >
                   <option value="" disabled>
                     Categoria
@@ -221,9 +198,7 @@ export const NewProductModal = () => {
                   ))}
                 </select>
                 {errors.category && (
-                  <span className="text-xs text-[#C41E00]">
-                    {errors.category.message}
-                  </span>
+                  <span className="text-xs text-[#C41E00]">{errors.category.message}</span>
                 )}
               </div>
 
@@ -237,19 +212,17 @@ export const NewProductModal = () => {
                   inputMode="decimal"
                   placeholder="Valor inteiro sem vírgulas"
                   className="h-9 w-full rounded-md border border-[#9D9D94]/40 bg-transparent px-3 text-sm text-[#9D9D94] outline-none focus:border-[#C41E00]"
-                  {...register("price")}
+                  {...register('price')}
                 />
                 {errors.price && (
-                  <span className="text-xs text-[#C41E00]">
-                    {errors.price.message}
-                  </span>
+                  <span className="text-xs text-[#C41E00]">{errors.price.message}</span>
                 )}
               </div>
             </div>
           </div>
 
           <Button
-            title={isPending ? "Adicionando..." : "Adicionar Produto"}
+            title={isPending ? 'Adicionando...' : 'Adicionar Produto'}
             colorVariation="bgRedVariation"
             type="submit"
           />
