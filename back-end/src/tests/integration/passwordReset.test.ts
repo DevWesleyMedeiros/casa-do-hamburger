@@ -88,7 +88,7 @@ describe('POST /auth/forgot-password e /auth/reset-password (Recuperação de Se
     });
 
     it('deve retornar mensagem genérica mas NÃO enviar e-mail para contas GOOGLE (RF-57)', async () => {
-      // Arrange: Cria um usuário GOOGLE
+      // Arrange: Cria um usuário GOOGLE válido no banco
       const googleEmail = faker.internet.email();
       await prisma.user.create({
         data: {
@@ -96,7 +96,6 @@ describe('POST /auth/forgot-password e /auth/reset-password (Recuperação de Se
           email: googleEmail,
           password: null, // Contas GOOGLE não tem senha local
           provider: 'GOOGLE',
-          providerId: faker.string.uuid(),
           emailVerified: true,
         },
       });
