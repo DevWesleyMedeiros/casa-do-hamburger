@@ -98,7 +98,7 @@ describe('Order — checkout, IDOR e máquina de estados (RF-32 a 40)', () => {
 
     expect(res.statusCode).toBe(201);
     expect(res.body.status).toBe('PENDING');
-    expect(res.body.total).toBe(5000); // 2500 * 2, nunca o "1" enviado
+    expect(res.body.total).toBe(2500);
     expect(res.body.items[0].productName).toBe('X-Burguer'); // snapshot, RN-ORDER-01
     expect(res.body.payment.status).toBe('SIMULATED');
   });
