@@ -228,20 +228,16 @@ flowchart TB
     subgraph Infra[Infraestrutura & Serviços]
         DB[(PostgreSQL + Prisma)]
         CLD["Cloudinary (Imagens)"]
-        RSM[Resend (Emails)]
+        RSM["Resend (Emails)"]
         FBA["Firebase Admin (Google OAuth)"]
     end
     
-    UI --> RQ --> AX[Axios Interceptor] --> CT
+    UI --> RQ --> AX["Axios Interceptor"] --> CT
     CT --> SV --> RP --> DB
     MW -->|auth, rate-limit, upload| CT
     SV --> CLD
     SV --> RSM
     SV --> FBA
-    
-    style Frontend fill:#1e40af,color:#fff
-    style Backend fill:#065f46,color:#fff
-    style Infra fill:#7c2d12,color:#fff
 ```
 
 ### 📊 Modelo de dados — Entidades e relacionamentos
