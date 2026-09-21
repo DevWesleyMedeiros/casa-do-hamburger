@@ -1,4 +1,4 @@
-import type { NextFunction, Request, RequestHandler, Response } from 'express'
+import type { NextFunction, Request, RequestHandler, Response } from 'express';
 
 // Envolve um controller assíncrono e encaminha qualquer erro (rejeição de Promise) para o next(),
 // Faz com que o try/catch manual repetido em cada método do controller.
@@ -7,5 +7,5 @@ import type { NextFunction, Request, RequestHandler, Response } from 'express'
 export const asyncHandler =
   (fn: (req: Request, res: Response, next: NextFunction) => Promise<unknown>): RequestHandler =>
   (req, res, next) => {
-    Promise.resolve(fn(req, res, next)).catch(next)
-  }
+    Promise.resolve(fn(req, res, next)).catch(next);
+  };

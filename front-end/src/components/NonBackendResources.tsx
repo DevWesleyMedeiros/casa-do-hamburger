@@ -1,4 +1,4 @@
-import { NO_BACKEND_RESOURCE_IMAGE } from "../constant/fallbackImage";
+import { NO_BACKEND_RESOURCE_IMAGE } from '../constant/fallbackImage';
 
 export const NonBackendResources = () => {
   return (
@@ -22,9 +22,8 @@ export const NonBackendResources = () => {
       </div>
 
       <p className="max-w-md text-sm text-amber-100/80 md:text-base">
-        Desculpe, o backend ainda não foi implantado em produção. Mas você pode
-        conferir o andamento do projeto e os últimos prints de desenvolvimento
-        no meu
+        Desculpe, o backend ainda não foi implantado em produção. Mas você pode conferir o andamento
+        do projeto e os últimos prints de desenvolvimento no meu
         <a
           href="https://github.com/DevWesleyMedeiros/casa-do-hamburger"
           target="_blank"

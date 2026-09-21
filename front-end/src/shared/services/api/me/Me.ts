@@ -1,5 +1,5 @@
-import { api } from "../ApiConfig";
-import { type UserLogin } from "../../../../types/Payload";
+import { api } from '../ApiConfig';
+import { type UserLogin } from '../../../../types/Payload';
 
 // bate na rota auth/me e onde estão os dados do usuário com o token decodificado
 // Deixa o Axios estourar o erro naturalmente (AxiosError).
@@ -7,7 +7,7 @@ import { type UserLogin } from "../../../../types/Payload";
 // tanktack já lida com try e catch nas requisições
 export const getAuth = {
   getMe: async (): Promise<UserLogin | undefined> => {
-    const response = await api.get("/auth/me");
+    const response = await api.get('/auth/me');
     return response.data.user ?? [];
   },
 };

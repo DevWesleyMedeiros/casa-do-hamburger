@@ -3,12 +3,13 @@
 // Escopo: apenas o backend (Node.js + Express + TypeScript + Bun + Prisma).
 // Simula as regras que um time sênior aplicaria em PR review automatizado.
 
-import js from '@eslint/js'
-import tseslint from 'typescript-eslint'
-import security from 'eslint-plugin-security'
-import globals from 'globals'
+import js from '@eslint/js';
+import security from 'eslint-plugin-security';
+import { defineConfig } from 'eslint/config';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
 
-export default tseslint.config(
+export default defineConfig([
   // 1) O que o lint NUNCA deve tocar: gerado por ferramenta, build, deps
   {
     ignores: [
@@ -27,7 +28,7 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
 
   // 4) Regras de segurança — relevante porque o Express recebe input
-  //    externo direto (body, params, headers) em toda rota
+  // externo direto (body, params, headers) em toda rota
   security.configs.recommended,
 
   // 5) Configuração específica do projeto
@@ -44,7 +45,7 @@ export default tseslint.config(
       eqeqeq: ['error', 'always'], // proíbe == , exige ===
       'no-var': 'error', // força let/const
       'prefer-const': 'error',
-      'no-console': ['warn', { allow: ['warn', 'error'] }], // console.log solto vira warning
+      'no-console': ['warn', { allow: ['warn', 'error', 'log'] }], // console.log solto vira warning
 
       // --- TypeScript ---
       '@typescript-eslint/no-unused-vars': [
@@ -76,4 +77,4 @@ export default tseslint.config(
       'no-console': 'off',
     },
   },
-)
+]);

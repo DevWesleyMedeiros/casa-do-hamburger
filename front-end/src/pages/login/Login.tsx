@@ -1,25 +1,22 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient } from "@tanstack/react-query";
-import { Eye, EyeOff } from "lucide-react";
-import { useCallback, useState } from "react";
-import { useForm } from "react-hook-form";
-import { FcGoogle } from "react-icons/fc";
-import { Link, useNavigate } from "react-router-dom";
-import { toast } from "sonner";
-import { Button } from "../../components/button/Button";
-import { Input } from "../../components/input/Input";
-import { ICON_CONFIG } from "../../constant/iconConfig";
-import { queryKeys } from "../../constant/queryKeys";
-import { loginSchema, type loginInput } from "../../shared/schemas/authSchemas";
-import { ApiError } from "../../shared/services/api/ApiExceptions";
-import { LoginDate } from "../../shared/services/api/login/Login";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useQueryClient } from '@tanstack/react-query';
+import { Eye, EyeOff } from 'lucide-react';
+import { useCallback, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { FcGoogle } from 'react-icons/fc';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import { Button } from '../../components/button/Button';
+import { Input } from '../../components/input/Input';
+import { ICON_CONFIG } from '../../constant/iconConfig';
+import { queryKeys } from '../../constant/queryKeys';
+import { loginSchema, type loginInput } from '../../shared/schemas/authSchemas';
+import { ApiError } from '../../shared/services/api/ApiExceptions';
+import { LoginDate } from '../../shared/services/api/login/Login';
 
 // import login firebase
-import {
-  firebaseAuthSignOut,
-  signInWithGooglePopup,
-} from "../../shared/config/firebase";
-import { GoogleLoginDate } from "../../shared/services/api/login/googleLogin";
+import { firebaseAuthSignOut, signInWithGooglePopup } from '../../shared/config/firebase';
+import { GoogleLoginDate } from '../../shared/services/api/login/googleLogin';
 
 export const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -50,26 +47,24 @@ export const Login = () => {
         });
 
         if (result instanceof ApiError) {
-          if (result.statusCode === 401) setBackendError("Senha incorreta");
-          else if (result.statusCode === 404)
-            setBackendError("Usuário não encontrado");
-          else if (result.statusCode === 500)
-            setBackendError("Erro no servidor, tente depois");
+          if (result.statusCode === 401) setBackendError('Senha incorreta');
+          else if (result.statusCode === 404) setBackendError('Usuário não encontrado');
+          else if (result.statusCode === 500) setBackendError('Erro no servidor, tente depois');
           else setBackendError(result.message);
           return;
         }
 
         // Sucesso: sessão criada no backend, atualiza o estado local do app
-        toast("Login realizado");
+        toast('Login realizado');
 
         // Escreve o usuário direto no cache da query "me" (React Query) em vez de
         // disparar um novo GET /auth/me — Header e AuthGate reagem de imediato à
         // mudança de estado, sem esperar um round-trip extra à API.
         queryClient.setQueryData(queryKeys.me, result.user);
         reset();
-        navigate("/home");
+        navigate('/home');
       } catch {
-        setBackendError("Ocorreu um erro inesperado. Tente novamente.");
+        setBackendError('Ocorreu um erro inesperado. Tente novamente.');
       } finally {
         setIsLoading(false); // ← sempre reseta o loading, com sucesso ou erro
       }
@@ -84,19 +79,17 @@ export const Login = () => {
     try {
       const googleCredential = await signInWithGooglePopup();
       const idToken =
-        typeof googleCredential === "string"
+        typeof googleCredential === 'string'
           ? googleCredential
           : await googleCredential.user.getIdToken();
       const result = await GoogleLoginDate.create({ idToken });
 
       if (result instanceof ApiError) {
         if (result.statusCode === 409) {
-          setBackendError("Usuário já cadastrado");
+          setBackendError('Usuário já cadastrado');
           return;
         } else if (result.statusCode === 401) {
-          setBackendError(
-            "Não foi possível confirmar sua conta Google. Tente novamente",
-          );
+          setBackendError('Não foi possível confirmar sua conta Google. Tente novamente');
           return;
         } else {
           setBackendError(result.message);
@@ -104,13 +97,13 @@ export const Login = () => {
         }
       }
 
-      toast("Login realizado");
+      toast('Login realizado');
       queryClient.setQueryData(queryKeys.me, result.user);
       reset();
-      navigate("/home");
+      navigate('/home');
     } catch (err) {
-      console.error("[GoogleLogin] Erro no fluxo de popup:", err);
-      setBackendError("Ocorreu um erro inesperado. Tente novamente.");
+      console.error('[GoogleLogin] Erro no fluxo de popup:', err);
+      setBackendError('Ocorreu um erro inesperado. Tente novamente.');
     } finally {
       // Limpa sessão do Firebase no cliente — sessão real é o cookie do backend
       await firebaseAuthSignOut();
@@ -139,9 +132,7 @@ export const Login = () => {
 
         <div className="w-full rounded-2xl border border-white/10 bg-[#1b1a16] px-4 py-5">
           <div className="mb-5">
-            <p className="text-center font-bold text-[#F2DAAC]">
-              Bem vindo à Casa do Hamburguer!!
-            </p>
+            <p className="text-center font-bold text-[#F2DAAC]">Bem vindo à Casa do Hamburguer!!</p>
           </div>
 
           <div className="flex flex-col gap-3">
@@ -158,16 +149,13 @@ export const Login = () => {
                 placeholder="seu@email.com"
                 type="email"
                 autoComplete="email"
-                {...register("email")}
+                {...register('email')}
                 disabled={isSubmitting}
                 aria-invalid={!!errors.email}
-                aria-describedby={errors.email ? "email-error" : undefined}
+                aria-describedby={errors.email ? 'email-error' : undefined}
               />
               {errors.email && (
-                <p
-                  id="email-error"
-                  className="text-left text-xs font-bold text-red-500"
-                >
+                <p id="email-error" className="text-left text-xs font-bold text-red-500">
                   {errors.email.message}
                 </p>
               )}
@@ -184,19 +172,17 @@ export const Login = () => {
               <div className="relative w-full">
                 <Input
                   id="password"
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
-                  {...register("password")}
+                  {...register('password')}
                   disabled={isSubmitting}
                   aria-invalid={!!errors.password}
-                  aria-describedby={
-                    errors.password ? "password-error" : undefined
-                  }
+                  aria-describedby={errors.password ? 'password-error' : undefined}
                 />
                 <button
                   type="button"
                   onClick={togglePasswordVisibility}
-                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
                   className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 transition-colors hover:text-gray-300"
                 >
                   {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
@@ -204,18 +190,12 @@ export const Login = () => {
               </div>
 
               {errors.password && (
-                <p
-                  id="password-error"
-                  className="text-left text-sm font-bold text-red-500"
-                >
+                <p id="password-error" className="text-left text-sm font-bold text-red-500">
                   {errors.password.message}
                 </p>
               )}
               {backendError && (
-                <p
-                  role="alert"
-                  className="text-left text-sm font-bold text-red-500"
-                >
+                <p role="alert" className="text-left text-sm font-bold text-red-500">
                   {backendError}
                 </p>
               )}
@@ -233,7 +213,7 @@ export const Login = () => {
 
             <Button
               type="submit"
-              title={isLoading ? "Entrando..." : "Entrar"}
+              title={isLoading ? 'Entrando...' : 'Entrar'}
               colorVariation="bgDarkVariation"
               disabled={isLoading}
             />
@@ -246,7 +226,7 @@ export const Login = () => {
 
             <Button
               type="button"
-              title={isGoogleLoading ? "Conectando..." : "Entrar com Google"}
+              title={isGoogleLoading ? 'Conectando...' : 'Entrar com Google'}
               colorVariation="bgGoogleVariation"
               disabled={isSubmitting || isGoogleLoading}
               onClick={handleGoogleLogin}
@@ -256,9 +236,9 @@ export const Login = () => {
 
             <div className="my-2 flex justify-center gap-1 text-sm">
               <p className="font-bold text-[#4c4b48]">Não tem uma conta?</p>
-              <Link to={isSubmitting ? "#" : "/register"}>
+              <Link to={isSubmitting ? '#' : '/register'}>
                 <span
-                  className={`text-brand-amber text-right text-sm ${isSubmitting ? "pointer-events-none cursor-not-allowed opacity-50 select-none" : ""}`}
+                  className={`text-brand-amber text-right text-sm ${isSubmitting ? 'pointer-events-none cursor-not-allowed opacity-50 select-none' : ''}`}
                 >
                   Criar conta
                 </span>

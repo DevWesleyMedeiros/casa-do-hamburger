@@ -1,16 +1,19 @@
-import { Spinner } from "../../components/ui/spinner";
-import { useMe } from "../../hook/useMe";
-import { useEffect, useState, type ReactNode } from "react";
-import { useDelayedLoading } from "../../hook/useDelayedLoading";
+import { useEffect, useState, type ReactNode } from 'react';
+import { Spinner } from '../../components/ui/spinner';
+import { useDelayedLoading } from '../../hook/useDelayedLoading';
+import { useMe } from '../../hook/useMe';
 
 export const AuthGate = ({ children }: { children: ReactNode }) => {
   const { isPending } = useMe();
   const [hasSettledOnce, setHasSettledOnce] = useState(false);
   const showSpinner = useDelayedLoading(isPending, 200);
 
+  // useEffect só roda uma vez para marcar que o carregamento inicial e terminou
   useEffect(() => {
-    if (!isPending) setHasSettledOnce(true);
-  }, [isPending]);
+    if (!isPending && !hasSettledOnce) {
+      queueMicrotask(() => setHasSettledOnce(true));
+    }
+  }, [isPending, hasSettledOnce]);
 
   if (!hasSettledOnce) {
     if (!showSpinner) return null;

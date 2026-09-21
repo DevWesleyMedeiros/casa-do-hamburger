@@ -17,7 +17,7 @@ O Casa do Hamburguer é uma aplicação fullstack moderna que simula um ecossist
 ✅ **Rate limiting** e proteção contra força bruta
 ✅ Upload de imagens com validação de magic bytes e Cloudinary
 ✅ Carrinho atrelado ao usuário (persistido no banco)
-✅ Sistema completo de pedidos com OrderItems e snapshots
+✅ Módulo de pedidos concluído com máquina de estados, controle administrativo e notificação por email
 ✅ Backend com camadas bem definidas (Controller → Service → Repository)
 ✅ Testes de integração implementados com Vitest + Supertest
 ✅ TypeScript em todo o projeto com type-safety
@@ -59,12 +59,16 @@ O Casa do Hamburguer é uma aplicação fullstack moderna que simula um ecossist
 
 ### 📦 Sistema de Pedidos
 
-- ✅ Entidade `Order` com status: PENDING, PICKED_UP, CANCELLED
-- ✅ `OrderItem` com snapshots de nome/preço no momento da compra
-- ✅ Garantia de integridade: produtos podem ser deletados, itens permanecem
-- ✅ Cálculo de subtotal e total persistidos
-- ✅ Índices de banco para consultas rápidas por usuário
-- ✅ Interface frontend com filtros de status de pedidos
+- ✅ Entidade `Order` com fluxos reais de atendimento e estado operacional: `PENDING`, `PREPARING`, `READY`, `DELIVERED` e `CANCELLED`
+- ✅ Máquina de estados implementada em `OrderServiceMachine` com validação de transições permitidas (`PENDING -> PREPARING|CANCELLED`, `PREPARING -> READY|CANCELLED`, `READY -> DELIVERED`)
+- ✅ Controle de pedidos por papel e posse: administradores alteram status, clientes visualizam apenas seus pedidos e a checagem de IDOR é tratada no backend
+- ✅ Regras de cancelamento aplicadas: cliente só cancela em `PENDING`; admin pode cancelar em `PENDING` ou `PREPARING` conforme regra de negócio
+- ✅ `OrderItem` com snapshots de nome, preço, imagem e quantidade no momento da compra para preservar integridade mesmo após alterações no catálogo
+- ✅ Cálculo de subtotal e total persistidos no pedido e checkout com montagem do pedido a partir do carrinho do usuário
+- ✅ Serviço de notificação `notifyOrderStatusChanged` com envio de e-mail transacional para o dono do pedido quando o status muda
+- ✅ Integração com Resend para email de atualização de pedido, mantendo o fluxo de status desacoplado da transação principal do banco
+- ✅ Listagem administrativa com filtro por status e interface frontend para acompanhamento visual dos pedidos
+- ✅ Índices de banco para consultas rápidas por usuário e status do pedido
 
 ### 🛠️ Ferramentas de desenvolvimento
 
@@ -148,7 +152,7 @@ src/
 
 ### 🎯 Padrões e boas práticas adotadas
 
-#### Backend
+### Backend
 
 - **Arquitetura em camadas**: Controllers (roteamento) → Services (regra de negócio) → Repositories (persistência)
 - **Tratamento de erros centralizado**: Classe `AppError` + middleware errorHandler
@@ -159,7 +163,7 @@ src/
 - **Upload seguro**: Validação de magic bytes, mimetype e tamanho antes de Cloudinary
 - **Segurança**: Helmet, CORS configurado, cookies httpOnly/secure
 
-#### Frontend
+### Frontend
 
 - **React Query**: Cache e sincronização de dados assíncronos
 - **Zustand**: Estado global apenas para UI (não duplicar cache do servidor)
@@ -487,10 +491,14 @@ Abaixo estão algumas telas representativas da experiência atual da aplicação
 | Tela               | Visual                                                                                  |
 | ------------------ | --------------------------------------------------------------------------------------- |
 | Login              | ![Tela de login](front-end/public/screenshots/logIn-screen.png)                         |
+
 | Cadastro           | ![Tela de cadastro](front-end/public/screenshots/signUp-screen.png)                     |
+
 | Validação de senha | ![Senha forte](<front-end/public/screenshots/password-strenght-meter(strong-pass).png>) |
+
 | Esqueceu a senha? | ![Esqueceu senha](<front-end/public/screenshots/forgot-password-screen.png>) |
 
+| Sugestão de senha forte | ![Popover de senha](<front-end/public/screenshots/sigUp-fomr(popover).png>) |
 | Reset Password Token | ![Reset Password Token](<front-end/public/screenshots/reset-password-token.png>) |
 | Reset Password Token | ![Reset Password Token](<front-end/public/screenshots/reset-password-screen.png>) |
 
@@ -498,18 +506,40 @@ Abaixo estão algumas telas representativas da experiência atual da aplicação
 
 | Tela                                                | Visual                                                                                      |
 | --------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| Home sem autenticação                               | ![Home pública](front-end/public/screenshots/logout-homepage.png)                           |
-| Home com usuário autenticado                        | ![Home autenticada](front-end/public/screenshots/admin-login-homepage.png)                        |
+| Home sem autenticação (Hamburguers)                              | ![Home pública](front-end/public/screenshots/non-admin-login-hamburguers-homepage.png)                           |
+
+| Home sem autenticação (bebidas) | ![Home pública](front-end/public/screenshots/non-login-bebidas-homepage.png)                           |
+| Home sem autenticação (porções) | ![Home pública](front-end/public/screenshots/non-login-porcoes-homepage.png)                           |
+
+| Home com usuário autenticado (hamburguers)                      | ![Home autenticada](front-end/public/screenshots/admin-login-hamburguers-homepage.png)                        |
+| Home com usuário autentificado (bebidas) | ![Home autenticada](front-end/public/screenshots/admin-login-bebidas-homepage.png)                        |
+| Home com usuário autentificado (porções) | ![Home autenticada](front-end/public/screenshots/admin-login-porcoes-homepage.png)                        |
+
+### Carrinho
+
 | Carrinho em uso                                     | ![Carrinho com itens](front-end/public/screenshots/login-homepage-with-admin-role_cart.png) |
+
+| Itens que serão pedidos | ![Adiciona Produtos](front-end/public/screenshots/items-que-serao-pedido.png)                    |
+
 | Janela de adcionar produto                          | ![Adiciona Produtos](front-end/public/screenshots/add-product-modal.png)                    |
-| Tratamento de erros na janela de adicionar produtos | ![Validações inputs](<front-end/public/screenshots/add-product-modal(with_validation).png>) |
+
+| Tratamento de erros na janela de adicionar produtos | ![Validações inputs](front-end/public/screenshots/add-product-modal(with_validation).png) |
 
 ### Pedidos e administração
 
+O controle dos pedidos é feito pelo administrador do sistema
+> obs.: onde está o id (valores aleatórios ao lado do status do produto) irá o nome do usuário que fez a ordem
+
 | Tela                    | Visual                                                                      |
 | ----------------------- | --------------------------------------------------------------------------- |
-| Gestão de pedidos       | ![Pedidos](front-end/public/screenshots/cardPedidos.png)                    |
-| Sugestão de senha forte | ![Popover de senha](<front-end/public/screenshots/sigUp-fomr(popover).png>) |
+| Gestão de pedidos (pendentes)   | ![Pedidos ](front-end/public/screenshots/cardPedidos-pendentes.png)                    |
+
+| Gestão de pedidos (preparando)  | ![Pedidos](front-end/public/screenshots/cardPedidos-sem-pedidos-preparando.png)                    |
+
+| Gestão de pedidos (prontos)     | ![Pedidos](front-end/public/screenshots/cardPedidos-prontos.png)                    |
+
+| Gestão de pedidos (cancelados)  | ![Pedidos](front-end/public/screenshots/cardPedidos-cancelados.png)                    |
+| Gestão de pedidos (entregues)   | ![Pedidos](front-end/public/screenshots/cardPedidos-entregues.png)                    |
 
 ### Nomeação
 

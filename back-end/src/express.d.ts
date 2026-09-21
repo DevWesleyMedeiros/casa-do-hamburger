@@ -5,12 +5,12 @@
 // Serve para estender, declarar ou criar tipos sem gerar código JavaScript
 // Aqui acessamos o namespace do Express para adicionar campos ao tipo Request
 
-import type { JWTPayload } from 'jose'
+import type { JWTPayload } from 'jose';
 
 declare global {
   namespace Express {
     interface Request {
-      user?: JWTPayload
+      user?: JWTPayload;
     }
   }
 }

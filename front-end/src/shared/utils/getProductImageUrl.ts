@@ -1,6 +1,6 @@
-import type { ProductImage, ImageVariant } from "../../types/ProductImage";
+import type { ProductImage, ImageVariant } from '../../types/ProductImage';
 
-const FALLBACK_IMAGE = "../../../public//assetsImages/"; // asset local, sem depender de rede
+const FALLBACK_IMAGE = '../../../public//assetsImages/'; // asset local, sem depender de rede
 
 export function getProductImageUrl(
   images: ProductImage[] | undefined,

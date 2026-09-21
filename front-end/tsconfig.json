@@ -8,7 +8,7 @@
       "@/*": ["./src/*"]
     },
     "types": ["vitest/globals", "node"],
-    "typeRoots": ["./types", "./node_modules/@types", "./node_modules"],
+    "typeRoots": ["./types", "./node_modules/@types", "./node_modules"]
   },
   "files": [],
   "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }]

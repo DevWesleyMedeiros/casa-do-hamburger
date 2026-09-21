@@ -7,12 +7,7 @@
 // estático de valor faz o bundler considerar o módulo "alcançável" desde o
 // carregamento inicial, e todos os `await import()` abaixo deixam de gerar
 // um chunk lazy de verdade.
-import type {
-  User,
-  Auth,
-  GoogleAuthProvider,
-  UserCredential,
-} from "firebase/auth";
+import type { User, Auth, GoogleAuthProvider, UserCredential } from 'firebase/auth';
 
 // Configurações do Firebase (carregadas antes da importação dinâmica)
 const firebaseConfig = {
@@ -31,14 +26,14 @@ async function initializeFirebase() {
   if (firebaseInitialized) return;
 
   // Importa o SDK do Firebase dinamicamente - só carrega quando necessário
-  const { initializeApp } = await import("firebase/app");
-  const { getAuth, GoogleAuthProvider } = await import("firebase/auth");
+  const { initializeApp } = await import('firebase/app');
+  const { getAuth, GoogleAuthProvider } = await import('firebase/auth');
 
   const firebaseApp = initializeApp(firebaseConfig);
   firebaseAuth = getAuth(firebaseApp);
 
   googleRedirectProvider = new GoogleAuthProvider();
-  googleRedirectProvider.setCustomParameters({ prompt: "select_account" });
+  googleRedirectProvider.setCustomParameters({ prompt: 'select_account' });
 
   firebaseInitialized = true;
 }
@@ -51,11 +46,9 @@ async function initializeFirebase() {
  * Chama initializeFirebase() internamente — não depende de nenhuma outra
  * função ter rodado antes. Pode ser chamada isoladamente com segurança.
  */
-export const signInWithGooglePopup = async (): Promise<
-  string | UserCredential
-> => {
+export const signInWithGooglePopup = async (): Promise<string | UserCredential> => {
   await initializeFirebase();
-  const { signInWithPopup } = await import("firebase/auth");
+  const { signInWithPopup } = await import('firebase/auth');
 
   const result = await signInWithPopup(firebaseAuth, googleRedirectProvider);
   return (await result.user?.getIdToken()) || result;
@@ -70,7 +63,7 @@ export const signInWithGooglePopup = async (): Promise<
  */
 export const signInWithGoogleRedirect = async (): Promise<void> => {
   await initializeFirebase();
-  const { signInWithRedirect } = await import("firebase/auth");
+  const { signInWithRedirect } = await import('firebase/auth');
   await signInWithRedirect(firebaseAuth, googleRedirectProvider);
 };
 
@@ -92,7 +85,7 @@ export const onGoogleAuthStateChanged = async (
   callback: (user: User | null) => void,
 ): Promise<() => void> => {
   await initializeFirebase();
-  const { onAuthStateChanged } = await import("firebase/auth");
+  const { onAuthStateChanged } = await import('firebase/auth');
   return onAuthStateChanged(firebaseAuth, callback);
 };
 
@@ -105,7 +98,7 @@ export const onGoogleAuthStateChanged = async (
  */
 export const getGoogleRedirectResult = async (): Promise<string | null> => {
   await initializeFirebase();
-  const { getRedirectResult } = await import("firebase/auth");
+  const { getRedirectResult } = await import('firebase/auth');
   const result = await getRedirectResult(firebaseAuth);
   if (!result) return null;
   return result.user.getIdToken();
@@ -114,7 +107,7 @@ export const getGoogleRedirectResult = async (): Promise<string | null> => {
 // função signOut do firebase
 export const firebaseAuthSignOut = async (): Promise<void> => {
   await initializeFirebase();
-  const { signOut } = await import("firebase/auth");
+  const { signOut } = await import('firebase/auth');
   await signOut(firebaseAuth);
 };
 

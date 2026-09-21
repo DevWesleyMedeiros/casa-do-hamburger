@@ -4,7 +4,9 @@
  * para que trocar de provedor no futuro não exija mudar chamadores.
  */
 
-// responsável por enviar e-mails de redefinição de senha; to = destinatário; name = nome do usuário; resetUrl = url de redefinição de senha
 export interface EmailService {
-  sendPasswordResetEmail(params: { to: string; name: string; resetUrl: string }): Promise<void>
+  // Envia e-mail de redefinição de senha
+  sendPasswordResetEmail(params: { to: string; name: string; resetUrl: string }): Promise<void>;
+  // Envia e-mail genérico (usado para notificações de pedido)
+  sendGenericEmail(params: { to: string; subject: string; html: string }): Promise<void>;
 }

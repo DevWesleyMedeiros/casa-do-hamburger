@@ -1,9 +1,9 @@
 // ApiConfig.ts
-import axios from "axios";
+import axios from 'axios';
 
 const getBaseURL = () => {
-  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000/";
-  return apiUrl.replace(/\/auth$/, "");
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/';
+  return apiUrl.replace(/\/auth$/, '');
 };
 
 export const api = axios.create({

@@ -1,5 +1,5 @@
 // --- Validação (mesma filosofia do backend: nunca confiar no dado bruto) ---
-import { z } from 'zod'
+import { z } from 'zod';
 
 export const createProductsSchema = z.object({
   name: z.string().trim().min(3, 'Nome deve ter ao menos 3 caracteres').max(80, 'Nome muito longo'),
@@ -13,6 +13,6 @@ export const createProductsSchema = z.object({
     .number({ error: 'Preço inválido' })
     .positive('Preço dever ser positivo')
     .transform((value) => Math.round(value * 10000)),
-})
+});
 
-export type CreateProductInput = z.infer<typeof createProductsSchema>
+export type CreateProductInput = z.infer<typeof createProductsSchema>;

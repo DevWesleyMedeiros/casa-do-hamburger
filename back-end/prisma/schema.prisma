@@ -91,34 +91,62 @@ model Order{
   userId String
   user User @relation(fields: [userId], references: [id])
   status OrderStatus @default(PENDING)
-  total Int
+  total Int @default(0)
   items OrderItem[]
+  payment Payment[] // 1:0..1 (RF-46, pagamento sempre simulado por ora)
+  deletedAt DateTime?
   createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  updatedAt DateTime    @default(now()) @updatedAt
 
   @@index([userId])
+  @@index([status]) // acelera listagem admin filtrada por status (US-07)
 }
 
-enum OrderStatus {
-  PENDING     // Pendente
-  PICKED_UP   // Retirado
-  CANCELLED   // Cancelado
-}
+model OrderItem {
+  id String @id @default(uuid())
+  orderId String
+  order Order @relation(fields: orderId, references: [id], onDelete: Cascade)
+  productId String? // opcional: mantém o item mesmo se o produto for apagado
+  product Products? @relation(fields: [productId], references: [id], onDelete: SetNull)
 
-model OrderItem{
-  id          String    @id @default(uuid())
-  orderId     String
-  order       Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
-
-  productId   String?   // opcional: permite manter o item mesmo se o produto for apagado
-  product     Products? @relation(fields: [productId], references: [id], onDelete: SetNull)
-
-  productName String    // snapshot — nome do produto no momento da compra
-  unitPrice   Int        // snapshot — preço unitário no momento da compra (centavos)
-  quantity    Int
-  subtotal    Int        // unitPrice * quantity, guardado (não recalculado on-the-fly)
+  // --- Snapshot Pattern (RN-ORDER-01/02/03) — nunca ler via JOIN ao vivo ---
+  productName String  //snapshot para nome do produto no memento da compra
+  productImageUrl String? //snapshot para url da imagem do produto no memento da compra (RF-33)
+  unitPrice Int     // snapshot — preço unitário em centavos (RN-ORDER-04)
+  quantity Int
+  subtotal Int     // unitPrice * quantity, persistido (não recalculado on-the-fly)
 
   @@index([orderId])
+
+}
+
+// controle da máquina de estados do produto
+enum OrderStatus {
+  PENDING     // Pendente
+  PREPARING   // Preparando
+  READY   // Retirado
+  CANCELLED   // Cancelado
+  DELIVERED // Entregue ou retirado pelo cliente
+}
+
+// NOVO — RF-32/33/34 (Seção 6.9 da doc)
+enum PaymentStatus {
+  SIMULATED // único status usado na prática até implementarmos gateway de pagamento
+  PENDING
+  PAID
+  FAILED
+}
+
+model Payment {
+  id String @id @default(uuid())
+  orderId String @unique
+  order Order? @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status PaymentStatus @default(SIMULATED)
+  gatewayProvider String? // null hoje; "stripe"/"mercadopago" no futuro (RF-46)
+  gatewayId String? // null hoje; id do pagamento no gateway de pagamento
+
+  createdAt DateTime @default(now())
+
 }
 model PasswordResetToken {
   id String @id @default(uuid())

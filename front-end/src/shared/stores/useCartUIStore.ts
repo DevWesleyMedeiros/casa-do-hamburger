@@ -1,5 +1,5 @@
-import { create } from "zustand";
-import { devtools } from "zustand/middleware";
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
 
 // ação no meu Cart.tsx
 interface CartUIStore {
@@ -13,15 +13,10 @@ export const useCartUIStore = create<CartUIStore>()(
   devtools(
     (set) => ({
       isCartOpen: false,
-      openCart: () => set({ isCartOpen: true }, false, "cart/open"),
-      closeCart: () => set({ isCartOpen: false }, false, "cart/close"),
-      toggleCart: () =>
-        set(
-          (state) => ({ isCartOpen: !state.isCartOpen }),
-          false,
-          "cart/toggle",
-        ),
+      openCart: () => set({ isCartOpen: true }, false, 'cart/open'),
+      closeCart: () => set({ isCartOpen: false }, false, 'cart/close'),
+      toggleCart: () => set((state) => ({ isCartOpen: !state.isCartOpen }), false, 'cart/toggle'),
     }),
-    { name: "CartUIStore" },
+    { name: 'CartUIStore' },
   ),
 );

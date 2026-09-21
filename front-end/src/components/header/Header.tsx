@@ -1,26 +1,24 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Box, LayoutDashboard, LogOut, Plus, ShoppingCart } from "lucide-react";
-import { useCallback } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { toast } from "sonner";
-import { ICON_CONFIG } from "../../constant/iconConfig";
-import { queryKeys } from "../../constant/queryKeys";
-import { useMe } from "../../hook/useMe";
-import { getCartItemsList } from "../../shared/services/api/cartItems/getCartItems";
-import { userLogOut } from "../../shared/services/api/logout/Logout";
-import { useCartUIStore } from "../../shared/stores";
-import { useNewProductUIModalStore } from "../../shared/stores/useNewProductUIModal";
-import { Cart } from "../cart/Cart";
-import { NewProductModal } from "../newProductModal/NewProductModal";
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Box, LayoutDashboard, LogOut, Plus, ShoppingCart } from 'lucide-react';
+import { useCallback } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import { ICON_CONFIG } from '../../constant/iconConfig';
+import { queryKeys } from '../../constant/queryKeys';
+import { useMe } from '../../hook/useMe';
+import { getCartItemsList } from '../../shared/services/api/cartItems/getCartItems';
+import { userLogOut } from '../../shared/services/api/logout/Logout';
+import { useCartUIStore } from '../../shared/stores';
+import { useNewProductUIModalStore } from '../../shared/stores/useNewProductUIModal';
+import { Cart } from '../cart/Cart';
+import { NewProductModal } from '../newProductModal/NewProductModal';
 
 export const Header = () => {
   const { data: user } = useMe();
   const location = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const handleToggleCartVisibility = useCartUIStore(
-    (state) => state.toggleCart,
-  );
+  const handleToggleCartVisibility = useCartUIStore((state) => state.toggleCart);
   const isOpenModal = useNewProductUIModalStore((state) => state.isModalOpen);
   const openModal = useNewProductUIModalStore((state) => state.openModal);
 
@@ -28,31 +26,29 @@ export const Header = () => {
   const { data: totalItems = 0 } = useQuery({
     queryKey: queryKeys.cartItems,
     queryFn: () => getCartItemsList.getCartItemsProduct(),
-    select: (cartItem) =>
-      cartItem.reduce((sum, item) => sum + item.quantity, 0),
+    select: (cartItem) => cartItem.reduce((sum, item) => sum + item.quantity, 0),
     enabled: Boolean(user), // só busca carrinho se tiver usuário logado
     retry: false,
   });
 
   // Quando deslogar o usuário
   const handleLogout = useCallback(async () => {
-    toast("saindo...");
+    toast('saindo...');
     try {
       // quando eu deslogar, remova o usuário e a lista de CartItems (identificados pelas queryKeys)
       await userLogOut();
       queryClient.removeQueries({ queryKey: queryKeys.me });
       queryClient.removeQueries({ queryKey: queryKeys.cartItems });
     } catch {
-      toast.error("Erro ao sair. Tente novamente.");
+      toast.error('Erro ao sair. Tente novamente.');
     }
     await new Promise((resolve) => setTimeout(resolve, 4000));
-    toast.success("Usuário deslogado");
-    navigate("/login");
+    toast.success('Usuário deslogado');
+    navigate('/login');
   }, [navigate, queryClient]);
 
   const setNavItemActiveClass = (pathname: string): string => {
-    const baseClass =
-      "flex h-[8.75] w-[8.75] items-center justify-center rounded-md p-1.5";
+    const baseClass = 'flex h-[8.75] w-[8.75] items-center justify-center rounded-md p-1.5';
     return pathname === location.pathname
       ? `${baseClass} border-2 border-amber-200 text-[#161410] bg-[#F2DAAC]`
       : `${baseClass}`;
@@ -68,10 +64,7 @@ export const Header = () => {
       </div>
       <div className="mx-auto flex w-full items-center justify-between p-3 md:w-184.25 md:p-0">
         <Link to="/">
-          <img
-            src="./assetsImages/logo-casa-do-hamburguer.png"
-            alt="Logo link caso do Hamburger"
-          />
+          <img src="./assetsImages/logo-casa-do-hamburguer.png" alt="Logo link caso do Hamburger" />
         </Link>
 
         {user ? (
@@ -79,7 +72,7 @@ export const Header = () => {
             {user.admin && (
               <div className="hidden gap-2 text-[#F2DAAC] md:flex">
                 <Link to="/home">
-                  <div className={setNavItemActiveClass("/home")}>
+                  <div className={setNavItemActiveClass('/home')}>
                     <Box
                       size={ICON_CONFIG.mxSize}
                       strokeWidth={ICON_CONFIG.strokWidth}
@@ -88,7 +81,7 @@ export const Header = () => {
                   </div>
                 </Link>
                 <Link to="/pedidos">
-                  <div className={setNavItemActiveClass("/pedidos")}>
+                  <div className={setNavItemActiveClass('/pedidos')}>
                     <LayoutDashboard
                       size={ICON_CONFIG.mxSize}
                       strokeWidth={ICON_CONFIG.strokWidth}

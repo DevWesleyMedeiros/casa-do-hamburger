@@ -1,5 +1,5 @@
-import { prisma } from '../db.js'
-import { handlePrismaError } from '../utils/handlePrismaError.js'
+import { prisma } from '../db.js';
+import { handlePrismaError } from '../utils/handlePrismaError.js';
 
 export const cartRepository = {
   findCartItemProduct: async (userId: string) => {
@@ -7,9 +7,9 @@ export const cartRepository = {
       return await prisma.cartItem.findMany({
         where: { userId },
         include: { product: { include: { images: true } } },
-      })
+      });
     } catch (error) {
-      return handlePrismaError(error)
+      return handlePrismaError(error);
     }
   },
 
@@ -28,18 +28,18 @@ export const cartRepository = {
           user: { connect: { id: userId } },
         },
         include: { product: { include: { images: true } } },
-      })
+      });
     } catch (error) {
-      return handlePrismaError(error)
+      return handlePrismaError(error);
     }
   },
   deleteCartItemById: async (cartItemId: string, userId: string) => {
     try {
       return await prisma.cartItem.delete({
         where: { id: cartItemId, userId },
-      })
+      });
     } catch (error) {
-      return handlePrismaError(error)
+      return handlePrismaError(error);
     }
   },
   updateCartItemQuantity: async (cartItemId: string, userId: string, quantity: number) => {
@@ -48,9 +48,9 @@ export const cartRepository = {
         where: { id: cartItemId, userId },
         data: { quantity },
         include: { product: { include: { images: true } } },
-      })
+      });
     } catch (error) {
-      return handlePrismaError(error)
+      return handlePrismaError(error);
     }
   },
-}
+};

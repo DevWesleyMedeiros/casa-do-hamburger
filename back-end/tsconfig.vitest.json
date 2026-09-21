@@ -5,8 +5,5 @@
     // "types": ["vitest/globals"],
     // "typeRoots": ["./types", "./node_modules/@types", "./node_modules"],
   },
-  "include": [
-    "./vitest.config.ts",
-    "./src/tests/**/*.test.ts"
-  ]
+  "include": ["./vitest.config.ts", "./src/tests/**/*.test.ts"]
 }

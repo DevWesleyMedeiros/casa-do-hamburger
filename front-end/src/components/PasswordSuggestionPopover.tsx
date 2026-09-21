@@ -1,20 +1,18 @@
 // src/components/PasswordSuggestionPopover.tsx
-import { useState, useCallback } from "react";
-import { Copy, Wand2, X } from "lucide-react";
-import { toast } from "sonner";
-import { usePasswordGenerator } from "../hook/usePasswordStrength";
-import { ICON_CONFIG } from "../constant/iconConfig";
+import { useState, useCallback } from 'react';
+import { Copy, Wand2, X } from 'lucide-react';
+import { toast } from 'sonner';
+import { usePasswordGenerator } from '../hook/usePasswordStrength';
+import { ICON_CONFIG } from '../constant/iconConfig';
 
 interface PasswordSuggestionPopoverProps {
   // devolve a senha escolhida para quem estiver usando o componente
   onApplyPassword: (password: string) => void;
 }
 
-export const PasswordSuggestionPopover = ({
-  onApplyPassword,
-}: PasswordSuggestionPopoverProps) => {
+export const PasswordSuggestionPopover = ({ onApplyPassword }: PasswordSuggestionPopoverProps) => {
   const [showPopover, setShowPopover] = useState(false);
-  const [suggestedPassword, setSuggestedPassword] = useState("");
+  const [suggestedPassword, setSuggestedPassword] = useState('');
   const { generateSecurePassword } = usePasswordGenerator();
 
   // abre o popover com uma sugestão de senha
@@ -26,16 +24,16 @@ export const PasswordSuggestionPopover = ({
   // gera outra senha sem fechar o popover
   const handleRegeneratePassword = useCallback(() => {
     setSuggestedPassword(generateSecurePassword());
-    toast("Nova senha gerada");
+    toast('Nova senha gerada');
   }, [generateSecurePassword]);
 
   // copia a senha sugerida para a área de transferência
   const handleCopyPassword = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(suggestedPassword);
-      toast.success("Senha copiada para área de transferência");
+      toast.success('Senha copiada para área de transferência');
     } catch {
-      toast.error("Não foi possível copiar a senha");
+      toast.error('Não foi possível copiar a senha');
     }
   }, [suggestedPassword]);
 
@@ -43,7 +41,7 @@ export const PasswordSuggestionPopover = ({
   const handleUsePassword = useCallback(() => {
     onApplyPassword(suggestedPassword);
     setShowPopover(false);
-    toast.success("Senha aplicada!");
+    toast.success('Senha aplicada!');
   }, [onApplyPassword, suggestedPassword]);
 
   return (
@@ -61,9 +59,7 @@ export const PasswordSuggestionPopover = ({
       {showPopover && (
         <div className="mt-2 rounded-lg border border-white/12 bg-[#1f1d18] p-3">
           <div className="mb-2 flex items-center justify-between gap-2">
-            <p className="font-mono text-sm break-all text-white/80">
-              {suggestedPassword}
-            </p>
+            <p className="font-mono text-sm break-all text-white/80">{suggestedPassword}</p>
             <button
               type="button"
               onClick={handleCopyPassword}
