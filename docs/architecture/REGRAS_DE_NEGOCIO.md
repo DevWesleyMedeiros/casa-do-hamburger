@@ -3,7 +3,7 @@
 > **Tipo de documento:** Especificação de Requisitos + Regras de Negócio (BRD/SRS)
 > **Projeto:** Casa do Hambúrguer — Sistema de Pedidos para Hamburgueria (E-commerce de Food Service)
 > **Natureza:** Boilerplate reutilizável para aplicações de e-commerce/pedidos
-> **Versão:** 1.8.1
+> **Versão:** 2.1.0
 > **Status:** Documento vivo — Recuperação de senha via e-mail implementada **em partes** (RF-09 permanece 🟡): fluxo `forgot-password` correto e mergeado na `develop` (PR #22), mas `reset-password` tem bug crítico de campo inexistente no schema (`passwordHash` vs `password`) que provavelmente quebra o caminho feliz em produção — ver Changelog 1.7.0 e Seção 6.1. **Login via Google confirmado no código** (PR #24, commit `904710e`, mergeado na `develop` em 05/09/2026): RF-51 a RF-55 realmente implementados via Firebase Authentication — ver Changelog 1.8.1 para a auditoria completa, incluindo regras de suporte (RN-AUTH-08 a 12, RNF-23 a 25) que ficaram com selo e/ou texto desatualizados na v1.8.0 e foram corrigidas agora. Sprint 2 encerrada no Trello (board `projeto-casa-do-hamburguer`); Rate limiting em rotas de autenticação concluído (RF-12, RNF-06); Auditoria de segurança incorporada (Seção 6.11, correção de contradição A05, Seção 14.2); DTO de User com mapper de saída concluído (RN-DTO-01) e payload de sessão minimizado (RN-DTO-06)
 
 ---
@@ -145,7 +145,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | RF-28 | Usuário deve poder remover item do carrinho | 🟢 |
 | RF-29 | Usuário deve poder esvaziar o carrinho por completo | 🟢 |
 | RF-30 | O sistema deve recalcular o total do carrinho no backend (nunca confiar no total enviado pelo frontend) | 🟢 |
-| RF-31 | Carrinho deve expirar/limpar após finalização bem-sucedida do pedido | 🔵 |
+| RF-31 | Carrinho deve expirar/limpar após finalização bem-sucedida do pedido | 🟢 |
 
 ### 3.4 Módulo de Pedidos (Orders)
 
@@ -181,7 +181,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 
 | ID | Requisito | Status |
 | --- | --- | --- |
-| RF-46 | O sistema deve simular a etapa de pagamento no fluxo de checkout, sem processar transação financeira real | 🔵 |
+| RF-46 | O sistema deve simular a etapa de pagamento no fluxo de checkout, sem processar transação financeira real | 🟢 |
 | RF-47 | O sistema deve integrar um gateway de pagamento real (ex.: Stripe) para processar cobranças de verdade | 🔵 |
 | RF-48 | O sistema **nunca** deve armazenar dados sensíveis de cartão (PAN, CVV) no próprio banco — toda tokenização deve ocorrer no gateway (escopo PCI-DSS minimizado) | 🔵 |
 | RF-49 | O sistema deve registrar o resultado do pagamento (`PAID`, `FAILED`, `PENDING`) vinculado ao `Order`, independente do gateway usado | 🔵 |
@@ -278,7 +278,7 @@ Então a UI reverte para o valor anterior (rollback)
 E uma notificação de erro é exibida
 ```
 
-### US-05 — Finalizar pedido 🔵
+### US-05 — Finalizar pedido 🟢
 
 **Como** cliente, **eu quero** finalizar meu carrinho como um pedido, **para que** a hamburgueria comece a prepará-lo.
 
@@ -307,7 +307,7 @@ Quando um usuário não-ADMIN tenta a mesma ação
 Então a API retorna 403 Forbidden
 ```
 
-### US-07 — Administrador gerencia status de pedidos 🔵
+### US-07 — Administrador gerencia status de pedidos 🟢
 
 **Como** administrador, **eu quero** alterar o status de um pedido, **para que** o cliente saiba o andamento.
 
@@ -318,7 +318,7 @@ Então a transição é validada contra a máquina de estados permitida
 E a alteração é refletida na listagem em tempo real (revalidação de query)
 ```
 
-### US-08 — Cliente acompanha pedido 🔵
+### US-08 — Cliente acompanha pedido 🟢
 
 **Como** cliente, **eu quero** ver o status atual do meu pedido, **para que** eu saiba quando retirar/receber.
 
