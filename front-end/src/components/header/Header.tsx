@@ -33,7 +33,6 @@ export const Header = () => {
 
   // Quando deslogar o usuário
   const handleLogout = useCallback(async () => {
-    toast('saindo...');
     try {
       // quando eu deslogar, remova o usuário e a lista de CartItems (identificados pelas queryKeys)
       await userLogOut();
@@ -42,7 +41,6 @@ export const Header = () => {
     } catch {
       toast.error('Erro ao sair. Tente novamente.');
     }
-    await new Promise((resolve) => setTimeout(resolve, 4000));
     toast.success('Usuário deslogado');
     navigate('/login');
   }, [navigate, queryClient]);
