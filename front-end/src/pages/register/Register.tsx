@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useState } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { FcGoogle } from 'react-icons/fc';
@@ -14,11 +15,19 @@ import { ApiError } from '../../shared/services/api/ApiExceptions';
 import { RegisterDate } from '../../shared/services/api/register/Register';
 import { resolveApiErrorMessage } from '../../shared/utils/apiErrorMessage';
 import { displayStrongPassword } from '../../shared/utils/Utils';
+import { firebaseAuthSignOut, signInWithGooglePopup } from '../../shared/config/firebase';
+import { GoogleLoginDate } from '../../shared/services/api/login/googleLogin';
+import { queryKeys } from '../../constant/queryKeys';
 
 export const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
+  // estado local
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [backendError, setBackendError] = useState<string | null>(null);
+
+  const queryClient = useQueryClient();
 
   const navigate = useNavigate();
   const {
@@ -37,6 +46,7 @@ export const Register = () => {
 
   const onSubmit: SubmitHandler<registerInput> = async (data) => {
     setIsLoading(true);
+    setBackendError(null);
     try {
       await RegisterDate.create({
         name: data.name,
@@ -63,6 +73,44 @@ export const Register = () => {
     }
   };
 
+  // Fluxo de login com Google (popup)
+  const handleGoogleLogin = useCallback(async () => {
+    setIsGoogleLoading(true);
+    setBackendError(null);
+    try {
+      const googleCredential = await signInWithGooglePopup();
+      const idToken =
+        typeof googleCredential === 'string'
+          ? googleCredential
+          : await googleCredential.user.getIdToken();
+      const result = await GoogleLoginDate.create({ idToken });
+
+      if (result instanceof ApiError) {
+        if (result.statusCode === 409) {
+          setBackendError('Usuário já cadastrado');
+          return;
+        } else if (result.statusCode === 401) {
+          setBackendError('Não foi possível confirmar sua conta Google. Tente novamente');
+          return;
+        } else {
+          setBackendError(result.message);
+          return;
+        }
+      }
+
+      toast('Login realizado');
+      queryClient.setQueryData(queryKeys.me, result.user);
+      reset();
+      navigate('/home');
+    } catch (err) {
+      console.error('[GoogleLogin] Erro no fluxo de popup:', err);
+      setBackendError('Ocorreu um erro inesperado. Tente novamente.');
+    } finally {
+      // Limpa sessão do Firebase no cliente — sessão real é o cookie do backend
+      await firebaseAuthSignOut();
+      setIsGoogleLoading(false);
+    }
+  }, [navigate, reset, queryClient]);
   // manipula os views da senha e confirmar senha
   const togglePasswordVisibility = useCallback(() => {
     setShowPassword((prev) => !prev);
@@ -124,9 +172,9 @@ export const Register = () => {
           {/* só aparece quando o usuário começa a digitar */}
           {passwordValue && (
             <div className="mt-1.5 flex items-center gap-1 px-0.5">
-              {strength.bars.map((active, i) => (
+              {strength.bars.map((active) => (
                 <div
-                  key={i}
+                  key={active}
                   className="h-0.5 flex-1 rounded-full transition-all duration-300"
                   style={{
                     background: active ? strength.color : 'rgba(255,255,255,0.1)',
@@ -142,6 +190,11 @@ export const Register = () => {
               {errors.password.message}
             </p>
           )}
+          {backendError && (
+                <p role="alert" className="text-left text-sm font-bold text-red-500">
+                  {backendError}
+                </p>
+              )}
           <div className="relative flex flex-col gap-2">
             {/* div campos formulário */}
             {/* confirmar senha */}
@@ -196,9 +249,10 @@ export const Register = () => {
               <div className="flex flex-col gap-2">
                 <Button
                   type="button"
-                  title="Registrar com Google"
+                  title={isGoogleLoading ? 'Conectando...' : 'Entrar com Google'}
                   colorVariation="bgGoogleVariation"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isGoogleLoading}
+                  onClick={handleGoogleLogin}
                 >
                   <FcGoogle size={ICON_CONFIG.mxSize} />
                 </Button>

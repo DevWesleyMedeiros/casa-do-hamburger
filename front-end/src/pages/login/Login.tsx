@@ -223,7 +223,7 @@ export const Login = () => {
               <span className="text-sm">ou</span>
               <div className="h-px w-full border-[0.5px] border-white/10" />
             </div>
-
+            {/* adicionar também login Google na register page */}
             <Button
               type="button"
               title={isGoogleLoading ? 'Conectando...' : 'Entrar com Google'}
