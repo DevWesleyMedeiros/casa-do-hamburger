@@ -87,18 +87,22 @@ export const Cart = () => {
         }
       }}
     >
-      <SheetContent side="right" className="bg-brand-amber flex w-73.75 flex-col border-none">
+      <SheetContent
+        side="right"
+        className="bg-brand-amber flex w-73.75 flex-col overflow-scroll border-none"
+      >
         <SheetHeader className="text-brand-dark flex-row items-center justify-between font-bold uppercase">
           <SheetTitle>Meu carrinho</SheetTitle>
         </SheetHeader>
-
         <div className="mx-3 flex flex-1 flex-col gap-2.5">
-          {isLoading ? (
+          {isLoading && (
             <p className="text-brand-dark animate-pulse text-center text-sm">Carregando...</p>
-          ) : cartItems.length === 0 ? (
-            <p className="text-brand-dark text-center text-sm">Seu carrinho está vazio.</p>
-          ) : (
-            cartItems.map((item) => (
+          )}
+          <div>
+            {cartItems.length === 0 && (
+              <p className="text-brand-dark text-center text-sm">Seu carrinho está vazio.</p>
+            )}
+            {cartItems.map((item) => (
               <CartItem
                 key={item.id}
                 id={item.id}
@@ -108,8 +112,8 @@ export const Cart = () => {
                 images={item.product.images ?? null}
                 quantity={item.quantity}
               />
-            ))
-          )}
+            ))}
+          </div>
         </div>
 
         <div className="border-brand-dark/20 mx-5 my-3 flex items-center justify-between border-t pt-3">
