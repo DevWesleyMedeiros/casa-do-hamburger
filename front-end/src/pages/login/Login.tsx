@@ -123,11 +123,13 @@ export const Login = () => {
     >
       <div className="flex flex-col items-center gap-2 rounded-xl border-[0.5px] border-white/13 p-7 shadow-2xl shadow-black/40">
         <Link to="/home">
-          <img
-            src="./assetsImages/logo-casa-do-hamburguer.png"
-            alt="logo da hamburgeria"
-            className="mb-4"
-          />
+          <div className="h-21.5 w-25">
+            <img
+              src="./assetsImages/logo-casa-do-hamburguer.png"
+              alt="logo da hamburgeria"
+              className="mb-4"
+            />
+          </div>
         </Link>
 
         <div className="w-full rounded-2xl border border-white/10 bg-[#1b1a16] px-4 py-5">

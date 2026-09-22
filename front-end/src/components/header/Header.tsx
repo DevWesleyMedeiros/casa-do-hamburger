@@ -61,9 +61,11 @@ export const Header = () => {
         {/* resto do header continua igual */}
       </div>
       <div className="mx-auto flex w-full items-center justify-between p-3 md:w-184.25 md:p-0">
-        <Link to="/">
-          <img src="./assetsImages/logo-casa-do-hamburguer.png" alt="Logo link caso do Hamburger" />
-        </Link>
+        <div className="h-21.5 w-25">
+          <Link to="/">
+            <img src="./assetsImages/logo-casa-do-hamburguer.png" alt="Logo caso do Hamburger" />
+          </Link>
+        </div>
 
         {user ? (
           <div className="flex items-center gap-6 text-white">
