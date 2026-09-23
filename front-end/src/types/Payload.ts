@@ -14,13 +14,14 @@ export interface RegisterPayloadInterface {
   cep: string;
 }
 
-// UserLogin bate exatamente com o UserDTO retornado pelo backend: id, name, email, admin
+// UserLogin bate exatamente com o UserDTO retornado pelo backend: id, name, email, admin e provider
 // O backend não retorna mais 'cep' no DTO de perfil do usuário
 export type UserLogin = {
   id: string;
   name: string;
   email: string;
   admin: boolean;
+  provider: string;
 };
 
 export type UserContextTypes = {

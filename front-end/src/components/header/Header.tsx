@@ -12,6 +12,7 @@ import { useCartUIStore } from '../../shared/stores';
 import { useNewProductUIModalStore } from '../../shared/stores/useNewProductUIModal';
 import { Cart } from '../cart/Cart';
 import { NewProductModal } from '../newProductModal/NewProductModal';
+import { AvatarUpload } from '../AvatarUpload';
 
 export const Header = () => {
   const { data: user } = useMe();
@@ -121,6 +122,15 @@ export const Header = () => {
                 onClick={handleLogout}
               />
             </div>
+            {/* icone do avatar pelo provider local */}
+            {user.provider === 'LOCAL' && <AvatarUpload name={user.name}></AvatarUpload>}
+            {/* icone do avatar pelo provider Google */}
+            {user.provider === 'GOOGLE' && (
+              <AvatarUpload
+                name={user.name}
+                imageUrl={user.provider === 'GOOGLE' ? user.googleImageUrl : null}
+              ></AvatarUpload>
+            )}
           </div>
         ) : (
           <Link to="/login">
