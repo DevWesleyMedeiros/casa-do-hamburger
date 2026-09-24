@@ -1,13 +1,19 @@
-import { useRef, useState, useEffect, type ChangeEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 
 interface AvatarUploadProps {
-  name: string;
-  imageUrl?: string | null; // vem do Google SDK, se existir
-  onImageSelect?: (file: File) => void; // callback pra quando você criar a persistência
+  name?: string;
+  profileAvatarUrl?: string | null; // vem do Google SDK, se existir
+  onAvatarSelect?: (file: File) => void; // callback pra quando você criar a persistência
 }
-export const AvatarUpload = ({ name, imageUrl, onImageSelect }: AvatarUploadProps) => {
+export const AvatarUpload = ({ name, profileAvatarUrl, onAvatarSelect }: AvatarUploadProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(imageUrl ?? null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(profileAvatarUrl ?? null);
+
+  useEffect(() => {
+    if (profileAvatarUrl) {
+      setPreviewUrl(profileAvatarUrl);
+    }
+  }, [profileAvatarUrl]);
 
   // Libera a memória do object URL quando ele deixa de ser usado
   useEffect(() => {
@@ -41,7 +47,7 @@ export const AvatarUpload = ({ name, imageUrl, onImageSelect }: AvatarUploadProp
 
     const objectUrl = URL.createObjectURL(file);
     setPreviewUrl(objectUrl);
-    onImageSelect?.(file); // aqui você vai plugar o upload real depois
+    onAvatarSelect?.(file); // aqui você vai plugar o upload real depois
   }
 
   return (
@@ -57,7 +63,7 @@ export const AvatarUpload = ({ name, imageUrl, onImageSelect }: AvatarUploadProp
         {previewUrl ? (
           <img src={previewUrl} alt={`Avatar de ${name}`} className="h-full w-full object-cover" />
         ) : (
-          name.charAt(0).toUpperCase()
+          name?.charAt?.(0).toUpperCase()
         )}
       </div>
 
