@@ -16,6 +16,26 @@ export const uploadProductImage = multer({
     return cb(null, true);
   },
 }).single('image');
+
+// função para multipartformdate do avatar
+/**
+ * função para upload de avatar do usuário
+ * @param req requisição
+ * @param file arquivo do upload
+ * @param cb callback para verificar o arquivo
+ * @returns void
+ */
+export const uploadAvatarImg = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: MAX_FILE_SIZE },
+  fileFilter: (_req, file, cb) => {
+    if (!ACCEPTED_MIME_TYPES.has(file.mimetype)) {
+      return cb(new AppError(400, 'Formato de imagem inválido. Use PNG, JPG ou WEBP'));
+    }
+    return cb(null, true);
+  },
+}).single('avatar');
+
 export const validateImageMagicBytes = async (req: Request, _res: Response, next: NextFunction) => {
   try {
     if (!req.file) return next();
