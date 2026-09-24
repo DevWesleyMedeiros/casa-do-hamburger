@@ -19,6 +19,7 @@ export const uploadImageToCloudinary = (file: Express.Multer.File): Promise<Uplo
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       { folder: 'casa-do-hamburguer/products', resource_type: 'image' },
+      // { folder: 'casa-do-hamburguer/avatars', resource_type: 'image' }
       (error, result) => {
         if (error || !result) {
           const rejectionReason =

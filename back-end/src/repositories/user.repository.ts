@@ -76,4 +76,26 @@ export const userRepository = {
       },
     });
   },
+
+  /**
+   * função que atualiza o avatar do usuário
+   * @param userId id do usuário
+   * @param data dados do avatar
+   * @returns usuário atualizado
+   */
+  async updateAvatar(
+    userId: string,
+    data: {
+      avatarUrl: string;
+      avatarKey: string;
+    },
+  ) {
+    return prisma.user.update({
+      where: { id: userId },
+      data: {
+        avatarUrl: data.avatarUrl,
+        avatarKey: data.avatarKey,
+      },
+    });
+  },
 };
