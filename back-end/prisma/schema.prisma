@@ -21,6 +21,11 @@ model User {
   googleId String? // duas constas não podem compartilhar o mesmo uid e nullable porque não tem esse campo preenchido contas via google
   firebaseUid String? @unique  // cada usuário do firebase tem um uid único
 
+  // url para os avatares locias e google. 
+// RN-AVATAR-01 User.avatarUrl contém a URL da imagem de perfil atual. LOCAL: URL gerada pelo Cloudinary. GOOGLE: URL proveniente da identidade Google verificada pelo Firebase.
+  avatarUrl String? // local será servida via infra Claudinary
+  avatarKey String? // A propriedade avatarKey serve para deletar o avatar do firebase quendo houver uma troca de usuário
+
   emailVerifiedAt DateTime?
   emailVerified Boolean @default(false)
   emailVerificationTokens  EmailVerificationToken[]
