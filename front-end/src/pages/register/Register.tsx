@@ -124,8 +124,8 @@ export const Register = () => {
       className="bg-brand-dark flex h-screen flex-col items-center justify-center"
       onSubmit={handleSubmit(onSubmit)} // ← handleSubmit valida antes de chamar onSubmit
     >
-      <div className="flex flex-col items-center justify-center rounded-xl border-[0.5px] border-white/13 px-5 py-3">
-        <div className="justify-left third-level flex flex-col gap-1.5 rounded-2xl border-white/13 bg-[#1b1a16] px-5 py-4">
+      <div className="flex w-100 flex-col items-center justify-center rounded-xl border-[0.5px] border-white/13 px-5 py-3">
+        <div className="justify-left third-level flex w-full flex-col gap-1.5 rounded-2xl border-white/13 bg-[#1b1a16] px-5 py-4">
           {/* nome */}
           <Input placeholder="Seu nome" type="text" {...register('name')} disabled={isSubmitting} />
           {errors.name && (
@@ -191,10 +191,10 @@ export const Register = () => {
             </p>
           )}
           {backendError && (
-                <p role="alert" className="text-left text-sm font-bold text-red-500">
-                  {backendError}
-                </p>
-              )}
+            <p role="alert" className="text-left text-sm font-bold text-red-500">
+              {backendError}
+            </p>
+          )}
           <div className="relative flex flex-col gap-2">
             {/* div campos formulário */}
             {/* confirmar senha */}

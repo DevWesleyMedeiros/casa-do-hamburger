@@ -121,7 +121,7 @@ export const Login = () => {
       onSubmit={handleSubmit(onSubmit)} // ← Zod valida os campos antes de onSubmit ser chamado
       noValidate
     >
-      <div className="flex flex-col items-center gap-2 rounded-xl border-[0.5px] border-white/13 p-7 shadow-2xl shadow-black/40">
+      <div className="flex w-100 flex-col items-center gap-2 rounded-xl border-[0.5px] border-white/13 p-7 shadow-2xl shadow-black/40">
         <Link to="/home">
           <div className="h-21.5 w-25">
             <img
@@ -132,7 +132,7 @@ export const Login = () => {
           </div>
         </Link>
 
-        <div className="w-full rounded-2xl border border-white/10 bg-[#1b1a16] px-4 py-5">
+        <div className="w-full rounded-2xl border border-white/10 px-4 py-5">
           <div className="mb-5">
             <p className="text-center font-bold text-[#F2DAAC]">Bem vindo à Casa do Hamburguer!!</p>
           </div>
