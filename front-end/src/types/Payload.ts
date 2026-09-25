@@ -16,12 +16,14 @@ export interface RegisterPayloadInterface {
 
 // UserLogin bate exatamente com o UserDTO retornado pelo backend: id, name, email, admin e provider
 // O backend não retorna mais 'cep' no DTO de perfil do usuário
+export type AuthProvider = 'LOCAL' | 'GOOGLE';
 export type UserLogin = {
   id: string;
   name: string;
   email: string;
   admin: boolean;
-  provider: string;
+  provider: AuthProvider;
+  avatarUrl: string | null;
 };
 
 export type UserContextTypes = {
