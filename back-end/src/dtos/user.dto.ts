@@ -14,6 +14,12 @@ import type { User } from '../../generated/prisma/index.js';
 // só o que é necessário para a sessão é extraído de User e passado para UserDTO
 export type UserDTO = Pick<User, 'id' | 'name' | 'email' | 'admin' | 'provider' | 'avatarUrl'>;
 
+/**
+ * @description Converte um usuário (vindo das tabelas/models) em um DTO de perfil.
+ *
+ * @param user do usuário a ser convertido.
+ * @returns Um objeto DTO de perfil do usuário.
+ */
 export const toUserDTO = (user: User): UserDTO => {
   return {
     id: user.id,

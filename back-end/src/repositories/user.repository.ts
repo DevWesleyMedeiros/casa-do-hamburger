@@ -78,9 +78,9 @@ export const userRepository = {
   },
 
   /**
-   * função que atualiza o avatar do usuário
+   * @description função que atualiza o avatar do usuário
    * @param userId id do usuário
-   * @param data dados do avatar
+   * @param data objeto com os dados atualização do avatar
    * @returns usuário atualizado
    */
   async updateAvatar(

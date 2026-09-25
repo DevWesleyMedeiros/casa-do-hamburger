@@ -80,10 +80,13 @@ export const googleAuthService = {
         ...(decoded.email_verified === true ? { firebaseUid: decoded.uid } : {}),
       },
       create: {
+        // decodifico as informações do usuário do token
+        // Ex.: name: decoded['name'] ?? decoded.email.split('@')[0] ?? 'Usuário Google',
         // Se não existir, cria a conta Google diretamente
         name: decoded['name'] ?? decoded.email.split('@')[0] ?? 'Usuário Google',
         email: decoded.email,
         firebaseUid: decoded.uid,
+        avatarUrl: decoded['photo_url'] ?? '',
         emailVerified: decoded.email_verified ?? false,
         emailVerifiedAt: decoded.email_verified ? new Date() : null,
         provider: 'GOOGLE',

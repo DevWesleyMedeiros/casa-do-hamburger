@@ -36,6 +36,13 @@ export const uploadAvatarImg = multer({
   },
 }).single('avatar');
 
+/**
+ * @description função para validar o arquivo de imagem
+ * @param req requisição
+ * @param _res resposta
+ * @param next próxima função do middleware
+ * @returns void
+ */
 export const validateImageMagicBytes = async (req: Request, _res: Response, next: NextFunction) => {
   try {
     if (!req.file) return next();
