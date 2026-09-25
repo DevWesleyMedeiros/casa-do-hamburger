@@ -6,8 +6,9 @@ import { type UserLogin } from '../../../../types/Payload';
 // O TanStack Query captura isso sozinho e popula isError/error.
 // tanktack já lida com try e catch nas requisições
 export const getAuth = {
-  getMe: async (): Promise<UserLogin | undefined> => {
-    const response = await api.get('/auth/me');
-    return response.data.user ?? [];
+  getMe: async (): Promise<UserLogin> => {
+    const response = await api.get<{ user: UserLogin }>('/auth/me');
+
+    return response.data.user;
   },
 };

@@ -13,7 +13,6 @@ import { useNewProductUIModalStore } from '../../shared/stores/useNewProductUIMo
 import { Cart } from '../cart/Cart';
 import { NewProductModal } from '../newProductModal/NewProductModal';
 import { AvatarUpload } from '../AvatarUpload';
-import { getGoogleProfilePhoto } from '../../shared/config/firebase';
 
 export const Header = () => {
   const { data: user } = useMe();
@@ -33,13 +32,6 @@ export const Header = () => {
     retry: false,
   });
 
-  const { data: googleAvatarUrl } = useQuery({
-    queryKey: ['googleAvatarUrl', user?.id],
-    queryFn: getGoogleProfilePhoto,
-    enabled: user?.provider === 'GOOGLE',
-    staleTime: Infinity, // foto não muda a cada request
-    retry: false,
-  });
   // Quando deslogar o usuário
   const handleLogout = useCallback(async () => {
     try {
@@ -133,7 +125,7 @@ export const Header = () => {
             {/* icone do avatar pelo provider local */}
             {user.provider === 'LOCAL' && <AvatarUpload name={user.name}></AvatarUpload>}
             {/* icone do avatar pelo provider Google */}
-            {user.provider === 'GOOGLE' && <AvatarUpload profileAvatarUrl={googleAvatarUrl} />}
+            {user.provider === 'GOOGLE' && <AvatarUpload avatarUrl={user?.avatarUrl} />}
           </div>
         ) : (
           <Link to="/login">

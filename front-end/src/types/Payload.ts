@@ -14,7 +14,7 @@ export interface RegisterPayloadInterface {
   cep: string;
 }
 
-// UserLogin bate exatamente com o UserDTO retornado pelo backend: id, name, email, admin e provider
+// UserLogin bate exatamente com o UserDTO retornado pelo backend: id, name, email, admin, provider e avatarUrl
 // O backend não retorna mais 'cep' no DTO de perfil do usuário
 export type AuthProvider = 'LOCAL' | 'GOOGLE';
 export type UserLogin = {
