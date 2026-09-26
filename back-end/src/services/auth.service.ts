@@ -23,6 +23,12 @@ import { AppError } from '../errors/AppError.js';
 import { userRepository } from '../repositories/user.repository.js';
 
 export const authService = {
+  /**
+   * @description service login é um método para realizar o login do usuário
+   * @param email email do usuário
+   * @param password senha do usuário
+   * @returns um objeto com as informações do usuário logado
+   */
   login: async (email: string, password: string) => {
     const user = await userRepository.findByEmail(email);
 
@@ -56,6 +62,14 @@ export const authService = {
     };
   },
 
+  /**
+   * @description service register é um método para registrar um usuário
+   * @param name nome do usuário
+   * @param email email do usuário
+   * @param password senha do usuário
+   * @param cep cep do usuário
+   * @returns um objeto com as informações do usuário cadastrado
+   */
   register: async (name: string, email: string, password: string, cep: string) => {
     const existing = await userRepository.findByEmail(email);
 

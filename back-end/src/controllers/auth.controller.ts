@@ -23,6 +23,12 @@ import { authService } from '../services/auth.service.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
 export const authController = {
+  /**
+   * @description controller login é um método para realizar o login do usuário
+   * @param email email do usuário
+   * @param password senha do usuário
+   * @returns um objeto com as informações do usuário logado em um cookie
+   */
   login: asyncHandler(async (req: Request, res: Response) => {
     const { email, password } = req.body;
     if (!email || !password) {
@@ -43,6 +49,14 @@ export const authController = {
     res.status(200).json({ user: toUserDTO(user) });
   }),
 
+  /**
+   * @description controller register é um método para registrar um usuário
+   * @param name nome do usuário
+   * @param email email do usuário
+   * @param password senha do usuário
+   * @param cep cep do usuário
+   * @returns um objeto com as informações do usuário registrado
+   */
   register: asyncHandler(async (req: Request, res: Response) => {
     const { name, email, password, cep } = req.body;
     const user = await authService.register(name, email, password, cep);
@@ -50,6 +64,12 @@ export const authController = {
   }),
 
   // quando acesso a rota "/me" o payload jwt separado do perfil
+  /**
+   * @description controller userAuth é um método para obter as informações do usuário autenticado
+   * @returns um objeto com as informações do usuário autenticado
+   * @param req requisição
+   * @param res resposta
+   */
   userAuth: asyncHandler(async (req: Request, res: Response) => {
     const jwtPayload = req.user as { id: string; admin: boolean }; // vem do token: só { id, admin }
 
@@ -65,6 +85,10 @@ export const authController = {
     res.status(200).json({ user: toUserDTO(user) });
   }),
 
+  /**
+   * @description controller logout é um método para realizar o logout do usuário
+   * @returns uma objeto com uma mensagem de logout com sucesso
+   */
   logout: asyncHandler(async (_req: Request, res: Response) => {
     res.clearCookie('user_section');
     res.status(200).json({ message: 'Logout realizado com sucesso' });
