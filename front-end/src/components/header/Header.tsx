@@ -123,9 +123,13 @@ export const Header = () => {
               />
             </div>
             {/* icone do avatar pelo provider local */}
-            {user.provider === 'LOCAL' && <AvatarUpload name={user.name}></AvatarUpload>}
+            {user.provider === 'LOCAL' && (
+              <AvatarUpload name={user.name} avatarUrl={user?.avatarUrl}></AvatarUpload>
+            )}
             {/* icone do avatar pelo provider Google */}
-            {user.provider === 'GOOGLE' && <AvatarUpload avatarUrl={user?.avatarUrl} />}
+            {user.provider === 'GOOGLE' && (
+              <AvatarUpload name={user.name} avatarUrl={user?.avatarUrl}></AvatarUpload>
+            )}
           </div>
         ) : (
           <Link to="/login">
