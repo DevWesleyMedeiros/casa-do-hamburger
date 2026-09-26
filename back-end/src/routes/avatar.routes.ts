@@ -1,8 +1,7 @@
 import { Router } from 'express';
 import { requireAuth } from '../middlewares/authMiddlewares.js';
 import { avatarController } from '../controllers/avatar.controller.js';
-import { uploadAvatarImg } from '../middlewares/upload.js';
-import { validateImageMagicBytes } from '../middlewares/upload.js';
+import { uploadAvatarImg, validateImageMagicBytes } from '../middlewares/upload.js';
 
 const router = Router();
 

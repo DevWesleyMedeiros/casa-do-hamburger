@@ -3,10 +3,11 @@ import { uploadImageToCloudinary } from './uploads/cloudinary.service.js';
 import { AppError } from '../errors/AppError.js';
 import type { CreateProductInput } from '../schemas/products.schemas.js';
 
+const PRODUCTS_CLOUDINARY_FOLDER = 'casa-do-hamburguer/products';
 export const productService = {
   async createProduct(data: CreateProductInput, file?: Express.Multer.File) {
     if (!file) throw new AppError(400, 'Imagem do produto obrigatório');
-    const image = await uploadImageToCloudinary(file);
+    const image = await uploadImageToCloudinary(file, PRODUCTS_CLOUDINARY_FOLDER);
     return productsRepository.createWithImage({ data, image });
   },
 

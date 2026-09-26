@@ -18,12 +18,16 @@ interface UploadsResult {
 /**
  * @description função para fazer upload de imagem para o cloudinary
  * @param file objeto com o metadados do arquivo do upload
- * @returns promise com o resultado do upload 
+ * @param folder caminho/pasta do Cloudinary onde o arquivo será salvo (ex.: 'casa-do-hamburguer/products', 'casa-do-hamburguer/avatars')
+ * @returns promise com o resultado do upload
  */
-export const uploadImageToCloudinary = (file: Express.Multer.File): Promise<UploadsResult> => {
+export const uploadImageToCloudinary = (
+  file: Express.Multer.File,
+  folder: string,
+): Promise<UploadsResult> => {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
-      { folder: 'casa-do-hamburguer/products', resource_type: 'image' },
+      { folder, resource_type: 'image' },
       (error, result) => {
         if (error || !result) {
           const rejectionReason =
