@@ -502,12 +502,12 @@ Abaixo estão algumas telas representativas da experiência atual da aplicação
 
 | Tela                                                | Visual                                                                                      |
 | --------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| Home sem autenticação (Hamburguers)                              | ![Home pública](front-end/public/screenshots/non-admin-login-hamburguers-homepage.png)                           |
+| Home sem autenticação (Hamburguers)                 | ![Home pública](front-end/public/screenshots/non-admin-login-hamburguers-homepage.png)                 |
 
 | Home sem autenticação (bebidas) | ![Home pública](front-end/public/screenshots/non-login-bebidas-homepage.png)                           |
 | Home sem autenticação (porções) | ![Home pública](front-end/public/screenshots/non-login-porcoes-homepage.png)                           |
 
-| Home com usuário autenticado (hamburguers)                      | ![Home autenticada](front-end/public/screenshots/admin-login-hamburguers-homepage.png)                        |
+| Home com usuário autenticado (hamburguers)              | ![Home autenticada](front-end/public/screenshots/admin-login-hamburguers-homepage.png)                        |
 | Home com usuário autentificado (bebidas) | ![Home autenticada](front-end/public/screenshots/admin-login-bebidas-homepage.png)                        |
 | Home com usuário autentificado (porções) | ![Home autenticada](front-end/public/screenshots/admin-login-porcoes-homepage.png)                        |
 
@@ -528,7 +528,7 @@ O controle dos pedidos é feito pelo administrador do sistema
 
 | Tela                    | Visual                                                                      |
 | ----------------------- | --------------------------------------------------------------------------- |
-| Gestão de pedidos (pendentes)   | ![Pedidos ](front-end/public/screenshots/cardPedidos-pendentes.png)                    |
+| Gestão de pedidos (pendentes)   | ![Pedidos ](front-end/public/screenshots/cardPedidos-pendentes.png)                      |
 
 | Gestão de pedidos (preparando)  | ![Pedidos](front-end/public/screenshots/cardPedidos-sem-pedidos-preparando.png)                    |
 
