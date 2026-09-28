@@ -66,6 +66,12 @@ export const userRepository = {
     });
   },
   // RF-54 + RN-AUTH-11: vincula uma conta LOCAL existente a uma identidade Google, SEM criar usuário novo. Só deve ser chamado depois que service já confirmou email_verified=true (o gate de segurança fica no service, não aqui — este método só persiste).
+  /**
+   * @description vincula uma conta LOCAL existente a uma identidade Google, SEM criar usuário novo.
+   * @param userId id do usuário
+   * @param firebaseUid uid do firebase (extraído do Firebase ID Token)
+   * @returns usuário atualizado
+   */
   async linkGoogleIdentity(userId: string, firebaseUid: string) {
     return prisma.user.update({
       where: { id: userId },
@@ -96,6 +102,20 @@ export const userRepository = {
         avatarUrl: data.avatarUrl,
         avatarKey: data.avatarKey,
       },
+    });
+  },
+  /**
+   * @description Sincroniza o avatar vindo do Google (RN-AVATAR-01).
+   * Só deve ser chamado se o usuário NÃO tiver avatar próprio (avatarKey null);
+   * regra aplicada no service.
+   * @param userId id do usuário
+   * @param avatarUrl URL já validada da foto do Google
+   * @returns usuário atualizado
+   */
+  async updateGoogleAvatar(userId: string, avatarUrl: string) {
+    return prisma.user.update({
+      where: { id: userId },
+      data: { avatarUrl },
     });
   },
 };
