@@ -16,7 +16,6 @@ export type UserDTO = Pick<User, 'id' | 'name' | 'email' | 'admin' | 'provider' 
 
 /**
  * @description Converte um usuário (vindo das tabelas/models) em um DTO de perfil.
- *
  * @param user do usuário a ser convertido.
  * @returns Um objeto DTO de perfil do usuário.
  */
