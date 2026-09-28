@@ -128,7 +128,10 @@ export const Header = () => {
             )}
             {/* icone do avatar pelo provider Google */}
             {user.provider === 'GOOGLE' && (
-              <AvatarUpload name={user.name} avatarUrl={user?.avatarUrl}></AvatarUpload>
+              <AvatarUpload
+                name={user.name.split(' ')[0]}
+                avatarUrl={user?.avatarUrl}
+              ></AvatarUpload>
             )}
           </div>
         ) : (
