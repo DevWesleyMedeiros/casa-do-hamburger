@@ -98,7 +98,7 @@ model Order{
   status OrderStatus @default(PENDING)
   total Int @default(0)
   items OrderItem[]
-  payment Payment[] // 1:0..1 (RF-46, pagamento sempre simulado por ora)
+  payment Payment[] // (RF-46, pagamento sempre simulado por ora)
   deletedAt DateTime?
   createdAt DateTime    @default(now())
   updatedAt DateTime    @default(now()) @updatedAt
