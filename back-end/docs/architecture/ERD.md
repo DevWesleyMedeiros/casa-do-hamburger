@@ -84,6 +84,7 @@ FAILED FAILED
 
   "Order" {
     String id "🗝️"
+    String customerName 
     OrderStatus status 
     Int total 
     DateTime deletedAt "❓"

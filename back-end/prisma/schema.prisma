@@ -94,6 +94,7 @@ model CartItem {
 model Order{
   id String @id @default(uuid())
   userId String
+  customerName String // snapshot do User.name no momento do pedido
   user User @relation(fields: [userId], references: [id])
   status OrderStatus @default(PENDING)
   total Int @default(0)
