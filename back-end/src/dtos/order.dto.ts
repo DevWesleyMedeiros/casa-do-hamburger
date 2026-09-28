@@ -49,6 +49,7 @@ export interface PaymentDTO {
  */
 export interface OrderResponseDTO {
   id: string;
+  customerName: string;
   status: Order['status'];
   total: number; // centavos — mesma regra de unitPrice/subtotal
   items: OrderItemDTO[];
@@ -97,6 +98,11 @@ export const toOrderItemDTO = (item: OrderItem): OrderItemDTO => {
  * Extraída por simetria com toOrderItemDTO — mesmo motivo: evitar duplicar
  * a lógica de "quais campos do Payment saem" em mais de um lugar do código.
  */
+/**
+ * @description Serializa um único Payment do Prisma para PaymentDTO.
+ * @param payment O pagamento a ser serializado.
+ * @returns O DTO correspondente ao pagamento.
+ */
 export const toPaymentDTO = (payment: Payment): PaymentDTO => {
   return {
     status: payment.status,
@@ -113,9 +119,16 @@ export const toPaymentDTO = (payment: Payment): PaymentDTO => {
  * manualmente — se um campo mudar em qualquer um dos DTOs, muda em um
  * único lugar.
  */
+
+/**
+ * @description Serializa um DTO de Order (com relações carregadas) no DTO final.
+ * @param order O pedido a ser serializado.
+ * @returns O DTO correspondente ao pedido.
+ */
 export const toOrderDTO = (order: OrderWithRelation): OrderResponseDTO => {
   return {
     id: order.id,
+    customerName: order.customerName,
     status: order.status,
     total: order.total,
     items: order.items.map(toOrderItemDTO),

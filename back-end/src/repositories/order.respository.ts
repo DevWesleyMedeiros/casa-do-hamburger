@@ -1,5 +1,5 @@
-import { prisma } from '../db.js';
 import type { OrderStatus } from '../../generated/prisma/index.js';
+import { prisma } from '../db.js';
 
 // snapshot de order
 interface SnapshotItemInput {
@@ -27,8 +27,18 @@ export const OrderRepository = {
    * Cria o Order + OrderItems (snapshot) + Payment simulado + esvazia o carrinho, tudo em uma única transação atômica ($transaction) - (RN-ORDER-01, RN-CART-06,
    * US-05). Se qualquer etapa falhar, nada é persistido.
    */
+
+  /**
+   * @description Cria um pedido com seus itens, pagamentos e carrinho zerado.
+   * @param userId id do usuário.
+   * @param customerName Nome do cliente.
+   * @param total Total do pedido.
+   * @param items Os itens do pedido.
+   * @returns O pedido criado.
+   */
   async createOrderWithItems(params: {
     userId: string;
+    customerName: string;
     total: number;
     items: SnapshotItemInput[];
   }) {
@@ -36,6 +46,7 @@ export const OrderRepository = {
       const order = await tx.order.create({
         data: {
           userId: params.userId,
+          customerName: params.customerName,
           total: params.total,
           status: 'PENDING',
           items: { createMany: { data: params.items } },
@@ -88,6 +99,7 @@ export const OrderRepository = {
         product: {
           include: { images: { where: { isPrimary: true }, take: 1 } },
         },
+        user: { select: { name: true } },
       },
     });
   },

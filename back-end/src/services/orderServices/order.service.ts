@@ -37,6 +37,7 @@ export const OrderServiceItems = {
     const total = snapshotItems.reduce((sum, item) => sum + item.subtotal, 0);
     const order = await OrderRepository.createOrderWithItems({
       userId,
+      customerName: cartItems[0].user.name,
       total,
       items: snapshotItems,
     });

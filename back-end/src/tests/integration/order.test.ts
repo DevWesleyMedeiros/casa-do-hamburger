@@ -19,13 +19,14 @@ import {
 async function createAuthedUser(admin = false) {
   const fake: Faker = faker;
   const email = fake.internet.email();
+  const name = fake.person.fullName();
   const password = 'SenhaForte123!';
   // CEP FIXO válido que sempre passa na validação do schema (formato 00000-000)
   const cep = '01001-000';
 
   // Registra usuário com CEP (campo obrigatório no register do controller)
   const registerRes = await request(app).post('/auth/register').send({
-    name: fake.person.fullName(),
+    name,
     email,
     password,
     confirmPassword: password,
@@ -53,7 +54,7 @@ async function createAuthedUser(admin = false) {
     .map((value) => value.split(';', 1)[0])
     .join('; ');
 
-  return { email, cookie };
+  return { email, cookie, name };
 }
 async function seedProductAndCartItem(userCookie: string | undefined) {
   if (!userCookie) throw new Error('Cookie de autenticação inválido — login falhou');
@@ -91,13 +92,14 @@ describe('Order — checkout, IDOR e máquina de estados (RF-32 a 40)', () => {
   });
 
   it('cria um pedido a partir do carrinho, com snapshot e total recalculado no backend (RN-ORDER-01/04, RN-CART-06)', async () => {
-    const { cookie } = await createAuthedUser();
+    const { cookie, name } = await createAuthedUser();
     await seedProductAndCartItem(cookie);
 
     const res = await request(app).post('/orders').set('Cookie', cookie).send({ total: 1 }); // valor forjado pelo cliente — deve ser ignorado
 
     expect(res.statusCode).toBe(201);
     expect(res.body.status).toBe('PENDING');
+    expect(res.body.customerName).toBe(name);
     expect(res.body.total).toBe(2500);
     expect(res.body.items[0].productName).toBe('X-Burguer'); // snapshot, RN-ORDER-01
     expect(res.body.payment.status).toBe('SIMULATED');

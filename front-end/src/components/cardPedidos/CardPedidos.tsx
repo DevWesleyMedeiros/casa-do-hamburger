@@ -59,7 +59,7 @@ export const CardPedidos = ({ order, isAdmin = false, onStatusChange }: CardPedi
       <div className="mt-2 ml-3 flex flex-col">
         <div className="my-0.5 flex items-center gap-1">
           <UserRound size={ICON_CONFIG.mnSize} />
-          <span className="text-sm">{order.items[0]?.productName ?? 'Pedido'}</span>
+          <span className="text-sm">{order.customerName}</span>
         </div>
 
         <div className="my-1 flex items-center gap-1">

@@ -16,6 +16,7 @@ export interface OrderItem {
 // para OrderResponseDTO
 export interface Order {
   id: string;
+  customerName: string;
   status: OrderStatus;
   total: number;
   items: OrderItem[];
