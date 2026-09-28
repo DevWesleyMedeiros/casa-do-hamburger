@@ -11,6 +11,7 @@ import type { Order, OrderItem, Payment } from '../../generated/prisma/index.js'
  *   de OrderResponseDTO.items[], então o front já sabe a qual pedido pertence.
  *   Devolvê-lo de novo seria dado redundante inflando o payload sem uso real
  */
+
 export interface OrderItemDTO {
   id: string;
   productId: string | null;
@@ -72,6 +73,12 @@ type OrderWithRelation = Order & {
  * Extraída como função própria para ser reaproveitada tanto isoladamente
  * (ex.: endpoint que retorna um item específico) quanto dentro de
  * toOrderDTO — mantendo uma ÚNICA fonte de verdade para esse mapeamento (DRY).
+ */
+
+/**
+ * @description Serializa um único OrderItem do Prisma para OrderItemDTO.
+ * @param item O item de pedido a ser serializado.
+ * @returns O DTO correspondente ao item de pedido.
  */
 export const toOrderItemDTO = (item: OrderItem): OrderItemDTO => {
   return {
