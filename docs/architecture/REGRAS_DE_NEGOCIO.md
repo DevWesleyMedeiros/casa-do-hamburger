@@ -105,11 +105,12 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | RF-07 | O sistema deve impedir cadastro com e-mail já existente | 🟢 |
 | RF-08 | O sistema deve validar formato de e-mail e força mínima de senha no cadastro | 🟢 |
 | RF-09 | O sistema deve permitir recuperação de senha via e-mail (fluxo "esqueci minha senha") | 🟡 (forgot-password 🟢 / reset-password 🔴 bug — ver Changelog 1.7.0) |
-| RF-10 | O sistema deve permitir edição de dados de perfil (nome, e-mail, avatar) | 🔵 |
+| RF-10 | O sistema deve permitir edição de dados de perfil (nome, avatar) | 🟢 |
 | RF-11 | O sistema deve suportar renovação de token via refresh token (rotação de sessão) | 🔵 |
 | RF-12 | O sistema deve registrar tentativas de login falhas para fins de rate limiting sem persistência auditável | 🟢 |
 | RF-56 🆕 | O token de redefinição de senha deve ser de uso único e expirar 30 minutos após a emissão | 🟡 (lógica de expiração/hash correta; risco de token ser marcado usado mesmo sem a senha mudar, por causa do bug de `reset-password` — ver 1.7.0) |
 | RF-57 🆕 | Contas com `provider=GOOGLE` não podem solicitar redefinição de senha local (não possuem `passwordHash` — RN-AUTH-10); o sistema deve orientar o uso do login social nesse caso | 🟡 (checagem implementada no service; convenção `provider` local='local' vs check='GOOGLE' ainda sem enum formal; teste de integração correspondente falha por `providerId` inexistente no schema) |
+| RN-AVATAR-01 | O avatar do usuário autenticado pode ser definido/atualizado independentemente do provider. Avatares locais são persistidos via Cloudinary; contas Google podem utilizar a foto proveniente da identidade Google verificada. Quando o usuário possuir avatar próprio, ele deve ter prioridade sobre a foto do Google. | 🟢 |
 | RF-51 🆕 | O sistema deve permitir login/cadastro via **Google OAuth 2.0** ("Entrar com Google") como alternativa ao login local por e-mail/senha | 🟢 |
 | RF-52 🆕 | O backend deve verificar o `id_token` retornado pelo Google (assinatura, `aud`, `iss`, `exp`) antes de criar qualquer sessão — nunca confiar em dados de identidade enviados diretamente pelo frontend | 🟢 |
 | RF-53 🆕 | Contas criadas via Google devem ser persistidas com `provider=GOOGLE` e `password` nulo; contas locais mantêm `provider=LOCAL` | 🟢 |
@@ -152,7 +153,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | ID | Requisito | Status |
 | --- | --- | --- |
 | RF-32 | O sistema deve permitir converter um carrinho em um pedido (`Order`) | 🟢 |
-| RF-33 | Cada item do pedido (`OrderItem`) deve gravar uma **cópia (snapshot)** dos dados do produto no momento da compra (nome, preço, imagem) — *Snapshot Pattern* | 🟢 |
+| RF-33 | Cada item do pedido (`OrderItem`) deve gravar uma **cópia (snapshot)** dos dados do produto no momento da compra (nome, preço, imagem, customerName, quantity) — *Snapshot Pattern* | 🟢 |
 | RF-34 | Pedidos devem ter um campo de status: `PENDING`, `PREPARING`, `READY`, `DELIVERED`, `CANCELLED` | 🟢 |
 | RF-35 | Administradores devem poder visualizar todos os pedidos e alterar seu status | 🟢 |
 | RF-36 | Usuário deve poder visualizar apenas o histórico de seus próprios pedidos | 🟢 |
@@ -471,7 +472,7 @@ Requisição HTTP
 | --- | --- |
 | RN-DTO-01 🟢 | Toda resposta de API que envolve `User` deve passar por um mapper que remove `password` (hash) do payload — nunca confiar no Prisma `select` implícito. Implementado via `toUserDTO` (`dtos/user.dto.ts`), aplicado consistentemente em `login`, `register` e `/me` |
 | RN-DTO-02 🟢 | Entrada de dados (`request body`) é validada com **schemas Zod dedicados por rota** (ex.: `createUserSchema`, `createOrderSchema`), nunca reaproveitando o schema do banco |
-| RN-DTO-03 🟡 | Saída de dados usa **DTOs explícitos** (ex.: `UserResponseDTO`, `ProductResponseDTO`, `OrderResponseDTO`) — desacopla o formato de API do schema interno do Prisma. Fatia de `User` concluída (`toUserDTO`); `ProductResponseDTO`/`OrderResponseDTO` ainda pendentes |
+| RN-DTO-03 🟢 | Saída de dados usa **DTOs explícitos** (ex.: `UserResponseDTO`, `ProductResponseDTO`, `OrderResponseDTO`) — desacopla o formato de API do schema interno do Prisma. Fatia de `User` concluída (`toUserDTO`); `ProductResponseDTO`/`OrderResponseDTO` ainda pendentes |
 | RN-DTO-04 🟢 | Preços são serializados como inteiros em centavos no backend e formatados (R$) somente na camada de apresentação (frontend) |
 | RN-DTO-05 🔵 | Datas trafegam em ISO 8601 (UTC); formatação de fuso/local é responsabilidade do frontend |
 | RN-DTO-06 🟢 🆕 | O payload do JWT (dado de **sessão**) deve conter o mínimo necessário para autorização (`id`, `admin`) e nunca dado de **perfil** (`name`, `email`) — o JWT é assinado, não criptografado, então qualquer um com o cookie decodifica o payload em base64 sem precisar da chave secreta. Sessão (`toJwtPayloadDTO`) e perfil (`toUserDTO`) são DTOs deliberadamente separados, nunca reunidos no mesmo objeto de saída |
@@ -521,13 +522,14 @@ type UserResponseDTO = {
 
 | Regra | Descrição |
 | --- | --- |
-| RN-ORDER-01 🟢 | Ao criar um pedido, cada `CartItem` gera um `OrderItem` com **cópia imutável** dos dados do produto (nome, preço unitário, URL de imagem) no momento da compra |
+| RN-ORDER-01 🟢 | Ao criar um pedido, cada `CartItem` gera um `OrderItem` com **cópia imutável** dos dados do produto (nome, preço unitário, URL de imagem, customerName, quantity) no momento da compra |
 | RN-ORDER-02 🟢 | Justificativa do Snapshot Pattern: se o preço ou nome do produto mudar no catálogo depois, o histórico do pedido **não pode ser afetado retroativamente** — nota fiscal/histórico é imutável |
 | RN-ORDER-03 🟢 | `Order` referencia `productId` apenas para rastreabilidade (ex.: link "ver produto"), mas os dados exibidos no pedido vêm do snapshot, nunca de um `JOIN` ao vivo com `Product` |
 | RN-ORDER-04 🟢 | Preço é armazenado como inteiro em centavos em todo o fluxo (evita erro de ponto flutuante em somas) |
 | RN-ORDER-05 🟢 | Status do pedido segue máquina de estados finita (ver Seção 8) — transições inválidas são rejeitadas no service layer |
 | RN-ORDER-06 🟢 | Um usuário só pode visualizar/cancelar os próprios pedidos (`Order.userId === req.user.id`), exceto administradores. ⚠️ **Não é opcional nem posterior ao checkout**: a checagem de posse deve nascer na mesma PR que implementa `GET /orders/:id`, nunca como ajuste "depois" — é a mitigação de IDOR (OWASP A01) para este módulo |
 | RN-ORDER-07 🔵 | Quando `ATTEND`/`DELIVER` existirem, a transição de status deve checar não só o papel (role), mas se o papel tem permissão para **aquela transição específica** (ver RN-RBAC-07/08) |
+| RN-ORDER-08 | Ao criar um pedido, o sistema deve armazenar em Order.customerName um snapshot do User.name naquele momento, de modo que alterações futuras no nome do usuário não alterem retroativamente o histórico do pedido. | 🟢 |
 
 ### 6.9 Pagamento (Simulado hoje, Gateway real no futuro) 🆕
 

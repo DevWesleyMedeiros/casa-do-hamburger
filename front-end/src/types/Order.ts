@@ -16,9 +16,10 @@ export interface OrderItem {
 // para OrderResponseDTO
 export interface Order {
   id: string;
+  customerName: string;
   status: OrderStatus;
   total: number;
-  items: OrderItem[];
+  items: OrderItem[]; // lista de itens do pedido, inclui o quantidade do produto no carrinho
   payment: OrderPayment | null;
   createdAt: string;
   updatedAt: string;

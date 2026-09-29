@@ -21,6 +21,11 @@ model User {
   googleId String? // duas constas não podem compartilhar o mesmo uid e nullable porque não tem esse campo preenchido contas via google
   firebaseUid String? @unique  // cada usuário do firebase tem um uid único
 
+  // url para os avatares locias e google. 
+// RN-AVATAR-01 User.avatarUrl contém a URL da imagem de perfil atual. LOCAL: URL gerada pelo Cloudinary. GOOGLE: URL proveniente da identidade Google verificada pelo Firebase.
+  avatarUrl String? // local será servida via infra Claudinary
+  avatarKey String? // A propriedade avatarKey serve para deletar o avatar do firebase quendo houver uma troca de usuário
+
   emailVerifiedAt DateTime?
   emailVerified Boolean @default(false)
   emailVerificationTokens  EmailVerificationToken[]
@@ -89,11 +94,12 @@ model CartItem {
 model Order{
   id String @id @default(uuid())
   userId String
+  customerName String // snapshot do User.name no momento do pedido
   user User @relation(fields: [userId], references: [id])
   status OrderStatus @default(PENDING)
   total Int @default(0)
   items OrderItem[]
-  payment Payment[] // 1:0..1 (RF-46, pagamento sempre simulado por ora)
+  payment Payment[] // (RF-46, pagamento sempre simulado por ora)
   deletedAt DateTime?
   createdAt DateTime    @default(now())
   updatedAt DateTime    @default(now()) @updatedAt
@@ -113,7 +119,7 @@ model OrderItem {
   productName String  //snapshot para nome do produto no memento da compra
   productImageUrl String? //snapshot para url da imagem do produto no memento da compra (RF-33)
   unitPrice Int     // snapshot — preço unitário em centavos (RN-ORDER-04)
-  quantity Int
+  quantity Int      // serve para saber a quantidade do produto no carrinho
   subtotal Int     // unitPrice * quantity, persistido (não recalculado on-the-fly)
 
   @@index([orderId])

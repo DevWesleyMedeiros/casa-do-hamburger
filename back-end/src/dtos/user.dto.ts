@@ -4,21 +4,28 @@ import type { User } from '../../generated/prisma/index.js';
  * DTO de PERFIL do usuário.
  *
  * Representa os dados "públicos" de um usuário — o que pode ser exibido
- * na tela (nome, email, se é admin) sem expor dado sensível de banco
+ * na tela (nome, email, se é admin entre outros) sem expor dado sensível de banco
  * (password) nem dado que não faz parte da identidade pública (cep).
  *
- * Usado sempre que o usuário completo (vindo do Prisma) precisa virar
+ * Usado sempre que o usuário completo (vindo das tabelas/models) precisa virar
  * resposta de API: login, register, /me. NÃO é usado para montar o JWT
  * — para isso existe o toJwtPayloadDTO (ver toJwtPayloadDTO.ts)
  */
 // só o que é necessário para a sessão é extraído de User e passado para UserDTO
-export type UserDTO = Pick<User, 'id' | 'name' | 'email' | 'admin'>;
+export type UserDTO = Pick<User, 'id' | 'name' | 'email' | 'admin' | 'provider' | 'avatarUrl'>;
 
+/**
+ * @description Converte um usuário (vindo das tabelas/models) em um DTO de perfil.
+ * @param user do usuário a ser convertido.
+ * @returns Um objeto DTO de perfil do usuário.
+ */
 export const toUserDTO = (user: User): UserDTO => {
   return {
     id: user.id,
     name: user.name,
     email: user.email,
     admin: user.admin,
+    provider: user.provider,
+    avatarUrl: user.avatarUrl,
   };
 };

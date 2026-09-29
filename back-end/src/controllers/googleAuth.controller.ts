@@ -1,5 +1,5 @@
 /**
- * Controller HTTP do login social via Google — único responsável por
+ * Controller HTTP do login social via Google — único responsável
  * Reaproveita literalmente as mesmas opções de cookie do login local
  * (httpOnly, secure condicional a NODE_ENV, sameSite, maxAge de 7 dias) — é assim que RF-55 fica garantido no código, não só na regra de negócio.
  */
@@ -10,7 +10,7 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 
 export const googleAuthController = {
   loginWithGoogle: asyncHandler(async (req: Request, res: Response) => {
-    // no frontend, quando eu clicar no botão de cadastrar com Google, eu registro no app do Firebase e retorno um credential e um tokenJWT. No Firebase Auth, o objeto UserCredential é o resultado retornado após um login ou cadastro bem-sucedido. Ele serve como um contêiner que agrupa os dados do usuário, o token de acesso e informações do provedor de autenticação.Para obter o Firebase ID Token (o token JWT necessário para enviar ao seu servidor), você precisa chamar o método getIdToken() a partir do objeto de usuário contido nesse UserCredential.
+    // no frontend, quando eu clicar no botão de cadastrar com Google, eu registro no app do Firebase e retorno um credential e um tokenJWT. No Firebase Auth, o objeto UserCredential é o resultado retornado após um login ou cadastro bem-sucedido. Para obter o Firebase ID Token (o token JWT necessário para enviar ao servidor), você precisa chamar o método getIdToken() a partir do objeto de usuário contido nesse UserCredential.
     const { idToken } = req.body;
 
     // verifica o token do Firebase ID Token

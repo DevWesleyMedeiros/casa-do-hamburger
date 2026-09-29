@@ -19,8 +19,9 @@ export const OrderServiceItems = {
    */
   createOrder: async (userId: string): Promise<OrderResponseDTO> => {
     const cartItems = await OrderRepository.findCartItemsForCheckout(userId);
+    const [firstCartItem] = cartItems;
 
-    if (cartItems.length === 0) {
+    if (!firstCartItem) {
       throw new AppError(400, 'Carrinho vazio - adicione itens para finalizar o pedido');
     }
     const snapshotItems = cartItems.map((item) => {
@@ -37,6 +38,7 @@ export const OrderServiceItems = {
     const total = snapshotItems.reduce((sum, item) => sum + item.subtotal, 0);
     const order = await OrderRepository.createOrderWithItems({
       userId,
+      customerName: firstCartItem.user.name,
       total,
       items: snapshotItems,
     });

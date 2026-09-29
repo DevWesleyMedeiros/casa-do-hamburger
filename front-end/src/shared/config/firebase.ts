@@ -55,6 +55,29 @@ export const signInWithGooglePopup = async (): Promise<string | UserCredential> 
 };
 
 /**
+ * Lê a foto de perfil do usuário Google JÁ autenticado no Firebase,
+ * SEM abrir popup nenhum. Usa onGoogleAuthStateChanged em vez de
+ * ler firebaseAuth.currentUser direto, porque o SDK pode ainda estar
+ * restaurando a sessão do IndexedDB no instante da chamada (race
+ * condition conhecida do Firebase Auth) — currentUser síncrono
+ * poderia voltar null mesmo com o usuário logado.
+ */
+export const getGoogleProfilePhoto = (): Promise<string | null> => {
+  return new Promise((resolve) => {
+    let unsubscribe: (() => void) | undefined;
+
+    onGoogleAuthStateChanged((firebaseUser) => {
+      resolve(firebaseUser?.photoURL ?? null);
+      unsubscribe?.();
+    }).then((unsub) => {
+      unsubscribe = unsub;
+    });
+  });
+};
+
+// remova profileAvatar — a lógica dela era a raiz do bug 2 e 3
+
+/**
  * Redireciona o usuário para a página de login do Google.
  * A página atual é descartada nessa chamada — quem chama não deve esperar
  * nada de volta aqui. O resultado só chega depois, via

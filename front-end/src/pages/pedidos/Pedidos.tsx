@@ -10,6 +10,7 @@ import { orderSeriviceApi } from '../../shared/services/api/orders/ordersService
 import { resolveApiErrorMessage } from '../../shared/utils/apiErrorMessage.js';
 import { getItemSelectedClass } from '../../shared/utils/Utils';
 import type { Order, OrderStatus } from '../../types/Order';
+import { Seo } from '../../shared/components/SEO';
 
 const FILTER_ITEMS = ['Pendentes', 'Preparando', 'Pronto', 'Cancelados', 'Entregue'] as const;
 
@@ -115,34 +116,43 @@ export const Pedidos = () => {
   }
 
   return (
-    <div className="mx-auto flex w-full flex-col gap-2 px-3 text-white md:w-184.25 md:px-0">
-      <div className="my-1 mb-3 flex gap-2 md:my-3">
-        {FILTER_ITEMS.map((item) => (
-          <button
-            key={item}
-            type="button"
-            className={getItemSelectedClass(item, selectedItemClass)}
-            onClick={() => setSelectedItemClass(item)}
-          >
-            {item}
-          </button>
-        ))}
-      </div>
+    <>
+      <Seo
+        title="Página de pedidos"
+        description="Visualize seus pedidos e gerencie suas ordens na Casa do Hamburguer"
+        canonicalPath="/pedidos"
+        noIndex
+      />
 
-      <div className="grid grid-cols-3 gap-3">
-        {filteredOrders.length === 0 ? (
-          <div className="justify-ccenter flex items-center">Nenhum pedido encontrado.</div>
-        ) : (
-          filteredOrders.map((order) => (
-            <CardPedidos
-              key={order.id}
-              order={order}
-              isAdmin={isAdmin}
-              onStatusChange={handleStatusChange}
-            />
-          ))
-        )}
+      <div className="mx-auto flex w-full flex-col gap-2 px-3 text-white md:w-184.25 md:px-0">
+        <div className="my-1 mb-3 flex gap-2 md:my-3">
+          {FILTER_ITEMS.map((item) => (
+            <button
+              key={item}
+              type="button"
+              className={getItemSelectedClass(item, selectedItemClass)}
+              onClick={() => setSelectedItemClass(item)}
+            >
+              {item}
+            </button>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-3 gap-3">
+          {filteredOrders.length === 0 ? (
+            <div className="justify-ccenter flex items-center">Nenhum pedido encontrado.</div>
+          ) : (
+            filteredOrders.map((order) => (
+              <CardPedidos
+                key={order.id}
+                order={order}
+                isAdmin={isAdmin}
+                onStatusChange={handleStatusChange}
+              />
+            ))
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };

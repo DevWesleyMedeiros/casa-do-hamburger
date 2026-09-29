@@ -9,6 +9,7 @@ import cartRoutes from './routes/cart.routes.js';
 import googleAuthRoutes from './routes/googleAuth.routes.js';
 import orderRoutes from './routes/order.routes.js';
 import productsRoutes from './routes/products.routes.js';
+import avatarRoutes from './routes/avatar.routes.js';
 
 // conection linka o backend com o banco de dados. Deve ser a primeira linha
 connection();
@@ -47,18 +48,14 @@ app.use(cookieParser());
 
 // rotas só depois de todos os pipelines de middlewares globais
 app.use('/auth', authRoutes);
+// registro da rota de avatar
+app.use('/auth', avatarRoutes);
 app.use('/auth', productsRoutes);
 // O router de carrinho usa requireAuth globalmente; as rotas públicas de login
 // precisam ser registradas antes dele para não serem interceptadas.
 app.use('/auth', googleAuthRoutes);
 app.use('/auth', cartRoutes);
-
 // registro da rota de order
 app.use('/orders', orderRoutes);
-
 // middleware que vai sempre por último — Express só invoca middleware de 4 parâmetros depois de todas as rotas; Serve para tratamento de erros
 app.use(errorHandler);
-
-// app.use(cors())
-// app.use(cookieParser())
-// app.use(express.json())

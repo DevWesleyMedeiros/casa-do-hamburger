@@ -12,6 +12,7 @@ import { useCartUIStore } from '../../shared/stores';
 import { useNewProductUIModalStore } from '../../shared/stores/useNewProductUIModal';
 import { Cart } from '../cart/Cart';
 import { NewProductModal } from '../newProductModal/NewProductModal';
+import { AvatarUpload } from '../AvatarUpload';
 
 export const Header = () => {
   const { data: user } = useMe();
@@ -113,7 +114,7 @@ export const Header = () => {
               </p>
             </div>
             <div className="item-center flex gap-2">
-              <p className="text-white">{user.name}!</p>
+              <p className="text-white">{user.name.split(' ')[0] || ''}</p>
               <LogOut
                 size={ICON_CONFIG.mxSize}
                 strokeWidth={ICON_CONFIG.strokWidth}
@@ -121,6 +122,14 @@ export const Header = () => {
                 onClick={handleLogout}
               />
             </div>
+            {/* icone do avatar pelo provider local */}
+            {user.provider === 'LOCAL' && (
+              <AvatarUpload name={user.name} avatarUrl={user?.avatarUrl}></AvatarUpload>
+            )}
+            {/* icone do avatar pelo provider Google */}
+            {user.provider === 'GOOGLE' && (
+              <AvatarUpload name={user.name} avatarUrl={user?.avatarUrl}></AvatarUpload>
+            )}
           </div>
         ) : (
           <Link to="/login">

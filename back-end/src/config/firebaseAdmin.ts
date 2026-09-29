@@ -1,7 +1,6 @@
 /**
  * Configuração do Firebase Admin SDK — usado exclusivamente para verificar
- * o Firebase ID Token enviado pelo frontend após o login com Google
- * (RF-52, RN-AUTH-08).
+ * o Firebase ID Token enviado pelo frontend após o login com Google (RF-52, RN-AUTH-08).
  *
  * lê variáveis de ambiente, valida se estão presentes, nunca expõe a service account fora deste módulo.
  *
@@ -43,10 +42,15 @@ export const getFirebaseApp = (): App => {
 };
 
 // Wrapper fino — quem consome (googleAuth.service.ts). Ele não precisa saber como o Firebase Admin foi inicializado, só chama verifyIdToken.
+/**
+ * @description verifica o Firebase ID Token enviado pelo frontend após o login com Google
+ * @param idToken
+ * @returns resultado de uma promessa com as claims (pares de chave-valor injetados no token JWT de autenticação de um usuário para armazenar dados leves sobre suas permissões e papéis) decodificadas do token
+ */
 export const verifyFirebaseIdToken = async (idToken: string) => {
   const auth = getAuth(getFirebaseApp());
   // checkRevoked=true consulta o Firebase se o token foi revogado
   // (ex.: usuário deslogado de todos os dispositivos) — mais uma chamada de rede, mas fecha uma janela de reuso de token roubado
   return auth.verifyIdToken(idToken, true);
-  // varifyIdToken - Verifica um token de ID do Firebase (JWT). Se o token for válido, a promise é resolvida com as claims decodificadas do token; caso contrário, a promise é rejeitada.
+  // varifyIdToken - Verifica um token ID do Firebase (JWT). Se o token for válido, a promise é resolvida com as claims decodificadas do token; caso contrário, a promise é rejeitada.
 };

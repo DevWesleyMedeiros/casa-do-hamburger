@@ -13,6 +13,7 @@ import { queryKeys } from '../../constant/queryKeys';
 import { loginSchema, type loginInput } from '../../shared/schemas/authSchemas';
 import { ApiError } from '../../shared/services/api/ApiExceptions';
 import { LoginDate } from '../../shared/services/api/login/Login';
+import { Seo } from '../../shared/components/SEO';
 
 // import login firebase
 import { firebaseAuthSignOut, signInWithGooglePopup } from '../../shared/config/firebase';
@@ -116,139 +117,151 @@ export const Login = () => {
   }, []);
 
   return (
-    <form
-      className="bg-brand-dark flex min-h-screen w-full items-center justify-center px-4"
-      onSubmit={handleSubmit(onSubmit)} // ← Zod valida os campos antes de onSubmit ser chamado
-      noValidate
-    >
-      <div className="flex flex-col items-center gap-2 rounded-xl border-[0.5px] border-white/13 p-7 shadow-2xl shadow-black/40">
-        <Link to="/home">
-          <div className="h-21.5 w-25">
-            <img
-              src="./assetsImages/logo-casa-do-hamburguer.png"
-              alt="logo da hamburgeria"
-              className="mb-4"
-            />
-          </div>
-        </Link>
+    <>
+      {/* login tem noIndex = true > não pode ser indexada pelo Google */}
+      <Seo
+        title="Login"
+        description="Faça login na Casa do Hamburguer"
+        canonicalPath="/login"
+        noIndex
+      />
 
-        <div className="w-full rounded-2xl border border-white/10 bg-[#1b1a16] px-4 py-5">
-          <div className="mb-5">
-            <p className="text-center font-bold text-[#F2DAAC]">Bem vindo à Casa do Hamburguer!!</p>
-          </div>
-
-          <div className="flex flex-col gap-3">
-            {/* email */}
-            <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor="email"
-                className="text-xs font-medium tracking-wide text-[#F2DAAC]/80 uppercase"
-              >
-                E-mail
-              </label>
-              <Input
-                id="email"
-                placeholder="seu@email.com"
-                type="email"
-                autoComplete="email"
-                {...register('email')}
-                disabled={isSubmitting}
-                aria-invalid={!!errors.email}
-                aria-describedby={errors.email ? 'email-error' : undefined}
+      <form
+        className="bg-brand-dark flex min-h-screen w-full items-center justify-center px-4"
+        onSubmit={handleSubmit(onSubmit)} // ← Zod valida os campos antes de onSubmit ser chamado
+        noValidate
+      >
+        <div className="flex w-100 flex-col items-center gap-2 rounded-xl border-[0.5px] border-white/13 p-7 shadow-2xl shadow-black/40">
+          <Link to="/home">
+            <div className="h-21.5 w-25">
+              <img
+                src="./assetsImages/logo-casa-do-hamburguer.png"
+                alt="logo da hamburgeria"
+                className="mb-4"
               />
-              {errors.email && (
-                <p id="email-error" className="text-left text-xs font-bold text-red-500">
-                  {errors.email.message}
-                </p>
-              )}
+            </div>
+          </Link>
+
+          <div className="w-full rounded-2xl border border-white/10 px-4 py-5">
+            <div className="mb-5">
+              <p className="text-center font-bold text-[#F2DAAC]">
+                Bem vindo à Casa do Hamburguer!!
+              </p>
             </div>
 
-            {/* senha */}
-            <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor="password"
-                className="text-xs font-medium tracking-wide text-[#F2DAAC]/80 uppercase"
-              >
-                Senha
-              </label>
-              <div className="relative w-full">
+            <div className="flex flex-col gap-3">
+              {/* email */}
+              <div className="flex flex-col gap-1.5">
+                <label
+                  htmlFor="email"
+                  className="text-xs font-medium tracking-wide text-[#F2DAAC]/80 uppercase"
+                >
+                  E-mail
+                </label>
                 <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="current-password"
-                  {...register('password')}
+                  id="email"
+                  placeholder="seu@email.com"
+                  type="email"
+                  autoComplete="email"
+                  {...register('email')}
                   disabled={isSubmitting}
-                  aria-invalid={!!errors.password}
-                  aria-describedby={errors.password ? 'password-error' : undefined}
+                  aria-invalid={!!errors.email}
+                  aria-describedby={errors.email ? 'email-error' : undefined}
                 />
-                <button
-                  type="button"
-                  onClick={togglePasswordVisibility}
-                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-                  className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 transition-colors hover:text-gray-300"
-                >
-                  {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
-                </button>
+                {errors.email && (
+                  <p id="email-error" className="text-left text-xs font-bold text-red-500">
+                    {errors.email.message}
+                  </p>
+                )}
               </div>
 
-              {errors.password && (
-                <p id="password-error" className="text-left text-sm font-bold text-red-500">
-                  {errors.password.message}
-                </p>
-              )}
-              {backendError && (
-                <p role="alert" className="text-left text-sm font-bold text-red-500">
-                  {backendError}
-                </p>
-              )}
+              {/* senha */}
+              <div className="flex flex-col gap-1.5">
+                <label
+                  htmlFor="password"
+                  className="text-xs font-medium tracking-wide text-[#F2DAAC]/80 uppercase"
+                >
+                  Senha
+                </label>
+                <div className="relative w-full">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    autoComplete="current-password"
+                    {...register('password')}
+                    disabled={isSubmitting}
+                    aria-invalid={!!errors.password}
+                    aria-describedby={errors.password ? 'password-error' : undefined}
+                  />
+                  <button
+                    type="button"
+                    onClick={togglePasswordVisibility}
+                    aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                    className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 transition-colors hover:text-gray-300"
+                  >
+                    {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
+                  </button>
+                </div>
 
-              <div className="mt-1 flex items-center justify-end gap-3 text-xs">
-                <Link className="text-brand-amber" to="/forgot-password">
-                  Esqueceu senha
-                </Link>
-                <span className="text-white/20">•</span>
-                <Link className="text-brand-amber" to="/reset-password">
-                  Redefinir senha
+                {errors.password && (
+                  <p id="password-error" className="text-left text-sm font-bold text-red-500">
+                    {errors.password.message}
+                  </p>
+                )}
+                {backendError && (
+                  <p role="alert" className="text-left text-sm font-bold text-red-500">
+                    {backendError}
+                  </p>
+                )}
+
+                <div className="mt-1 flex items-center justify-end gap-3 text-xs">
+                  <Link className="text-brand-amber" to="/forgot-password">
+                    Esqueceu senha
+                  </Link>
+                  <span className="text-white/20">•</span>
+                  <Link className="text-brand-amber" to="/reset-password">
+                    Redefinir senha
+                  </Link>
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                title={isLoading ? 'Entrando...' : 'Entrar'}
+                colorVariation="bgDarkVariation"
+                disabled={isLoading}
+              />
+
+              <div className="flex w-full items-center justify-center gap-2 text-[#595753]">
+                <div className="h-px w-full border-[0.5px] border-white/10" />
+                <span className="text-sm">ou</span>
+                <div className="h-px w-full border-[0.5px] border-white/10" />
+              </div>
+              {/* adicionar também login Google na register page */}
+              <Button
+                type="button"
+                title={isGoogleLoading ? 'Conectando...' : 'Entrar com Google'}
+                colorVariation="bgGoogleVariation"
+                disabled={isSubmitting || isGoogleLoading}
+                onClick={handleGoogleLogin}
+              >
+                <FcGoogle size={ICON_CONFIG.mxSize} />
+              </Button>
+
+              <div className="my-2 flex justify-center gap-1 text-sm">
+                <p className="font-bold text-[#4c4b48]">Não tem uma conta?</p>
+                <Link to={isSubmitting ? '#' : '/register'}>
+                  <span
+                    className={`text-brand-amber text-right text-sm ${isSubmitting ? 'pointer-events-none cursor-not-allowed opacity-50 select-none' : ''}`}
+                  >
+                    Criar conta
+                  </span>
                 </Link>
               </div>
-            </div>
-
-            <Button
-              type="submit"
-              title={isLoading ? 'Entrando...' : 'Entrar'}
-              colorVariation="bgDarkVariation"
-              disabled={isLoading}
-            />
-
-            <div className="flex w-full items-center justify-center gap-2 text-[#595753]">
-              <div className="h-px w-full border-[0.5px] border-white/10" />
-              <span className="text-sm">ou</span>
-              <div className="h-px w-full border-[0.5px] border-white/10" />
-            </div>
-            {/* adicionar também login Google na register page */}
-            <Button
-              type="button"
-              title={isGoogleLoading ? 'Conectando...' : 'Entrar com Google'}
-              colorVariation="bgGoogleVariation"
-              disabled={isSubmitting || isGoogleLoading}
-              onClick={handleGoogleLogin}
-            >
-              <FcGoogle size={ICON_CONFIG.mxSize} />
-            </Button>
-
-            <div className="my-2 flex justify-center gap-1 text-sm">
-              <p className="font-bold text-[#4c4b48]">Não tem uma conta?</p>
-              <Link to={isSubmitting ? '#' : '/register'}>
-                <span
-                  className={`text-brand-amber text-right text-sm ${isSubmitting ? 'pointer-events-none cursor-not-allowed opacity-50 select-none' : ''}`}
-                >
-                  Criar conta
-                </span>
-              </Link>
             </div>
           </div>
         </div>
-      </div>
-    </form>
+      </form>
+    </>
   );
 };

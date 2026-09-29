@@ -11,6 +11,7 @@ import type { Order, OrderItem, Payment } from '../../generated/prisma/index.js'
  *   de OrderResponseDTO.items[], então o front já sabe a qual pedido pertence.
  *   Devolvê-lo de novo seria dado redundante inflando o payload sem uso real
  */
+
 export interface OrderItemDTO {
   id: string;
   productId: string | null;
@@ -48,6 +49,7 @@ export interface PaymentDTO {
  */
 export interface OrderResponseDTO {
   id: string;
+  customerName: string;
   status: Order['status'];
   total: number; // centavos — mesma regra de unitPrice/subtotal
   items: OrderItemDTO[];
@@ -73,6 +75,12 @@ type OrderWithRelation = Order & {
  * (ex.: endpoint que retorna um item específico) quanto dentro de
  * toOrderDTO — mantendo uma ÚNICA fonte de verdade para esse mapeamento (DRY).
  */
+
+/**
+ * @description Serializa um único OrderItem do Prisma para OrderItemDTO.
+ * @param item O item de pedido a ser serializado.
+ * @returns O DTO correspondente ao item de pedido.
+ */
 export const toOrderItemDTO = (item: OrderItem): OrderItemDTO => {
   return {
     id: item.id,
@@ -90,6 +98,11 @@ export const toOrderItemDTO = (item: OrderItem): OrderItemDTO => {
  * Extraída por simetria com toOrderItemDTO — mesmo motivo: evitar duplicar
  * a lógica de "quais campos do Payment saem" em mais de um lugar do código.
  */
+/**
+ * @description Serializa um único Payment do Prisma para PaymentDTO.
+ * @param payment O pagamento a ser serializado.
+ * @returns O DTO correspondente ao pagamento.
+ */
 export const toPaymentDTO = (payment: Payment): PaymentDTO => {
   return {
     status: payment.status,
@@ -106,9 +119,16 @@ export const toPaymentDTO = (payment: Payment): PaymentDTO => {
  * manualmente — se um campo mudar em qualquer um dos DTOs, muda em um
  * único lugar.
  */
+
+/**
+ * @description Serializa um DTO de Order (com relações carregadas) no DTO final.
+ * @param order O pedido a ser serializado.
+ * @returns O DTO correspondente ao pedido.
+ */
 export const toOrderDTO = (order: OrderWithRelation): OrderResponseDTO => {
   return {
     id: order.id,
+    customerName: order.customerName,
     status: order.status,
     total: order.total,
     items: order.items.map(toOrderItemDTO),

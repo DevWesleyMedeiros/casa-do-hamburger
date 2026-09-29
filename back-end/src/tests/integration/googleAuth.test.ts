@@ -105,7 +105,7 @@ describe('Google Auth Integration', () => {
       expect(response.status).toBe(200);
       const linked = await prisma.user.findUnique({ where: { email: userEmail } });
       expect(linked?.firebaseUid).toBe(decoded.uid);
-      expect(linked?.provider).toBe('LOCAL');
+      expect(linked?.provider).toBe('GOOGLE');
     });
 
     it('NÃO deve vincular automaticamente quando email_verified=false (RN-AUTH-11 — segurança)', async () => {
