@@ -119,7 +119,7 @@ model OrderItem {
   productName String  //snapshot para nome do produto no memento da compra
   productImageUrl String? //snapshot para url da imagem do produto no memento da compra (RF-33)
   unitPrice Int     // snapshot — preço unitário em centavos (RN-ORDER-04)
-  quantity Int
+  quantity Int      // serve para saber a quantidade do produto no carrinho
   subtotal Int     // unitPrice * quantity, persistido (não recalculado on-the-fly)
 
   @@index([orderId])
