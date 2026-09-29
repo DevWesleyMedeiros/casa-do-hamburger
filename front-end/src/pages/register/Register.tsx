@@ -122,7 +122,7 @@ export const Register = () => {
 
   return (
     <>
-    {/* register tem noIndex = true > não pode ser indexada pelo Google */}
+      {/* register tem noIndex = true > não pode ser indexada pelo Google */}
       <Seo
         title="Cadastro"
         description="Cadastre-se para começar a usar a nossa plataforma."

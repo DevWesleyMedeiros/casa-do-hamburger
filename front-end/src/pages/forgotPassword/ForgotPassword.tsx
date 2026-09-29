@@ -12,7 +12,6 @@ import { useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Seo } from '../../shared/components/SEO';
 
-
 export const ForgotPassword = () => {
   const {
     handleSubmit,
