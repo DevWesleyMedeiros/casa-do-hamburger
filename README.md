@@ -12,12 +12,15 @@ O Casa do Hamburguer é uma aplicação fullstack moderna que simula um ecossist
 
 ✅ **Autenticação e autorização** completa com múltiplos provedores
 ✅ **Login social** com Google + Firebase integration
+✅ Avatares de perfil para contas locais e Google, com upload de foto própria
 ✅ **Recuperação de senha** com envio de email via Resend
 ✅ **Verificação de email** para novas contas
 ✅ **Rate limiting** e proteção contra força bruta
 ✅ Upload de imagens com validação de magic bytes e Cloudinary
 ✅ Carrinho atrelado ao usuário (persistido no banco)
 ✅ Módulo de pedidos concluído com máquina de estados, controle administrativo e notificação por email
+✅ Checkout integrado ao carrinho e cards de pedidos com dados do cliente e dos produtos
+✅ SEO básico com metadados por página, sitemap e dados estruturados
 ✅ Backend com camadas bem definidas (Controller → Service → Repository)
 ✅ Testes de integração implementados com Vitest + Supertest
 ✅ TypeScript em todo o projeto com type-safety
@@ -38,6 +41,8 @@ O Casa do Hamburguer é uma aplicação fullstack moderna que simula um ecossist
 - ✅ Verificação de email para novas contas
 - ✅ Logout seguro com limpeza de cookies
 - ✅ Persistência de provedor (LOCAL/GOOGLE) por usuário
+- ✅ Avatar de perfil com upload de imagem para Cloudinary; contas Google usam a foto validada do provedor quando não há avatar próprio
+- ✅ Atualização do avatar pela interface do perfil, com validação de formato e limite de 5 MB
 
 ### 🍔 Catálogo e produtos
 
@@ -64,11 +69,19 @@ O Casa do Hamburguer é uma aplicação fullstack moderna que simula um ecossist
 - ✅ Controle de pedidos por papel e posse: administradores alteram status, clientes visualizam apenas seus pedidos e a checagem de IDOR é tratada no backend
 - ✅ Regras de cancelamento aplicadas: cliente só cancela em `PENDING`; admin pode cancelar em `PENDING` ou `PREPARING` conforme regra de negócio
 - ✅ `OrderItem` com snapshots de nome, preço, imagem e quantidade no momento da compra para preservar integridade mesmo após alterações no catálogo
+- ✅ `Order.customerName` registra o nome do cliente no momento da compra; os cards exibem cliente, nome e quantidade dos produtos, status, data, horário e total
 - ✅ Cálculo de subtotal e total persistidos no pedido e checkout com montagem do pedido a partir do carrinho do usuário
 - ✅ Serviço de notificação `notifyOrderStatusChanged` com envio de e-mail transacional para o dono do pedido quando o status muda
 - ✅ Integração com Resend para email de atualização de pedido, mantendo o fluxo de status desacoplado da transação principal do banco
 - ✅ Listagem administrativa com filtro por status e interface frontend para acompanhamento visual dos pedidos
 - ✅ Índices de banco para consultas rápidas por usuário e status do pedido
+
+### 🔎 SEO básico
+
+- ✅ Título, descrição, diretiva de indexação, URL canônica e metadados Open Graph definidos por página
+- ✅ Página inicial indexável com dados estruturados JSON-LD do tipo `FoodService`
+- ✅ `robots.txt` restringe páginas de autenticação e pedidos; `sitemap.xml` publica a página inicial
+- ✅ URL pública configurável pela variável `VITE_SITE_URL`
 
 ### 🛠️ Ferramentas de desenvolvimento
 
@@ -251,6 +264,8 @@ erDiagram
         string password
         boolean admin
         AuthProviders provider
+        string avatarUrl
+        string avatarKey
         datetime createdAt
         datetime updatedAt
     }
@@ -285,6 +300,7 @@ erDiagram
     Order {
         cuid id PK
         string userId FK
+        string customerName
         OrderStatus status
         int total
         datetime createdAt
@@ -349,7 +365,7 @@ sequenceDiagram
 2. Após autenticar-se, o sistema valida o token e libera o acesso às páginas protegidas.
 3. O usuário navega pelo catálogo, filtra produtos por categoria e escolhe itens.
 4. Os itens selecionados são adicionados ao carrinho e calculados em tempo real.
-5. O fluxo de pedidos é preparado para evoluir com dados reais e regras de negócio mais completas.
+5. No checkout, o sistema cria o pedido a partir do carrinho, persiste snapshots dos itens e do nome do cliente e limpa o carrinho após a criação.
 
 ---
 
@@ -426,7 +442,6 @@ A aplicação frontend fica disponível em `http://localhost:5173`.
 
 ### Curto prazo
 
-- [ ] Finalizar fluxo de checkout e criação de pedidos
 - [ ] Implementar webhooks para pagamento (Stripe/PIX)
 - [ ] Adicionar mais testes de unidade e E2E (Playwright)
 - [ ] Deploy em produção (Vercel + Render)
