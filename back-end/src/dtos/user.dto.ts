@@ -26,6 +26,6 @@ export const toUserDTO = (user: User): UserDTO => {
     email: user.email,
     admin: user.admin,
     provider: user.provider,
-    avatarUrl: user.avatarUrl
+    avatarUrl: user.avatarUrl,
   };
 };

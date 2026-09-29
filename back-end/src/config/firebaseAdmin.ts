@@ -44,7 +44,7 @@ export const getFirebaseApp = (): App => {
 // Wrapper fino — quem consome (googleAuth.service.ts). Ele não precisa saber como o Firebase Admin foi inicializado, só chama verifyIdToken.
 /**
  * @description verifica o Firebase ID Token enviado pelo frontend após o login com Google
- * @param idToken 
+ * @param idToken
  * @returns resultado de uma promessa com as claims (pares de chave-valor injetados no token JWT de autenticação de um usuário para armazenar dados leves sobre suas permissões e papéis) decodificadas do token
  */
 export const verifyFirebaseIdToken = async (idToken: string) => {

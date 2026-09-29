@@ -42,7 +42,7 @@ export const requireAuth = async (
 
   try {
     const { payload } = await jose.jwtVerify(token, getJwtSecret());
-    
+
     req['user'] = {
       id: payload['id'],
       admin: payload['admin'],

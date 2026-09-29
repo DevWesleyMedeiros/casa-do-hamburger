@@ -59,4 +59,3 @@ app.use('/auth', cartRoutes);
 app.use('/orders', orderRoutes);
 // middleware que vai sempre por último — Express só invoca middleware de 4 parâmetros depois de todas as rotas; Serve para tratamento de erros
 app.use(errorHandler);
-
