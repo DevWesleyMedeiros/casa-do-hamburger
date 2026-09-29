@@ -114,7 +114,7 @@ export const Header = () => {
               </p>
             </div>
             <div className="item-center flex gap-2">
-              <p className="text-white">{user.name}!</p>
+              <p className="text-white">{user.name.split(' ')[0] || ''}</p>
               <LogOut
                 size={ICON_CONFIG.mxSize}
                 strokeWidth={ICON_CONFIG.strokWidth}
@@ -128,10 +128,7 @@ export const Header = () => {
             )}
             {/* icone do avatar pelo provider Google */}
             {user.provider === 'GOOGLE' && (
-              <AvatarUpload
-                name={user.name.split(' ')[0]}
-                avatarUrl={user?.avatarUrl}
-              ></AvatarUpload>
+              <AvatarUpload name={user.name} avatarUrl={user?.avatarUrl}></AvatarUpload>
             )}
           </div>
         ) : (
