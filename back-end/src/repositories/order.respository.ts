@@ -54,7 +54,7 @@ export const OrderRepository = {
         },
         include: ORDER_INCLUDE,
       });
-      // após envio do pedido, vamos deletar o cartItem associado a ele no carrinho. Basicamente, zeramos o carrinho
+      // após envio do pedido, vamos deletar o cartItem associado a ele no carrinho
       await tx.cartItem.deleteMany({ where: { userId: params.userId } });
 
       return order;
