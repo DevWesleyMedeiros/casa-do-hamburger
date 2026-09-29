@@ -34,9 +34,7 @@ export const CardPedidos = ({ order, isAdmin = false, onStatusChange }: CardPedi
   return (
     <div className="card bg-brand-amber my-2 flex flex-col rounded-md text-[#32343E]">
       <div className="mt-1 flex justify-between">
-        <p className="ml-3 font-bold">
-          #{order.items?.map((item) => item.productName).join(' & ')}
-        </p>
+        <p className="ml-3 font-bold">{order.items?.map((item) => item.productName).join(' & ')}</p>
 
         {isAdmin ? (
           <select
