@@ -495,7 +495,7 @@ A aplicação frontend fica disponível em `http://localhost:5173`.
 
 ## 📸 Galeria de telas
 
-Abaixo estão algumas telas representativas da experiência atual da aplicação, organizadas por contexto de uso.
+Abaixo estão algumas telas representativas da experiência atual da aplicação, organizadas por contexto de uso. Essas imagens foram colocadas aqui com intuito de mostrar o andamento e das funcionalidade do projeto, antes do deploy na web
 
 ### Autenticação
 
@@ -511,13 +511,14 @@ Abaixo estão algumas telas representativas da experiência atual da aplicação
 
 | Sugestão de senha forte | ![Popover de senha](<front-end/public/screenshots/sigUp-fomr(popover).png>) |
 | Reset Password Token | ![Reset Password Token](<front-end/public/screenshots/reset-password-token.png>) |
-| Reset Password Token | ![Reset Password Token](<front-end/public/screenshots/reset-password-screen.png>) |
+| Reset Password Token | ![Reset Password Token](<front-end/public/screenshots/password-reset-screen.png>) |
+| Reset Password email | ![Reset Password Email](<front-end/public/screenshots/email-password-reset.png>) |
 
 ### Catálogo e experiência principal
 
 | Tela                                                | Visual                                                                                      |
 | --------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| Home sem autenticação (Hamburguers)                 | ![Home pública](front-end/public/screenshots/non-admin-login-hamburguers-homepage.png)                 |
+| Home sem autenticação (Hamburguers)                 | ![Home pública](front-end/public/screenshots/non-admin-login-hamburguers-homepage.png)             |
 
 | Home sem autenticação (bebidas) | ![Home pública](front-end/public/screenshots/non-login-bebidas-homepage.png)                           |
 | Home sem autenticação (porções) | ![Home pública](front-end/public/screenshots/non-login-porcoes-homepage.png)                           |
@@ -543,9 +544,11 @@ O controle dos pedidos é feito pelo administrador do sistema
 
 | Tela                    | Visual                                                                      |
 | ----------------------- | --------------------------------------------------------------------------- |
-| Gestão de pedidos (pendentes)   | ![Pedidos ](front-end/public/screenshots/cardPedidos-pendentes.png)                      |
+| Gestão de pedidos (pendentes)   | ![Pedidos ](front-end/public/screenshots/cardPedidos-pendentes.png)                    |
 
 | Gestão de pedidos (preparando)  | ![Pedidos](front-end/public/screenshots/cardPedidos-sem-pedidos-preparando.png)                    |
+
+| Gestão de pedidos (preparando)  | ![Pedidos](front-end/public/screenshots/cardPedidos-preparando.png)                    |
 
 | Gestão de pedidos (prontos)     | ![Pedidos](front-end/public/screenshots/cardPedidos-prontos.png)                    |
 
