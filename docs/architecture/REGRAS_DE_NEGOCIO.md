@@ -3,7 +3,7 @@
 > **Tipo de documento:** Especificação de Requisitos + Regras de Negócio (BRD/SRS)
 > **Projeto:** Casa do Hambúrguer — Sistema de Pedidos para Hamburgueria (E-commerce de Food Service)
 > **Natureza:** Boilerplate reutilizável para aplicações de e-commerce/pedidos
-> **Versão:** 2.1.0
+> **Versão:** 2.1.1
 > **Status:** Documento vivo — Recuperação de senha via e-mail implementada **em partes** (RF-09 permanece 🟡): fluxo `forgot-password` correto e mergeado na `develop` (PR #22), mas `reset-password` tem bug crítico de campo inexistente no schema (`passwordHash` vs `password`) que provavelmente quebra o caminho feliz em produção — ver Changelog 1.7.0 e Seção 6.1. **Login via Google confirmado no código** (PR #24, commit `904710e`, mergeado na `develop` em 05/09/2026): RF-51 a RF-55 realmente implementados via Firebase Authentication — ver Changelog 1.8.1 para a auditoria completa, incluindo regras de suporte (RN-AUTH-08 a 12, RNF-23 a 25) que ficaram com selo e/ou texto desatualizados na v1.8.0 e foram corrigidas agora. Sprint 2 encerrada no Trello (board `projeto-casa-do-hamburguer`); Rate limiting em rotas de autenticação concluído (RF-12, RNF-06); Auditoria de segurança incorporada (Seção 6.11, correção de contradição A05, Seção 14.2); DTO de User com mapper de saída concluído (RN-DTO-01) e payload de sessão minimizado (RN-DTO-06)
 
 ---
