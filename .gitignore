@@ -10,6 +10,16 @@ node_modules
 .env
 .env.local
 .env.*.local
+.env.*
+!.env.example
+!.env.*.example
+
+# arquivos gerados localmente
+.firebase/
+__pycache__/
+*.py[cod]
+*.log
+
 firebase-debug.log
 firebase-error.log
 desktop.ini

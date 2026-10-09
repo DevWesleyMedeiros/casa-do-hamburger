@@ -12,9 +12,9 @@ coverage
 
 # logs
 logs
-_.log
+/log.txt
+*.log
 report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
-migration_lock.toml
 
 # dotenv environment variable files
 .env
