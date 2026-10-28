@@ -42,10 +42,14 @@ Comentários, selos de conclusão, exemplos e relatórios antigos não comprovam
 Sinalize divergências e resolva-as somente dentro do escopo autorizado. Nunca altere
 silenciosamente uma regra de negócio para justificar o código atual.
 
-Não foram encontrados hooks de validação configurados no projeto nesta inspeção;
-`pretest` existe nos dois pacotes e chama lint. Menções a “Husky-ready” não comprovam hook.
-Reconfira quando necessário: informe a ausência sem bloquear trabalho independente
-nem criar hooks automaticamente.
+Existe um hook versionado em `.githooks/pre-commit`, que executa `scripts/quality-gate.mjs`.
+Sua execução automática depende da ativação local pelo mantenedor; a presença do arquivo
+não comprova ativação. Leia `docs/development/automation.md` e execute o script compartilhado
+antes de concluir alterações às quais lint/formatação se apliquem, selecionando o escopo pertinente.
+Tarefas exclusivamente analíticas não exigem verificações da aplicação. A conclusão de uma
+resposta do agente não aciona o hook do Git. Hook e script não substituem testes, build,
+revisão de negócio ou CI; a precaução temporária com testes destrutivos de integração
+permanece válida. `pretest` existe nos dois pacotes e chama lint.
 
 ## Arquitetura e padrões técnicos
 
