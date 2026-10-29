@@ -22,7 +22,8 @@ carrinho e pedidos. O pagamento atual é simulado, sem cobrança financeira real
 - `back-end/prisma/schema.prisma` e `back-end/prisma/migrations/`: modelo e migrations.
   Confirme nomes reais no schema: hoje há `User.admin` booleano e `User.password` opcional.
 - Consulte `package.json` e `bun.lock` da raiz e de cada pacote para dependências e versões;
-  os pacotes têm scripts e lockfiles próprios. A raiz não tem scripts de validação.
+  os pacotes têm scripts e lockfiles próprios. A raiz possui `check:tooling` para
+  compatibilidade das dependências da CLI, sem substituir as validações dos pacotes.
 
 ## Procedimento inicial e fontes de referência
 
