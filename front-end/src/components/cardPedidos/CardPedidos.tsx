@@ -2,7 +2,7 @@ import { CalendarDays, ChevronDown, Clock, Timer, UserRound } from 'lucide-react
 import type { ReactNode } from 'react';
 
 import { ICON_CONFIG } from '../../constant/iconConfig';
-import { brazilinaCurrencyFormat } from '../../shared/utils/Utils';
+import { formatCurrency } from '../../shared/utils/currency';
 import type { Order, OrderStatus } from '../../types/Order';
 import { ORDER_STATUS_LABELS } from '../../types/Order';
 
@@ -38,10 +38,6 @@ const STATUS_DOT: Record<OrderStatus, string> = {
 
 const PILL_BASE =
   'inline-flex items-center gap-2 rounded-full bg-white/60 px-3 py-1 text-xs font-bold ring-1 ring-[#32343E]/25';
-
-const getOrderTotal = (order: Order) => {
-  return order.items.reduce((total, item) => total + item.subtotal, 0);
-};
 
 const formatOrderDate = (date: string) => dateFormatter.format(new Date(date));
 const formatOrderTime = (date: string) => timeFormatter.format(new Date(date));
@@ -115,15 +111,15 @@ const MetaItem = ({ icon, label, children }: MetaItemProps) => (
 /* ------------------------------------------------------------------ */
 
 export const CardPedidos = ({ order, isAdmin = false, onStatusChange }: CardPedidosProps) => {
-  const total = getOrderTotal(order);
+  const total = order.total;
 
   return (
     <article className="bg-brand-amber flex h-full w-full flex-col gap-3 rounded-xl p-4 text-[#32343E] shadow-md ring-1 ring-black/5">
       {/* 1) Quem pediu + em que pé está */}
-      <header className="flex items-center justify-between gap-3">
+      <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-1.5 text-sm font-medium">
           <UserRound size={ICON_CONFIG.mnSize} aria-hidden="true" className="shrink-0" />
-          <span className="truncate">{order.customerName}</span>
+          <span className="break-words">{order.customerName}</span>
         </div>
 
         <div className="shrink-0">
@@ -136,7 +132,7 @@ export const CardPedidos = ({ order, isAdmin = false, onStatusChange }: CardPedi
       </header>
 
       {/* 2) O que foi pedido: uma linha por item, em vez de "A & B & C" */}
-      <ul className="list-disc space-y-1 pl-5 text-base leading-snug font-bold marker:text-[#32343E]/40">
+      <ul className="list-disc space-y-1 pl-5 text-base leading-snug font-bold break-words marker:text-[#32343E]/40">
         {order.items.map((item) => (
           <li key={item.id}>
             {item.productName} ({item.quantity})
@@ -173,9 +169,7 @@ export const CardPedidos = ({ order, isAdmin = false, onStatusChange }: CardPedi
         <span className="text-xs font-semibold tracking-wide text-[#32343E]/85 uppercase">
           Total
         </span>
-        <span className="text-xl font-extrabold tabular-nums">
-          {brazilinaCurrencyFormat(total)}
-        </span>
+        <span className="text-xl font-extrabold tabular-nums">{formatCurrency(total)}</span>
       </footer>
     </article>
   );

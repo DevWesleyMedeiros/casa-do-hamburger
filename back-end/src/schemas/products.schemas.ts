@@ -11,8 +11,9 @@ export const createProductsSchema = z.object({
   category: z.enum(['HAMBURGUER', 'BEBIDAS', 'PORÇÕES'], { message: 'Categoria inválida' }),
   price: z.coerce
     .number({ error: 'Preço inválido' })
-    .positive('Preço dever ser positivo')
-    .transform((value) => Math.round(value * 10000)),
+    .int('Preço deve ser inteiro em centavos')
+    .positive('Preço deve ser positivo')
+    .max(2_147_483_647, 'Preço fora do limite suportado'),
 });
 
 export type CreateProductInput = z.infer<typeof createProductsSchema>;

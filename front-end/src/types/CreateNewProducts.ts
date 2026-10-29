@@ -3,7 +3,7 @@ export interface CreateProductInput {
   name: string;
   description: string;
   category: string;
-  price: string; // ainda cru, ex: "10,90" — a conversão pra centavos é no backend ficando 1090
+  price: number; // inteiro em centavos
   image: File;
 }
 

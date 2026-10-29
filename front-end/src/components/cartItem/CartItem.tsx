@@ -3,7 +3,7 @@
 import { CircleChevronLeft, CircleChevronRight, Trash2 } from 'lucide-react';
 import { useCallback } from 'react';
 import { ICON_CONFIG } from '../../constant/iconConfig';
-import { brazilinaCurrencyFormat } from '../../shared/utils/Utils';
+import { formatCurrency } from '../../shared/utils/currency';
 import { getProductImageUrl } from '../../shared/utils/getProductImageUrl';
 import { type ProductImage } from '../../types/ProductImage';
 import { useCartItemMutations } from '../../hook/useCartItemMutation';
@@ -32,7 +32,7 @@ export const CartItem = ({ id, name, price, images, quantity }: CartItemProps) =
       {/* flex-1 seta o conteiner item-cart para main e joga o botão para baixo */}
       <div className="texto mx-2 flex flex-1 flex-col gap-0.5 py-1.5">
         <p className="title text-brand-dark text-sm font-bold uppercase">{name}</p>
-        <p className="price text-sm text-[#848484]">{brazilinaCurrencyFormat(subtotal)}</p>
+        <p className="price text-sm text-[#848484]">{formatCurrency(subtotal)}</p>
         <div className="chevrons mt-1 flex h-4.75 w-22.75 items-center gap-2">
           <CircleChevronLeft
             color="white"

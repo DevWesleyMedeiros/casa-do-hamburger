@@ -8,18 +8,6 @@ export const getItemSelectedClass = (itemName: string, currentSelected: string) 
   return itemName === currentSelected ? selectedClassItem : unselectedClassItem;
 };
 
-// format brazilian currency
-export const brazilinaCurrencyFormat = (currencyValue: number): string => {
-  if (Number.isNaN(currencyValue)) {
-    throw new TypeError('Valor não é moeda');
-  }
-  const intToFloatValue = currencyValue / 1000000;
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(intToFloatValue);
-};
-
 // envia nome de produtos uppercase
 export const toUpperCase = (productName: string): string => {
   if (!productName) {

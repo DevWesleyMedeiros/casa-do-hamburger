@@ -570,6 +570,14 @@ type UserResponseDTO = {
 | RN-ORDER-07 🔵 | Quando `ATTEND`/`DELIVER` existirem, a transição de status deve checar não só o papel (role), mas se o papel tem permissão para **aquela transição específica** (ver RN-RBAC-07/08) |
 | RN-ORDER-08 | Ao criar um pedido, o sistema deve armazenar em Order.customerName um snapshot do User.name naquele momento, de modo que alterações futuras no nome do usuário não alterem retroativamente o histórico do pedido. | 🟢 |
 
+Contrato monetário de entrada: `POST /auth/products` recebe `price` como inteiro positivo
+em centavos (string inteira no multipart), limitado ao `Int` PostgreSQL. O formulário
+recebe reais e converte uma única vez, por partes decimais. DTOs, snapshots e analytics
+preservam centavos; a apresentação usa `Intl.NumberFormat` com divisão por 100.
+A correção RF-45/Fase A remove a multiplicação por 10.000 na entrada e a divisão
+por 1.000.000 na apresentação. Dados legados exigem auditoria operacional específica;
+não são corrigidos automaticamente. Clientes HTTP devem enviar centavos.
+
 ### 6.9 Pagamento (Simulado hoje, Gateway real no futuro) 🆕
 
 | Regra | Descrição | Status |

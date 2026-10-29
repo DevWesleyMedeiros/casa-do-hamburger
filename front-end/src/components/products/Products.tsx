@@ -9,7 +9,7 @@ import { useMe } from '../../hook/useMe';
 import { NewCartItem } from '../../shared/services/api/cartItems/createCartItems';
 import { deleteProductById } from '../../shared/services/api/delete/DeleteProduct';
 import { getProductImageUrl } from '../../shared/utils/getProductImageUrl';
-import { brazilinaCurrencyFormat } from '../../shared/utils/Utils';
+import { formatCurrency } from '../../shared/utils/currency';
 import { type ProductsInterface } from '../../types/Products';
 
 export const Products = ({ id, name, description, price, images }: ProductsInterface) => {
@@ -91,9 +91,7 @@ export const Products = ({ id, name, description, price, images }: ProductsInter
           </div>
 
           <div className="mt-2 flex items-center justify-end">
-            <p className="text-brand-amber text-md mx-3 md:text-lg">
-              {brazilinaCurrencyFormat(price)}
-            </p>
+            <p className="text-brand-amber text-md mx-3 md:text-lg">{formatCurrency(price)}</p>
             <ShoppingCart
               size={18}
               className="mx-0.5 cursor-pointer"

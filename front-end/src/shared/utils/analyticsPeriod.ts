@@ -27,6 +27,5 @@ export function recentAnalyticsPeriod(days: 7 | 30, now = new Date()): Analytics
   };
 }
 
-export const analyticsCurrency = (cents: number): string =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cents / 100);
+export { formatCurrency as analyticsCurrency } from './currency';
 export const analyticsDate = (date: string): string => date.split('-').reverse().join('/');

@@ -1,3 +1,4 @@
+import { reaisToCents } from '../../shared/utils/currency';
 // src/components/NewProductModal.tsx
 import { zodResolver } from '@hookform/resolvers/zod';
 import { OctagonX, Upload } from 'lucide-react';
@@ -92,7 +93,7 @@ export const NewProductModal = () => {
       name: data.name,
       description: data.description,
       category: data.category,
-      price: data.price.replace(',', '.'),
+      price: reaisToCents(data.price),
       image: imageFile,
     });
     closeModal();
@@ -210,7 +211,7 @@ export const NewProductModal = () => {
                   id="price"
                   type="text"
                   inputMode="decimal"
-                  placeholder="Valor inteiro sem vírgulas"
+                  placeholder="Preço em reais (ex.: 29,90)"
                   className="h-9 w-full rounded-md border border-[#9D9D94]/40 bg-transparent px-3 text-sm text-[#9D9D94] outline-none focus:border-[#C41E00]"
                   {...register('price')}
                 />
