@@ -34,6 +34,9 @@ RN-CART-02/04/06, RN-ORDER-01/04/05/06, RNF-10/14/20, RN-SEC-02.
   RF-53 e evita retirar a recuperação local do titular. Corrige o código anterior que
   trocava `provider` para GOOGLE mantendo um hash local residual. Dados legados não
   são convertidos automaticamente nesta tarefa. Avatar próprio continua prioritário.
+  A correção de integração de 29/10 preserva a capitalização do e-mail validado,
+  conforme o cadastro local; canonicalização global exigiria uma decisão e tratamento
+  dos dados legados, e não foi introduzida somente no fluxo Google.
 - O cache privado tem prefixo comum e separação por usuário e geração de sessão;
   pedidos incluem também o privilégio no identificador. Logout, login e expiração
   cancelam requisições antigas e removem caches privados. Respostas de outra geração

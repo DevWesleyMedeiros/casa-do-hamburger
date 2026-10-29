@@ -85,8 +85,8 @@ describe('Google Auth Integration', () => {
     });
 
     it('deve vincular automaticamente a uma conta LOCAL existente quando email_verified=true (RF-54)', async () => {
-      const userEmail = faker.internet.email();
-      await prisma.user.create({
+      const userEmail = `Mixed.Case-${faker.string.uuid()}@example.invalid`;
+      const existing = await prisma.user.create({
         data: {
           name: faker.person.fullName(),
           email: userEmail,
@@ -102,6 +102,8 @@ describe('Google Auth Integration', () => {
 
       expect(response.status).toBe(200);
       const linked = await prisma.user.findUnique({ where: { email: userEmail } });
+      expect(response.body.user.id).toBe(existing.id);
+      expect(await prisma.user.count()).toBe(1);
       expect(linked?.firebaseUid).toBe(decoded.uid);
       expect(linked?.provider).toBe('LOCAL');
       expect(linked?.password).not.toBeNull();

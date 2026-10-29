@@ -53,15 +53,15 @@ describe('fronteiras de segurança', () => {
       } as DecodedIdToken),
     ).toThrow();
   });
-  it('normaliza somente o e-mail de uma identidade Google verificada', () => {
+  it('valida o e-mail Google sem mudar a capitalização usada pelo cadastro local', () => {
     expect(
       verifiedGoogleEmail({
         uid: 'uid',
-        email: 'User@example.invalid',
+        email: ' User@example.invalid ',
         email_verified: true,
         firebase: { sign_in_provider: 'google.com' },
       } as DecodedIdToken),
-    ).toBe('user@example.invalid');
+    ).toBe('User@example.invalid');
   });
   it('relata nomes de variáveis inválidas sem seus valores', () => {
     try {
