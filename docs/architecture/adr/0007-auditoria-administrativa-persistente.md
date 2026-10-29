@@ -1,6 +1,6 @@
 # ADR-0007 — Auditoria administrativa persistente
 
-Data: 29/10/2026. Status: aceita para implementação; evidências no relatório RF-45.
+Data: 29/10/2026. Status: implementada e validada localmente; evidências e situação da CI no relatório RF-45.
 Referências: RF-45, RF-19/35/38/40/41/42, RN-RBAC, RNF-14/15/16/20 e ADR-0004/0006.
 
 ## Contexto e decisão
