@@ -3,8 +3,8 @@
 > **Tipo de documento:** Especificação de Requisitos + Regras de Negócio (BRD/SRS)
 > **Projeto:** Casa do Hambúrguer — Sistema de Pedidos para Hamburgueria (E-commerce de Food Service)
 > **Natureza:** Boilerplate reutilizável para aplicações de e-commerce/pedidos
-> **Versão:** 2.1.2
-> **Status:** Atualização de segurança de 28/10/2026: correções no ciclo de senha, isolamento de dados privados, validade da identidade, vínculos Google e concorrência dos pedidos. As notas antigas do changelog são históricas. Integração PostgreSQL depende de banco descartável comprovado; não foi executada nesta entrega. Revogação de sessões após reset permanece proposta na ADR-0005. Consulte ADR-0004 e docs/security-audit/correcoes-seguranca-2026-10-28.md para evidências e pendências.
+> **Versão:** 2.1.3
+> **Status:** Reconciliação documental de 29/10/2026 com o código atual: segurança, dashboard RF-44, testes, guarda de banco e automação de qualidade. RF-44 e a validação final das correções de concorrência permanecem 🟡; refresh token, revogação após reset, pagamento real e demais recursos ausentes continuam 🔵. Consulte a seção 14.5 para distinguir implementação inspecionada, resultados registrados em relatórios e verificações desta revisão. As notas antigas do changelog são históricas.
 
 ---
 
@@ -21,12 +21,18 @@ Selos de status:
 | 🟡 **Em andamento** | Parcialmente implementado ou próximo passo imediato do backlog |
 | 🔵 **Proposto (MVP+)** | Sugestão de arquiteto para o boilerplate ficar completo |
 
+Nesta atualização, cada alteração de selo tem evidência nos caminhos citados. A presença
+de código ou de uma suíte não comprova sua execução, cobertura integral, aprovação remota
+ou deploy. Pendências de validação permanecem explícitas; não se altera a regra pretendida
+para justificar a implementação existente.
+
 ---
 
 ## 📋 Changelog
 
 | Versão | Data | Mudança |
 | --- | --- | --- |
+| 2.1.3 | 29/10/2026 | Status reconciliados com o código: RN-AUTH-04/13 e RN-DTO-05 🟢; RNF-11/20 e RN-DATA-05 🟡 por entrega parcial. RF-44 detalhado como implementado em validação; RF-42 alinhado à edição de produtos ainda ausente. Atualizadas referências aos DTOs, testes Playwright, CI E2E, hook, quality gate e guarda de banco. Resultados históricos não foram tratados como verificações executadas nesta revisão. |
 | 2.1.2 | 28/10/2026 | Correções de atomicidade/concorrência, isolamento de caches privados, conta/privilégio atual na autenticação, vínculo Google sem sobrescrita e escape de HTML. Guarda de banco descartável adicionada. Integração e revogação de sessões após reset continuam pendentes (ADR-0004/0005 e relatório desta data). |
 | 2.1.0 | *(data do merge)* | Implementado o Módulo de Pedidos completo (RF-32 a RF-40): checkout com Snapshot Pattern (nome, preço e imagem), máquina de estados de 5 status (`PENDING\|PREPARING\|READY\|DELIVERED\|CANCELLED`), entidade `Payment` (simulada, RF-46 continua roadmap), checagem de posse (RN-ORDER-06, mitigação IDOR) e cancelamento com janela de tempo (RF-40). RF-39 (notificação por e-mail via Resend) implementado nesta mesma rodada. |
 | 1.8.1 | 06/09/2026 | **Auditoria pós-merge da branch `feat/RF051-055-login-google-firebase` → `develop`** (PR #24, commit único `904710e`, squash merge em 05/09/2026 — o nome real da branch e o nome citado na v1.8.0 (`feat/google-oauth-implementation`) divergem; o histórico do repositório confirma `feat/RF051-055-login-google-firebase (#24)`). **Confirmado no código:** RF-51 a RF-55 estão de fato implementados — `googleAuth.service.ts` verifica o Firebase ID Token via `firebase-admin` (`verifyFirebaseIdToken`), `schema.prisma` tem `password` opcional + enum `AuthProviders (LOCAL\|GOOGLE)` + `googleId`/`firebaseUid`, o vínculo automático de conta usa `prisma.user.upsert` (atômico) com gate por `email_verified` (RN-AUTH-11), e a sessão é emitida com o mesmo `signSessionJwt`/cookie do login local (RF-55), inclusive `sameSite`/`secure` agora alinhados também com `clearAuthCookie.ts`. Rate limiting dual camada confirmado (IP via `googleAuthBroadLimiter` na rota + UID via `googleAuthTargetedStore` no service). Nenhum PII (e-mail, uid, token) aparece nos `console.log`/`console.error` do fluxo. **Porém a v1.8.0 só girou o selo das 5 linhas de RF-51 a RF-55 — as regras de suporte não foram atualizadas junto**, o que é a causa da inconsistência de selos apontada pelo mantenedor: **RN-AUTH-10, RN-AUTH-11, RN-AUTH-12 e RN-CRYPT-05** permaneciam 🔵 mesmo com a regra já implementada e verificada no código — promovidas a 🟢 nesta versão. **RN-AUTH-08 e RN-AUTH-09, e RNF-23/24/25, não foram apenas re-selados: o *texto* delas ainda descrevia a Opção A rejeitada pela ADR-0003 (Authorization Code Flow + PKCE, `google-auth-library`, troca de `code` por `id_token` com `CLIENT_SECRET`)** — mecanismo que nunca chegou a ser construído; o que existe de fato é Firebase Authentication no client + Firebase Admin SDK no backend. Texto reescrito para refletir a Opção D (já formalizada na ADR-0003 revisada) e diagrama de sequência 9.3 redesenhado (não usava mais `code`/PKCE/CLIENT_SECRET, e sim `idToken` do Firebase). ERD (Seção 7) corrigido: `providerId` (nunca existiu) trocado por `googleId`/`firebaseUid` (campos reais), `provider`/`emailVerified` deixam de ser "proposto". OWASP A07 (Seção 11) atualizado. **Achados não bloqueantes, registrados como dívida técnica leve:** (1) `back-end/.env.example` e `front-end/.env.example` ainda têm o Project ID do Firebase com o mesmo typo já corrigido no `.env` real (`hambuguer` em vez de `hamburguer`) — não afeta produção, mas induz erro em quem copiar o exemplo; (2) `googleAuth.test.ts` não está mais com `describe.skip` (o bug #47 de dependência circular parece ter sido resolvido pelo commit que extraiu `googleAuthTargetStore.ts` para arquivo próprio), mas o comentário `TODO(#47)` no arquivo ainda descreve o bug como não resolvido — não executei a suíte, então não posso confirmar se ela passa, só que estruturalmente ela roda; (3) `googleAuthController.loginWithGoogle` lança `Error` genérico (não `AppError`) se `idToken` vier vazio — inconsistente com o padrão do resto do projeto, embora `validateBody(googleAuthSchema)` já bloqueie essa entrada antes de chegar ao controller. |
@@ -105,12 +111,12 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | RF-06 | O sistema deve permitir logout, invalidando o cookie de sessão | 🟢 |
 | RF-07 | O sistema deve impedir cadastro com e-mail já existente | 🟢 |
 | RF-08 | O sistema deve validar formato de e-mail e força mínima de senha no cadastro | 🟢 |
-| RF-09 | Recuperação de senha via e-mail, com atualização da senha e consumo do token atômicos | 🟡 Código corrigido; integração em banco descartável pendente |
+| RF-09 | Recuperação de senha via e-mail, com atualização da senha e consumo do token atômicos | 🟡 Fluxo implementado em `passwordReset.service.ts` e `passwordResetToken.repository.ts`; validação final conforme seção 14.5 |
 | RF-10 | O sistema deve permitir edição de dados de perfil (nome, avatar) | 🟢 |
 | RF-11 | O sistema deve suportar renovação de token via refresh token (rotação de sessão) | 🔵 |
 | RF-12 | O sistema deve registrar tentativas de login falhas para fins de rate limiting sem persistência auditável | 🟢 |
-| RF-56 | Token de redefinição de uso único, expiração de 30 minutos e emissão/consumo protegidos contra concorrência | 🟡 Código e regressões preparados; integração pendente |
-| RF-57 | Contas GOOGLE sem senha local não solicitam reset local; conta LOCAL vinculada ao Google preserva o método local | 🟡 Código corrigido; integração pendente |
+| RF-56 | Token de redefinição de uso único, expiração de 30 minutos e emissão/consumo protegidos contra concorrência | 🟡 Transação, lock e regressões de concorrência presentes; validação final conforme seção 14.5 |
+| RF-57 | Contas GOOGLE sem senha local não solicitam reset local; conta LOCAL vinculada ao Google preserva o método local | 🟡 Checagens e vínculo sem remover senha LOCAL implementados; validação final conforme seção 14.5 |
 | RN-AVATAR-01 | O avatar do usuário autenticado pode ser definido/atualizado independentemente do provider. Avatares locais são persistidos via Cloudinary; contas Google podem utilizar a foto proveniente da identidade Google verificada. Quando o usuário possuir avatar próprio, ele deve ter prioridade sobre a foto do Google. | 🟢 |
 | RF-51 🆕 | O sistema deve permitir login/cadastro via **Google OAuth 2.0** ("Entrar com Google") como alternativa ao login local por e-mail/senha | 🟢 |
 | RF-52 🆕 | O backend deve verificar o `id_token` retornado pelo Google (assinatura, `aud`, `iss`, `exp`) antes de criar qualquer sessão — nunca confiar em dados de identidade enviados diretamente pelo frontend | 🟢 |
@@ -128,7 +134,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | RF-16 | Upload de imagem deve validar o tipo real do arquivo por *magic bytes*, não apenas extensão/MIME declarado | 🟢 |
 | RF-17 | Imagens devem ser enviadas via streaming (`Readable.from(buffer).pipe(uploadStream)`) para o Cloudinary, sem salvar em disco local | 🟢 |
 | RF-18 | Variações de tamanho de imagem (thumbnail, card, detail) devem ser geradas via parâmetros de transformação de URL do Cloudinary, não por múltiplos uploads físicos | 🟢 |
-| RF-19 | Administradores devem poder editar e excluir produtos (soft delete recomendado) | 🟡 |
+| RF-19 | Administradores devem poder editar e excluir produtos (soft delete recomendado) | 🟡 Exclusão física implementada; edição e soft delete de produtos ausentes nas rotas/repositório atuais |
 | RF-20 | O sistema deve suportar categorização de produtos (atributo `category` na tabela `Product`) | 🟢 |
 | RF-21 | O sistema deve suportar produtos com estoque/disponibilidade controlada (flag `isAvailable`) | 🟡 |
 | RF-22 | O sistema deve suportar produtos configuráveis (ex.: ponto da carne, adicionais) | 🔵 |
@@ -172,9 +178,9 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | ID | Requisito | Status |
 | --- | --- | --- |
 | RF-41 | Rotas administrativas devem ser protegidas por middleware `requiredAdmin` | 🟢 |
-| RF-42 | Painel administrativo deve permitir CRUD completo de produtos | 🟢 |
+| RF-42 | Painel administrativo deve permitir CRUD completo de produtos | 🟡 Listagem, criação e exclusão presentes; edição pendente, conforme RF-19 |
 | RF-43 | Painel administrativo deve permitir gestão de pedidos (Kanban de status) | 🟢 |
-| RF-44 | Dashboard administrativo de pedidos e valores simulados, com filtros e agregações no servidor (contrato abaixo) | 🟡 Em implementação; conclusão depende da validação integral |
+| RF-44 | Dashboard administrativo de pedidos e valores simulados, com filtros e agregações no servidor (contrato abaixo) | 🟡 API, UI, filtros, cache privado, suítes e job E2E implementados; aprovação remota e conclusão do fluxo de PR não verificadas nesta revisão (ADR-0006 e seção 14.5) |
 | RF-45 | Deve existir auditoria (log) de ações administrativas sensíveis | 🔵 |
 
 #### RF-44 — Contrato de analytics administrativo
@@ -237,16 +243,16 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | RNF-08 | Segurança | Cabeçalhos de segurança HTTP (Helmet: CSP, HSTS, X-Frame-Options) — **bloqueador para considerar A05 (Seção 11) como 🟢** | 🟢 (confirmado em `app.ts`: `app.use(helmet())`, mergeado na `develop` via PR #21, antes da branch de RF-09 — este documento estava desatualizado nesse ponto) |
 | RNF-09 | Performance | Imagens devem ser servidas em tamanho adequado ao contexto via transformação de URL (CDN) | 🟢 |
 | RNF-10 | Performance | Estado de servidor deve ter única fonte de verdade (TanStack Query), evitando cache duplicado | 🟢 |
-| RNF-11 | Performance | Consultas frequentes devem ter índices no banco (ex.: `productId`, `userId`, `status`) | 🔵 |
+| RNF-11 | Performance | Consultas frequentes devem ter índices no banco (ex.: `productId`, `userId`, `status`) | 🟡 `schema.prisma` contém índices/chaves de usuário, produto, pedido e status; `Order.createdAt` não tem índice. Adequação do filtro temporal de analytics depende de volume/seletividade; não se presume cobertura completa |
 | RNF-12 | Performance | Core Web Vitals (LCP, CLS, INP) dentro da faixa "Good" do Lighthouse | 🔵 |
 | RNF-13 | Confiabilidade | Migrations de banco devem ser versionadas (`prisma migrate dev`), nunca `db push` em produção | 🟢 |
-| RNF-14 | Confiabilidade | Operações relacionadas usam transação e controle de concorrência: senha/token e checkout/carrinho serializam pelo usuário; status usa comparação do estado esperado | 🟡 Código e regressões preparados; integração pendente |
+| RNF-14 | Confiabilidade | Operações relacionadas usam transação e controle de concorrência: senha/token e checkout/carrinho serializam pelo usuário; status usa comparação do estado esperado | 🟡 Implementação confirmada em `userLock.ts`, repositórios de senha/carrinho/pedidos e regressões de integração; validação final conforme seção 14.5 |
 | RNF-15 | Manutenibilidade | Separação em camadas: `routes → controllers → services → repositories` | 🟢 |
 | RNF-16 | Manutenibilidade | Nenhuma regra de negócio dentro de controller — controller apenas orquestra | 🟢 |
 | RNF-17 | Escalabilidade | Domínio de Pedidos deve ser isolável em serviço próprio no futuro (ver Seção 10) | 🔵 |
 | RNF-18 | Usabilidade | Feedback visual imediato (otimista) em ações do carrinho | 🟢 |
 | RNF-19 | Observabilidade | Logs estruturados de erros de API (nível mínimo: método, rota, status, tempo) | 🔵 |
-| RNF-20 | Testabilidade | Cobertura de testes automatizados para regras de negócio críticas (carrinho, pedido, autenticação) — ver Seção 14 | 🔵 |
+| RNF-20 | Testabilidade | Cobertura de testes automatizados para regras de negócio críticas (carrinho, pedido, autenticação) — ver Seção 14 | 🟡 Existem testes unitários, integração/concorrência e E2E de analytics; jornadas completas de cadastro → carrinho → checkout e admin → criar produto continuam sem suíte E2E correspondente. Cobertura integral não comprovada |
 | RNF-21 | Portabilidade | Nenhuma URL hardcoded — todo endpoint via variável de ambiente | 🟢 |
 | RNF-22 | Multi-tenancy | Sistema é single-tenant por design — não há isolamento de dados por loja | 🟢 |
 | RNF-23 🆕 | Segurança | **(Reescrita v1.8.1)** Superado pela ADR-0003 revisada: com Firebase Authentication, o app não implementa nem gerencia Authorization Code Flow/PKCE — esse handshake OAuth com o Google fica inteiramente dentro do SDK do Firebase/Google Identity Services. A obrigação equivalente que o projeto de fato controla é RN-AUTH-08/09 (verificação server-side do Firebase ID Token) | 🟢 (não aplicável no desenho atual; requisito coberto por RN-AUTH-08) |
@@ -418,19 +424,19 @@ Então o vínculo automático NÃO ocorre, e o sistema orienta o usuário a conf
 | RN-AUTH-01 🟢 | Senha nunca trafega nem é armazenada em texto puro — hash bcrypt (custo ≥ 10) antes de qualquer persistência |
 | RN-AUTH-02 🟡 | O código atual emite JWT com `id`/`admin`, `iat`/`exp` e duração de sete dias. O requisito anterior de expiração curta diverge da implementação; duração e revogação após reset dependem de decisão do mantenedor (ADR-0005). Nenhum refresh token foi acrescentado. |
 | RN-AUTH-03 🟢 | O JWT é entregue exclusivamente via cookie `httpOnly` + `secure` (produção) — nunca em `localStorage`/`sessionStorage`, para mitigar roubo via XSS |
-| RN-AUTH-04 🔵 | `sameSite` deve ser `lax` em same-site e `none` (+ `secure: true`) quando frontend e backend estão em domínios diferentes (Vercel × Railway) |
+| RN-AUTH-04 🟢 | `sameSite` deve ser `lax` em same-site e `none` (+ `secure: true`) quando frontend e backend estão em domínios diferentes (Vercel × Railway). Login local/Google e limpeza do cookie usam `lax` fora de produção e `none`/`secure` em produção (`auth.controller.ts`, `googleAuth.controller.ts`, `clearAuthCookie.ts`); comportamento no deploy não foi revalidado nesta revisão |
 | RN-AUTH-05 🔵 | Deve existir um **refresh token** de vida longa, também `httpOnly`, para renovar o access token sem exigir novo login — rotação de token a cada uso (evita replay) |
 | RN-AUTH-06 🟢 | Logout invalida o cookie no cliente; se o refresh token existir, deve haver blacklist/revogação no servidor |
 | RN-AUTH-07 🟢 | Toda rota protegida verifica assinatura HS256, expiração e formato da identidade; consulta existência, `deletedAt` e `admin` atual no banco antes de definir `req.user`. O privilégio antigo do JWT não autoriza a operação. |
 | RN-AUTH-08 🟢 🆕 | **(Reescrita v1.8.1 — mecanismo real difere do proposto na v1.2.0)** Login externo (Google) usa **Firebase Authentication** (`GoogleAuthProvider` + `signInWithPopup`) no frontend; o Firebase já entrega ao client um **Firebase ID Token** pronto (o app nunca manuseia `code`/`CLIENT_SECRET`/PKCE). O backend verifica esse token com o **Firebase Admin SDK** (`verifyFirebaseIdToken`, `back-end/src/config/firebaseAdmin.ts`), que confere assinatura, `aud` (Project ID do Firebase), `iss` e `exp` antes de qualquer criação de sessão — ver ADR-0003 revisada (27/08/2026), Opção D |
 | RN-AUTH-09 🟢 🆕 | **(Reescrita v1.8.1)** O Firebase ID Token **nunca** é usado como sessão da aplicação — serve só para comprovar identidade perante o Firebase Admin. A sessão continua sendo o JWT próprio (RN-AUTH-02, `jose`), emitido pelo backend somente após `verifyFirebaseIdToken` resolver com sucesso (`googleAuth.service.ts`, função `signSessionJwt`, reaproveita `toJwtPayloadDTO` — mesmo formato do login local) |
 | RN-AUTH-10 🟢 🆕 | O campo `User.password` é **opcional** (nullable); contas com `provider=GOOGLE` não possuem senha local e não podem autenticar pelo fluxo de e-mail/senha — confirmado em `schema.prisma` (`password String?`) |
-| RN-AUTH-11 🟡 | Login Google exige Firebase `sign_in_provider=google.com` e `email_verified=true`. O vínculo nunca substitui outro `firebaseUid`. Contas LOCAL vinculadas mantêm provider/senha locais (RF-53); novas contas Google usam GOOGLE/password=null. O fluxo preserva a capitalização do e-mail validado, conforme o cadastro local; não introduz canonicalização exclusiva do login Google. Implementação corrigida; integração concorrente pendente (ADR-0004). |
+| RN-AUTH-11 🟡 | Login Google exige Firebase `sign_in_provider=google.com` e `email_verified=true`. O vínculo nunca substitui outro `firebaseUid`. Contas LOCAL vinculadas mantêm provider/senha locais (RF-53); novas contas Google usam GOOGLE/password=null. O fluxo preserva a capitalização do e-mail validado, conforme o cadastro local; não introduz canonicalização exclusiva do login Google. Implementação confirmada em `verifiedGoogleIdentity.ts` e `googleIdentity.repository.ts`; validação final conforme ADR-0004 e seção 14.5. |
 | RN-AUTH-12 🟢 🆕 | A rota `/auth/google` está sob rate limiting dual camada: `googleAuthBroadLimiter` (por IP, 20/15min, aplicado como middleware da rota) + `googleAuthTargetedStore` (por UID do Google, 5/15min, aplicado dentro do service após decodificar o token). **Nota:** a regra original previa reuso do *mesmo* limiter das demais rotas de auth (RNF-06); o que foi construído é um limiter **dedicado** para `/auth/google` — cumpre o espírito da regra (rota protegida contra brute-force) mas com uma store própria, não compartilhada |
-| RN-AUTH-13 🟡 🆕 | Token de redefinição de senha é opaco, gerado com `crypto.randomBytes(32)` (256 bits de entropia); apenas seu hash SHA-256 é persistido no banco — o valor em texto puro nunca é armazenado, só existe no e-mail enviado uma única vez |
-| RN-AUTH-14 🟡 | Token expira em 30 minutos e só pode ser consumido uma vez por atualização condicional. Alteração de `User.password` e consumo fazem commit/rollback juntos. Emissão e consumo serializam pela linha do usuário; emitir novo token invalida os anteriores na mesma transação. Código e testes preparados; integração pendente. |
+| RN-AUTH-13 🟢 | Token de redefinição de senha é opaco, gerado com `crypto.randomBytes(32)` (256 bits de entropia); apenas seu hash SHA-256 é persistido no banco. Implementado em `shared/utils/passwordResetToken.ts`, `passwordReset.service.ts` e `passwordResetToken.repository.ts`; o token cru compõe o link de e-mail e não é persistido |
+| RN-AUTH-14 🟡 | Token expira em 30 minutos e só pode ser consumido uma vez por atualização condicional. Alteração de `User.password` e consumo fazem commit/rollback juntos. Emissão e consumo serializam pela linha do usuário; emitir novo token invalida os anteriores na mesma transação. Código e regressões presentes; validação final conforme seção 14.5. |
 | RN-AUTH-15 🟢 🆕 | A resposta de `POST /auth/forgot-password` é **sempre genérica** (200, mesma mensagem), independentemente de o e-mail existir na base — mesma diretriz anti-enumeração já corrigida em US-02/RF-12 (v1.3.0). Confirmado em código (`passwordReset.controller.ts`, `ForgotPassword.tsx`) e coberto por 2 dos 7 testes de integração |
-| RN-AUTH-16 🟡 | Reset grava em `User.password`, campo já corrigido antes desta entrega. A correção atual elimina operações independentes de senha/consumo; falha parcial reverte ambos. Express 5 propaga rejeições assíncronas; o controller também segue o wrapper `asyncHandler`. Integração pendente. |
+| RN-AUTH-16 🟡 | Reset grava em `User.password`, campo já corrigido antes desta entrega. A correção atual elimina operações independentes de senha/consumo; falha parcial reverte ambos. Express 5 propaga rejeições assíncronas; o controller também segue o wrapper `asyncHandler`. Validação final conforme seção 14.5. |
 
 ### 6.2 Criptografia de Senhas 🟢
 
@@ -451,7 +457,7 @@ Então o vínculo automático NÃO ocorre, e o sistema orienta o usuário a conf
 | RN-RBAC-03 | `requiredAdmin` exige `req.user.admin === true`, definido pelo middleware a partir do banco; demais usuários recebem 403 | 🟢 |
 | RN-RBAC-04 | Middleware de admin **nunca** deve ser aplicado a rotas de recurso pessoal do usuário (ex.: seu próprio carrinho) | 🟢 |
 | RN-RBAC-05 | Autorização é sempre validada no backend — checagens de role no frontend são apenas cosméticas (UX), nunca a fonte de verdade de segurança | 🟢 |
-| RN-RBAC-06 | Hoje `USER` cobre: visualizar produtos, adicionar/remover/editar itens do carrinho, realizar compras. `ADMIN` cobre tudo isso + criar produtos, editar/excluir produtos (edição/exclusão ainda 🟡), e acompanhar todos os pedidos | 🟡 |
+| RN-RBAC-06 | Hoje `USER` cobre: visualizar produtos, adicionar/remover/editar itens do carrinho, realizar compras. `ADMIN` cobre tudo isso + criar/excluir produtos, acompanhar todos os pedidos e consultar analytics. Edição de produto permanece pendente (RF-19/42); analytics segue em validação (RF-44) | 🟡 |
 | RN-RBAC-07 | **[Proposto]** Role `ATTEND`: acesso de leitura/escrita apenas ao módulo de Pedidos (transições de status `PENDING→PREPARING→READY`); **sem** acesso a CRUD de produtos nem a dados de outros usuários além do necessário para o pedido | 🔵 |
 | RN-RBAC-08 | **[Proposto]** Role `DELIVER`: acesso de leitura restrito a pedidos com status `READY`/`DELIVERED`; única transição permitida é `READY → DELIVERED`; sem acesso a `PENDING`/`PREPARING` nem ao catálogo | 🔵 |
 | RN-RBAC-09 | **[Proposto]** Migrar de checagem de role única (`role === 'ADMIN'`) para checagem baseada em array de permissões (ex.: `hasPermission(user, 'orders:transition:preparing')`) quando a 3ª/4ª role for introduzida — evita `if/else` explosivo no middleware | 🔵 |
@@ -505,9 +511,9 @@ Requisição HTTP
 | --- | --- |
 | RN-DTO-01 🟢 | Toda resposta de API que envolve `User` deve passar por um mapper que remove `password` (hash) do payload — nunca confiar no Prisma `select` implícito. Implementado via `toUserDTO` (`dtos/user.dto.ts`), aplicado consistentemente em `login`, `register` e `/me` |
 | RN-DTO-02 🟢 | Entrada de dados (`request body`) é validada com **schemas Zod dedicados por rota** (ex.: `createUserSchema`, `createOrderSchema`), nunca reaproveitando o schema do banco |
-| RN-DTO-03 🟢 | Saída de dados usa **DTOs explícitos** (ex.: `UserResponseDTO`, `ProductResponseDTO`, `OrderResponseDTO`) — desacopla o formato de API do schema interno do Prisma. Fatia de `User` concluída (`toUserDTO`); `ProductResponseDTO`/`OrderResponseDTO` ainda pendentes |
+| RN-DTO-03 🟢 | Saída de dados usa **DTOs/mappers explícitos**, desacoplando o contrato de API do modelo interno. Existem `dtos/user.dto.ts`, `product.dto.ts`, `order.dto.ts`, `cartItem.dto.ts` e `adminAnalytics.dto.ts`; `toProductDTO`/`toOrderDTO` já estão implementados, não são pendências futuras |
 | RN-DTO-04 🟢 | Preços são serializados como inteiros em centavos no backend e formatados (R$) somente na camada de apresentação (frontend) |
-| RN-DTO-05 🔵 | Datas trafegam em ISO 8601 (UTC); formatação de fuso/local é responsabilidade do frontend |
+| RN-DTO-05 🟢 | Instantes como `createdAt`/`updatedAt` dos pedidos trafegam em ISO 8601 UTC pela serialização JSON de `Date` em `order.dto.ts`; `CardPedidos.tsx` formata data/hora no frontend. Datas civis de analytics são `YYYY-MM-DD`, não instantes UTC, conforme o contrato RF-44 |
 | RN-DTO-06 🟢 🆕 | O payload do JWT (dado de **sessão**) deve conter o mínimo necessário para autorização (`id`, `admin`) e nunca dado de **perfil** (`name`, `email`) — o JWT é assinado, não criptografado, então qualquer um com o cookie decodifica o payload em base64 sem precisar da chave secreta. Sessão (`toJwtPayloadDTO`) e perfil (`toUserDTO`) são DTOs deliberadamente separados, nunca reunidos no mesmo objeto de saída |
 
 **Exemplo de contrato:**
@@ -538,7 +544,7 @@ type UserResponseDTO = {
 | RN-DATA-02 🟢 | Alterações de schema **sempre** via `prisma migrate dev` (nunca `db push` fora do ambiente local de prototipagem) — garante histórico auditável de migrations |
 | RN-DATA-03 🟢 | Chaves compostas únicas para evitar duplicidade lógica (ex.: `@@unique([userId, productId])` em `CartItem`) |
 | RN-DATA-04 🟢 | Operações que afetam múltiplas tabelas de forma atômica (ex.: finalizar pedido = criar Order + OrderItems + esvaziar Cart) devem usar `prisma.$transaction([...])` |
-| RN-DATA-05 🔵 | Soft delete (`deletedAt: DateTime?`) para entidades com histórico relevante (Product, User) em vez de `DELETE` físico |
+| RN-DATA-05 🟡 | Soft delete (`deletedAt: DateTime?`) para entidades com histórico relevante (Product, User) em vez de `DELETE` físico. Há `deletedAt` em User/Order e rejeição de conta desativada em autenticação/locks; Product não tem o campo e sua exclusão continua física. Fluxo completo de soft delete permanece pendente |
 
 ### 6.7 Carrinho de Compras 🟢
 
@@ -700,7 +706,7 @@ back-end/docs/architecture/ERD.md (gerado pelo Prisma).
 > - `CART_ITEM` mantém a constraint `@@unique([userId, productId])` (RN-CART-02).
 > - 🆕 `USER.provider`/`googleId`/`firebaseUid`/`emailVerified` estão **implementados** (🟢) desde a PR #24 (login via Google, RN-AUTH-08 a 12) — `password` deixa de ser obrigatório.
 > - Atualização de 28/10/2026: o campo real é `User.password`, opcional, e o código já o utilizava corretamente antes desta entrega. O ERD acima foi alinhado ao nome real. A vulnerabilidade corrigida nesta tarefa era a falta de atomicidade/controle de concorrência entre a troca da senha e o consumo do token; o changelog antigo permanece como histórico.
-> - 🆕 `PASSWORD_RESET_TOKEN` é a entidade nova da RF-09 (🟡, Sprint 2) — só guarda o hash do token (RN-AUTH-13), nunca o valor cru.
+> - `PASSWORD_RESET_TOKEN` integra RF-09/56 (🟡 em validação); armazenamento somente do hash está implementado (RN-AUTH-13 🟢). Consumo e alteração de senha agora usam a mesma transação; não persistir token cru.
 > - 🆕 `EMAIL_VERIFICATION_TOKEN` (v1.7.0): model e repositório existem no banco desde a branch de RF-09, mas **nenhuma rota/controller os consome** hoje — não é uma entidade "proposta" nem "implementada" no sentido funcional, é scaffolding não conectado a nenhum fluxo. Não incluído no diagrama acima até virar feature real (ou ser removido).
 
 ---
@@ -842,19 +848,20 @@ sequenceDiagram
 | Carrinho | Adicionar/atualizar/remover item, upsert por chave composta |
 | Pedido | Criar pedido a partir do carrinho com snapshot, listar por usuário, admin altera status |
 | Pagamento | Simulação de checkout (sem gateway real obrigatório para o MVP) |
-| Infra | CI/CD funcional (Vercel + Railway + Neon), migrations versionadas |
+| Infra | CI/CD funcional (Vercel + Railway + Neon), migrations versionadas; atualmente há CI configurada, sem job ativo de CD/deploy |
 
-> 🟢 ✅ MVP fechado nesta rodada — criação de pedido de ponta a ponta (RF-32/33/34/35) e validação da máquina de estados no service (RF-38) concluídas e testadas (ver Seção 14 — testes de integração e unitários do
-módulo de pedidos).**.
+> 🟡 **MVP parcialmente entregue:** o fluxo de pedidos e a máquina de estados existem,
+> mas não se deve declarar todo o MVP concluído enquanto houver edição de catálogo
+> pendente (RF-19/42), validações em aberto e CD não comprovado. Consulte a seção 14.5.
 
 ### 10.2 Roadmap Pós-MVP
 
 | Fase | Entregas | Prioridade sugerida |
 | --- | --- | --- |
-| **Fase 2 — Fechar o MVP** | Finalizar fluxo de criação de pedido, máquina de estados validada no service | **Alta — próxima sprint** |
-| **Fase 3 — Robustez** | Refresh token + rotação, rate limiting, Helmet, testes automatizados (ver Seção 14) | Alta |
-| **Fase 4 — Experiência** | Notificações de status, histórico de pedidos, ~~recuperação de senha~~ (em desenvolvimento, RF-09 🟡 — ver Sprint 2 no Trello), ~~login via Google~~ (🟢 entregue, PR #24, ver ADR-0003 e Changelog 1.8.1) | Média |
-| **Fase 5 — Operação** | Roles `ATTEND`/`DELIVER`, painel de métricas admin, soft delete, auditoria | Média |
+| **Fase 2 — Fechar o MVP** | 🟢 Criação de pedidos e máquina de estados implementadas; 🟡 edição de catálogo, validação integral e conclusão operacional pendentes | Alta |
+| **Fase 3 — Robustez** | 🟢 Rate limiting, Helmet e guarda de banco implementados; 🟡 ampliação/validação de testes; 🔵 refresh token, rotação e revogação após reset (ADR-0005) | Alta |
+| **Fase 4 — Experiência** | 🟢 Notificações de status, histórico e login Google; 🟡 validação final de recuperação de senha (RF-09/56/57) | Média |
+| **Fase 5 — Operação** | 🟡 Dashboard RF-44 implementado em validação e soft delete parcial; 🔵 roles `ATTEND`/`DELIVER` e auditoria administrativa | Média |
 | **Fase 6 — Pagamento real** | Integração Stripe/Mercado Pago em modo live, webhooks | Média |
 | **Fase 7 — Escala** | Extração do domínio de Pedidos para microsserviço dedicado (ver 10.3) | Baixa (só se necessário) |
 
@@ -939,7 +946,13 @@ graph LR
 
 ## 14. Estratégia de Testes 🆕
 
-> Atualização de 28/10/2026: existem suítes unitárias de segurança, guarda de banco, máquina de estados e saída HTML, além de cinco arquivos de integração. No frontend, os testes cobrem serviço Google e ciclo da sessão/cache. As referências antigas a campos inexistentes foram corrigidas antes desta entrega. Integração exige banco descartável atestado antes da conexão; mocks não comprovam concorrência no PostgreSQL. Resultados efetivamente executados estão no relatório de segurança desta data. E2E real permanece pendente.
+> Atualização de 29/10/2026: existem sete arquivos unitários e seis suítes de integração
+> em `back-end/src/tests/`, incluindo segurança/concorrência e analytics. O frontend tem
+> testes do serviço Google, sessão/cache e dashboard, além de nove cenários Playwright
+> em `front-end/e2e/analytics.spec.ts`. A CI já possui job `e2e` ativo. Isso não comprova
+> cobertura de todas as jornadas de negócio nem execução aprovada nesta revisão.
+> Integração/E2E continuam exigindo banco descartável atestado antes da conexão;
+> mocks não comprovam concorrência no PostgreSQL. Consulte a seção 14.5.
 
 ### 14.1 Os 3 tipos essenciais (Pirâmide de Testes)
 
@@ -986,6 +999,44 @@ Uma feature só é considerada "pronta" quando:
 - [ ] Teste de integração cobre a rota de API correspondente
 - [ ] Lint e build passam sem warning novo
 - [ ] Code review (Seção 15) não apontou divergência com este documento
+
+### 14.5 Estado atual das automações e limites da validação — 29/10/2026
+
+- 🟢 **Diretrizes compartilhadas:** `AGENTS.md` existe na raiz e orienta implementação,
+  revisão, escopo, segredos e conclusão; não executa validações automaticamente.
+- 🟢 **Automação de qualidade implementada:** `.githooks/pre-commit` chama
+  `scripts/quality-gate.mjs --scope all`; o script executa lint e `format:check`,
+  confere arquivos compartilhados e sintaxe do hook. A ativação local depende do mantenedor
+  e não foi consultada nesta revisão, que não executa comandos Git. Consulte
+  `docs/development/automation.md`; na raiz, `bun run check:tooling` verifica compatibilidade
+  de dependências da CLI, sem substituir lint, testes ou build dos pacotes.
+- 🟢 **Guarda de banco implementada:** `src/db.ts` exige `TEST_DATABASE_URL` e autorização
+  temporária vinculada ao hash da conexão antes de criar adapter/cliente em testes.
+  `src/shared/utils/testDatabaseSafety.ts` valida destino e expiração. Nome de banco e
+  `NODE_ENV=test` isoladamente não autorizam limpezas. Arquivos sob `src/` neste item
+  são relativos a `back-end/`; não emitir autorização para banco persistente.
+- 🟢 **CI configurada:** `.github/workflows/ci.yml` tem jobs backend/frontend e E2E,
+  PostgreSQL descartável, autorização temporária, lint, Prettier, testes e build.
+  E2E usa Playwright/Chromium e fixtures próprias. Não há job ativo de CD/deploy;
+  configuração do workflow não comprova aprovação dos checks remotos.
+- 🟡 **Validação final:** o relatório `docs/reports/RF-44-admin-analytics.md` registra
+  103 testes backend, 15 frontend e nove cenários Playwright aprovados localmente,
+  além de builds e medições sintéticas. São resultados daquela execução, não verificações
+  repetidas nesta revisão documental; não se inferem CI aprovada, merge ou deploy.
+  RF-44 permanece amarelo até cumprir seus critérios de aceitação. As correções de
+  concorrência e vínculo de identidade mantêm validação final em aberto, com referência
+  às suítes atuais e à ADR-0004, em vez de afirmar ausência de execução de integração.
+- 🔵 **Ainda proposto:** refresh tokens, revogação de sessões após reset (ADR-0005),
+  roles adicionais, auditoria administrativa, scanner de segredos no histórico e gateway
+  real não foram encontrados implementados. Atualização de dependências ou busca textual
+  de segredos não equivalem a scanner contínuo no CI. Lighthouse/CWV também não foi comprovado.
+
+Verificações desta tarefa documental: caminhos e inventário de suítes conferidos;
+Markdown analisado pelo parser local do Prettier, sem reformatação global. O quality
+gate aprovou lint/formatação dos dois pacotes e formatação dos arquivos compartilhados.
+Sua etapa `sh -n` falhou ao iniciar no sandbox (3221225794); repetida isoladamente fora
+dele, aprovou com código zero. Não foram executados comandos Git, testes da aplicação,
+builds, integrações, E2E, migrations ou serviços externos nesta revisão documental.
 
 ---
 
