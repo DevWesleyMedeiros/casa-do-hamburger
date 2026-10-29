@@ -47,6 +47,7 @@ export const Cart = () => {
 
     onSuccess: () => {
       if (generation !== sessionRequests.generation()) return;
+      queryClient.invalidateQueries({ queryKey: queryKeys.analytics });
       queryClient.invalidateQueries({
         queryKey: queryKeys.orders,
       });

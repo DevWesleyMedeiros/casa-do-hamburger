@@ -66,12 +66,21 @@ export const Header = () => {
       <div className="mx-auto flex w-full items-center justify-between p-3 md:w-184.25 md:p-0">
         <div className="h-21.5 w-25">
           <Link to="/">
-            <img src="./assetsImages/logo-casa-do-hamburguer.png" alt="Logo caso do Hamburger" />
+            <img src="/assetsImages/logo-casa-do-hamburguer.png" alt="Logo caso do Hamburger" />
           </Link>
         </div>
 
         {user ? (
-          <div className="flex items-center gap-6 text-white">
+          <div className="flex items-center gap-3 text-white sm:gap-6">
+            {user.admin && (
+              <Link
+                to="/admin/analytics"
+                aria-label="Analytics administrativo"
+                className="rounded text-blue-200 focus-visible:outline-2 focus-visible:outline-blue-400"
+              >
+                Analytics
+              </Link>
+            )}
             {user.admin && (
               <div className="hidden gap-2 text-[#F2DAAC] md:flex">
                 <Link to="/home">

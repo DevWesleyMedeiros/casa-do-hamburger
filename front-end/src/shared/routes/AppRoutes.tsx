@@ -1,10 +1,14 @@
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
 import { Header } from '../../components/header/Header';
 import { Home } from '../../pages/home/Home';
 import { Login } from '../../pages/login/Login';
 import { Pedidos } from '../../pages/pedidos/Pedidos';
 import { Register } from '../../pages/register/Register';
 import { PublicRoutes } from './publicRoutes/PublicRoutes';
+const Analytics = lazy(() =>
+  import('../../pages/admin/Analytics').then((module) => ({ default: module.Analytics })),
+);
 import { ForgotPassword } from '../../pages/forgotPassword/ForgotPassword';
 import { ResetPassword } from '../../pages/forgotPassword/ResetPassword';
 
@@ -55,6 +59,20 @@ export const AppRoutes = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/pedidos" element={<Pedidos />} />
+        <Route
+          path="/admin/analytics"
+          element={
+            <Suspense
+              fallback={
+                <p role="status" className="p-6 text-white">
+                  Carregando analytics…
+                </p>
+              }
+            >
+              <Analytics />
+            </Suspense>
+          }
+        />
       </Route>
 
       <Route path="*" element={<Navigate to="/home" replace />} />
