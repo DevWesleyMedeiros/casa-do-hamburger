@@ -181,7 +181,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | RF-42 | Painel administrativo deve permitir CRUD completo de produtos | 🟡 Listagem, criação e exclusão presentes; edição pendente, conforme RF-19 |
 | RF-43 | Painel administrativo deve permitir gestão de pedidos (Kanban de status) | 🟢 |
 | RF-44 | Dashboard administrativo de pedidos e valores simulados, com filtros e agregações no servidor (contrato abaixo) | 🟡 API, UI, filtros, cache privado, suítes e job E2E implementados; aprovação remota e conclusão do fluxo de PR não verificadas nesta revisão (ADR-0006 e seção 14.5) |
-| RF-45 | Deve existir auditoria (log) de ações administrativas sensíveis | 🔵 |
+| RF-45 | Auditoria persistente de ações administrativas sensíveis, com consulta exclusiva de ADMIN e gravação transacional (contrato abaixo) | 🟡 Implementação em validação; ADR-0007 e relatório RF-45 |
 
 #### RF-44 — Contrato de analytics administrativo
 
@@ -214,6 +214,34 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 - Aceitação exige testes de regras, autorização e banco descartável, oito jornadas
   Playwright reais, CI E2E ativa, lint/build/formatação, revisão e fluxo de PR aprovado.
   ADR-0006 registra decisões e limites; relatório técnico registra evidências reais.
+
+#### Contrato RF-45 — auditoria administrativa
+
+- Persistir `PRODUCT_CREATED`, `PRODUCT_DELETED`, `ORDER_STATUS_CHANGED` e
+  `ORDER_CANCELLED`; cancelamento administrativo gera apenas o último evento.
+  Cancelamento pelo cliente não é ação administrativa. Edição de produto continua
+  pendente (RF-19/42), sem evento operacional de edição nesta versão.
+- Ator deriva da sessão validada; requestId do servidor, data do banco, entidade
+  identificada por ID histórico. Não registrar nome/e-mail de clientes nem copiar
+  requisições: produto limita nome/categoria/preço, pedido limita status.
+- Alteração de banco e evento usam a mesma transação. Falha de auditoria causa
+  rollback. CAS de status preserva 409 e somente o vencedor grava evento. Repetição
+  inválida não gera sucesso. Upload externo não participa do rollback PostgreSQL.
+- `GET /admin/audit-logs`: autenticação e admin atual, `private, no-store`, filtros
+  validados de ação, tipo/ID de entidade, ator e intervalo ISO UTC `[from,to)` de
+  até 366 dias. Cursor descendente por data/ID, limite padrão 20 e máximo 100.
+  DTO mínimo; nenhuma API pública para criar/alterar/excluir registros.
+- UI `/admin/audit-logs` responsiva, com responsável identificado por ID estável,
+  ação, data, entidade e resumo dos campos permitidos; filtros de período UTC/tipo,
+  paginação e loading/vazio/erro. Cache privado por usuário/admin/geração/filtros.
+  Logout/troca/expiração cancelam e removem dados antigos; 403 oculta dados em cache.
+- Histórico sobrevive à exclusão do ator/entidade, sem cascata. Fluxos comuns são
+  append-only, sem promessa de imutabilidade contra acesso privilegiado ao banco.
+  Retenção operacional de 365 dias; expurgo e política de backups exigem rotina
+  operacional separada. Não há expurgo automático nesta implementação.
+- Aceite: Vitest, integração em PostgreSQL descartável (incluindo rollback e
+  concorrência), Playwright real, quality gate, builds, revisão e CI/PR protegidos.
+  Consultar ADR-0007 para limites, observabilidade e serviços externos.
 
 ### 3.6 Módulo de Pagamento 🆕
 
