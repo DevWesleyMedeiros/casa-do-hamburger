@@ -200,7 +200,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | RNF-04 | Segurança | Toda entrada de API deve ser validada via schema (Zod) antes de tocar a camada de serviço | 🟢 |
 | RNF-05 | Segurança | Rotas administrativas nunca devem vazar para operações de usuário comum (e vice-versa) | 🟢 |
 | RNF-06 | Segurança | Rate limiting em rotas de autenticação | 🟢 |
-| RNF-07 | Segurança | Proteção CSRF para rotas mutáveis expostas a cookies | 🔵 |
+| RNF-07 | Segurança | CORS já rejeitava Origin hostil antes das rotas. Defesa adicional valida Origin/Referer e Fetch Metadata em requisições mutáveis, mantendo clientes sem contexto de navegador. Cookie de produção usa SameSite=None/Secure; não foi inferida vulnerabilidade apenas pela ausência de token CSRF | 🟡 Testes locais da política; validação em navegador/deploy pendente |
 | RNF-08 | Segurança | Cabeçalhos de segurança HTTP (Helmet: CSP, HSTS, X-Frame-Options) — **bloqueador para considerar A05 (Seção 11) como 🟢** | 🟢 (confirmado em `app.ts`: `app.use(helmet())`, mergeado na `develop` via PR #21, antes da branch de RF-09 — este documento estava desatualizado nesse ponto) |
 | RNF-09 | Performance | Imagens devem ser servidas em tamanho adequado ao contexto via transformação de URL (CDN) | 🟢 |
 | RNF-10 | Performance | Estado de servidor deve ter única fonte de verdade (TanStack Query), evitando cache duplicado | 🟢 |
@@ -556,7 +556,7 @@ type UserResponseDTO = {
 | Regra | Descrição | Status |
 | --- | --- | --- |
 | RN-SEC-01 🆕 | **Ausência de RLS é risco aceito, não descuido**: o projeto usa PostgreSQL puro via Prisma (não Supabase/Firebase), então não há *Row Level Security* nem *Security Rules* equivalentes disponíveis "de graça" na infraestrutura. Toda a autorização depende de RN-RBAC-05 (autorização sempre validada no backend) estar corretamente aplicada em **100% das rotas**, sem segunda camada no banco. Isso é uma decisão de arquitetura válida para o estágio atual do projeto, mas deve ser revista se o projeto migrar para Supabase/Firebase ou virar multi-tenant (RN-TENANT-02) | 🟢 (documentado) |
-| RN-SEC-02 🆕 | Todo conteúdo de usuário que venha a ser renderizado como HTML (hoje não existe nenhum caso no projeto) deve passar por sanitização de saída (`DOMPurify`/`sanitize-html`) antes de ser exibido — complementa RNF-04 (validação de entrada), que sozinha não protege contra XSS armazenado | 🔵 (preventivo — nenhuma renderização de HTML livre do usuário existe hoje) |
+| RN-SEC-02 | Dados interpolados no HTML de e-mails são escapados no contexto de texto/atributo. Templates não aceitam HTML livre do usuário. Sanitização de HTML arbitrário continua necessária se esse recurso for introduzido | 🟢 Escape aplicado e teste unitário acrescentado |
 | RN-SEC-03 🆕 | O CI deve rodar um scanner de segredos (Gitleaks ou TruffleHog) contra o histórico completo do repositório antes de qualquer deploy, complementando o `npm audit`/Dependabot já previsto na Seção 14.2 — protege contra o caso de uma chave ter sido commitada e depois removida (permanece no histórico do Git) | 🔵 |
 
 ---

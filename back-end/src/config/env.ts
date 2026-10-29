@@ -6,4 +6,6 @@ const envSchema = z.object({
   CLOUDINARY_API_SECRET: z.string().min(1, 'CLOUDINARY_API_SECRET é obrigatório'),
 });
 
-export const envs = envSchema.parse(process.env);
+const result = envSchema.safeParse(process.env);
+if (!result.success) throw new Error('Configuração Cloudinary incompleta');
+export const envs = result.data;

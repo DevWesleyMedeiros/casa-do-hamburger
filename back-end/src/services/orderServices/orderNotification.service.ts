@@ -2,6 +2,7 @@
 
 import type { OrderStatus } from '../../../generated/prisma/index.js';
 import type { EmailService } from '../email/email.service.js';
+import { escapeHtml } from '../../shared/utils/escapeHtml.js';
 
 const STATUS_LABEL: Record<OrderStatus, string> = {
   PENDING: 'recebido',
@@ -35,7 +36,7 @@ export async function notifyOrderStatusChanged(
     await emailService.sendGenericEmail({
       to,
       subject: `Pedido #${shortId} atualizado: ${label}`,
-      html: `<p>Olá! Seu pedido <strong>#${shortId}</strong> agora está: <strong>${label}</strong>.</p>
+      html: `<p>Olá! Seu pedido <strong>#${escapeHtml(shortId)}</strong> agora está: <strong>${escapeHtml(label)}</strong>.</p>
              <p>Agradecemos pela preferência!</p>`,
     });
     console.log(`Notificação de status enviada com sucesso para pedido #${shortId}`);

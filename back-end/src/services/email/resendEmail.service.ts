@@ -1,5 +1,6 @@
 import { Resend } from 'resend';
 import type { EmailService } from './email.service.ts';
+import { escapeHtml } from '../../shared/utils/escapeHtml.js';
 
 // RNF-27: chave de API só em variável de ambiente, nunca hardcoded
 const resend = new Resend(process.env['RESEND_API_KEY']);
@@ -20,7 +21,7 @@ export const resendEmailService: EmailService = {
     );
 
     if (error) {
-      console.error('[EmailService] Falha ao enviar e-mail', error);
+      console.error('[EmailService] Falha ao enviar e-mail');
       throw new Error('EMAIL_SEND_FAILED');
     }
   },
@@ -32,10 +33,10 @@ export const resendEmailService: EmailService = {
         to: [to],
         subject: 'Redefinição de senha — Casa do Hambúrguer',
         html: `
-          <p>Olá, ${name}.</p>
+          <p>Olá, ${escapeHtml(name)}.</p>
           <p>Recebemos uma solicitação para redefinir sua senha. O link abaixo expira em
           30 minutos e só pode ser usado uma vez.</p>
-          <p><a href="${resetUrl}">Redefinir minha senha</a></p>
+          <p><a href="${escapeHtml(resetUrl)}">Redefinir minha senha</a></p>
           <p>Se você não solicitou isso, ignore este e-mail — sua senha continua a mesma.</p>
         `,
       },
@@ -45,7 +46,7 @@ export const resendEmailService: EmailService = {
 
     if (error) {
       // Nunca propagar o erro cru para o controller: a resposta ao cliente continua genérica (RN-AUTH-15) independentemente de o envio falhar.
-      console.error('[EmailService] Falha ao enviar e-mail de redefinição de senha', error);
+      console.error('[EmailService] Falha ao enviar e-mail de redefinição de senha');
       throw new Error('EMAIL_SEND_FAILED');
     }
   },
