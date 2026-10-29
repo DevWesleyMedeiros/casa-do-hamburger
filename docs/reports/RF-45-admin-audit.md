@@ -176,3 +176,33 @@ Não foi possível ler os detalhes administrativos da proteção de `develop` pe
 conector GitHub (403). A leitura normal confirma `protected=true`; nenhuma regra
 foi alterada. Merge exige checks finais aprovados e estado de merge permitido,
 sem contornar bloqueios ou aprovações. Não há workflow ativo de CD/deploy.
+
+## Correção da CI — isolamento das origens de login
+
+A execução remota `40953511990` aprovou backend/frontend e falhou em cinco casos
+RF-45: os 25 cenários eram executados juntos, e todas as tentativas de login
+compartilhavam a origem loopback do servidor. As contas por cenário eram distintas,
+mas o limitador amplo é por IP: a primeira rodada consumia 19 logins antes de
+`audit.spec.ts`; o primeiro caso de auditoria consumia o vigésimo, e os seguintes
+recebiam 429. A ausência do cookie era consequência do login bloqueado, não prova
+de erro em `secure`, `sameSite` ou no armazenamento da sessão.
+
+Reprodução controlada com o app real e banco descartável: tentativas de 1 a 20
+com alvos inexistentes distintos retornaram 401; a 21ª retornou 429 com a mensagem
+de excesso de tentativas na origem. O teste local anterior em rodadas separadas
+não exercitava esse acúmulo, por isso a validação desta correção exige a suíte
+inteira em uma única execução, com `CI=true`.
+
+`front-end/e2e/fixtures.ts` centraliza seed, bloqueio de hosts externos e login.
+Cada cenário/retry recebe uma origem IPv6 sintética em sub-rede /56 própria pelo
+`X-Forwarded-For`, simulando clientes independentes no proxy que o app já confia.
+A opção Playwright `extraHTTPHeaders` vale para navegador e request fixture.
+Não se altera `trust proxy`, limite, janela, store ou política de cookies da
+aplicação; não há endpoint de bypass, reset remoto de limitador ou sessão forjada.
+
+O helper agora exige resposta HTTP 200, cookie `user_section` httpOnly e navegação
+para `/home`. Asserções não imprimem o valor do cookie/JWT. A nova regressão em
+`authentication.spec.ts` comprova 20 tentativas por origem/429 na 21ª, acesso
+normal de outro cliente e bloqueio na sexta tentativa para o mesmo e-mail/origem.
+A suíte passa a conter 26 cenários; resultados desta correção serão registrados
+após a execução completa e a CI remota do novo commit.

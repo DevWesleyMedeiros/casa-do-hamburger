@@ -991,6 +991,12 @@ graph LR
 > Integração/E2E continuam exigindo banco descartável atestado antes da conexão;
 > mocks não comprovam concorrência no PostgreSQL. Consulte a seção 14.5.
 
+Correção E2E de RF-45: cenários/retries usam origens sintéticas distintas no
+proxy local, além de contas separadas, sem alterar RF-12/RNF-06. O helper comprova
+HTTP 200 e cookie httpOnly antes de validar a navegação. A regressão de autenticação
+mantém os limites reais de 20 tentativas por origem e 5 por e-mail/origem. A suíte
+completa contém 26 cenários; evidências e CI em `docs/reports/RF-45-admin-audit.md`.
+
 ### 14.1 Os 3 tipos essenciais (Pirâmide de Testes)
 
 ```
