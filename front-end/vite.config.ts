@@ -31,6 +31,7 @@ export default defineConfig({
     },
   },
   test: {
+    include: ['src/**/*.test.{ts,tsx}'],
     globals: true,
     environment: 'jsdom', // Necessário para simular o DOM no front-end
     setupFiles: './src/test/setup.ts', // Opcional: para configurações globais

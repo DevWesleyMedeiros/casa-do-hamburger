@@ -10,6 +10,7 @@ import googleAuthRoutes from './routes/googleAuth.routes.js';
 import orderRoutes from './routes/order.routes.js';
 import productsRoutes from './routes/products.routes.js';
 import avatarRoutes from './routes/avatar.routes.js';
+import adminAnalyticsRoutes from './routes/adminAnalytics.routes.js';
 
 export const app = express();
 app.disable('x-powered-by'); // desabilita o header X-Powered-By, que contém a versão do Express usado para evitar ataques de informação
@@ -63,5 +64,6 @@ app.use('/auth', googleAuthRoutes);
 app.use('/auth', cartRoutes);
 // registro da rota de order
 app.use('/orders', orderRoutes);
+app.use('/admin/analytics', adminAnalyticsRoutes);
 // middleware que vai sempre por último — Express só invoca middleware de 4 parâmetros depois de todas as rotas; Serve para tratamento de erros
 app.use(errorHandler);

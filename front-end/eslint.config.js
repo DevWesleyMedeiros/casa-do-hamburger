@@ -12,7 +12,14 @@ import tseslint from 'typescript-eslint';
 
 export default defineConfig([
   {
-    ignores: ['dist/**', 'node_modules/**', 'coverage/**', 'build/**'],
+    ignores: [
+      'dist/**',
+      'node_modules/**',
+      'coverage/**',
+      'build/**',
+      'playwright-report/**',
+      'test-results/**',
+    ],
   },
 
   js.configs.recommended,
@@ -63,7 +70,7 @@ export default defineConfig([
   },
 
   {
-    files: ['vite.config.ts', 'eslint.config.js'],
+    files: ['vite.config.ts', 'eslint.config.js', 'playwright.config.ts', 'e2e/**/*.{ts,mjs}'],
     languageOptions: {
       globals: { ...globals.node },
     },

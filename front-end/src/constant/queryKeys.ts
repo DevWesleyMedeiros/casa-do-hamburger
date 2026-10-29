@@ -8,6 +8,9 @@ export const queryKeys = {
   cartFor: (id?: string) => ['private', 'cartItems', id, sessionRequests.generation()] as const,
   me: ['private', 'me'] as const,
   orders: ['private', 'orders'] as const,
+  analytics: ['private', 'analytics'] as const,
+  analyticsFor: (id: string | undefined, admin: boolean, from: string, to: string) =>
+    ['private', 'analytics', id, admin, sessionRequests.generation(), from, to] as const,
   ordersFor: (id?: string, admin = false) =>
     ['private', 'orders', id, admin, sessionRequests.generation()] as const,
 };
