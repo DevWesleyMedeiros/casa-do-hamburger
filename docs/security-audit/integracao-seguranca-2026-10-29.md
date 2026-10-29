@@ -2,6 +2,12 @@
 
 Origem: `fix/security-and-data-protection`. Destino: `develop`.
 
+Atualização final: o escopo foi ampliado pelo mantenedor para corrigir dependências.
+As auditorias locais da raiz e dos dois pacotes passaram com zero alertas. Consulte
+`dependencias-seguranca-2026-10-29.md` para versões, compatibilidade e resultados finais.
+As seções abaixo preservam o diagnóstico anterior às atualizações. A conclusão foi
+limitada aos commits a pedido do mantenedor, sem merge nem ampliação adicional da CI.
+
 ## Auditoria local
 
 - O levantamento inicial apresentou 191 entradas no status. Havia 41 arquivos
