@@ -101,7 +101,12 @@ export const OrderRepository = {
     });
   },
 
-  async updateOrderStatus(orderId: string, expectedStatus: OrderStatus, orderStatus: OrderStatus) {
+  async updateOrderStatus(
+    orderId: string,
+    expectedStatus: OrderStatus,
+    orderStatus: OrderStatus,
+    onUpdated?: (tx: Prisma.TransactionClient) => Promise<void>,
+  ) {
     return prisma.$transaction(async (tx) => {
       const updated = await tx.order.updateMany({
         where: { id: orderId, status: expectedStatus },
@@ -112,6 +117,7 @@ export const OrderRepository = {
           409,
           'Pedido alterado por outra requisição. Atualize e tente novamente.',
         );
+      await onUpdated?.(tx);
       return tx.order.findUniqueOrThrow({ where: { id: orderId }, include: ORDER_INCLUDE });
     });
   },

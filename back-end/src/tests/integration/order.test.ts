@@ -88,6 +88,7 @@ describe('Order — checkout, IDOR e máquina de estados (RF-32 a 40)', () => {
     await prisma.order.deleteMany();
     await prisma.cartItem.deleteMany();
     await prisma.products.deleteMany();
+    await prisma.auditLog.deleteMany();
     await prisma.user.deleteMany();
   });
 

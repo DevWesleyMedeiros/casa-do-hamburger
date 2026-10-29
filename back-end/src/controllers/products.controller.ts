@@ -7,7 +7,11 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 
 export const productsController = {
   create: asyncHandler(async (req: Request, res: Response) => {
-    const product = await productService.createProduct(req.body, req.file);
+    const product = await productService.createProduct(req.body, req.file, {
+      id: req.user!['id'] as string,
+      admin: req.user!['admin'] as boolean,
+      requestId: res.locals['requestId'] as string,
+    });
     return res.status(201).json(toProductDTO(product));
   }),
 
@@ -22,7 +26,11 @@ export const productsController = {
       throw new AppError(400, 'ID do produto inválido');
     }
 
-    await productService.deleteById(id);
+    await productService.deleteById(id, {
+      id: req.user!['id'] as string,
+      admin: req.user!['admin'] as boolean,
+      requestId: res.locals['requestId'] as string,
+    });
     return res.status(200).json({ message: 'Produto deletado com sucesso' });
   }),
 };

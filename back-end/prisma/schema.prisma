@@ -176,3 +176,33 @@ generator erd {
   output = "../docs/architecture/ERD.md"
   theme    = "forest"   // ou "default", "dark", "neutral"
 }
+
+// RF-45: referências históricas escalares, sem cascata do ator ou da entidade.
+model AuditLog {
+  id         String          @id @default(uuid())
+  actorId    String
+  action     AuditAction
+  entityType AuditEntityType
+  entityId   String
+  before     Json?
+  after      Json?
+  requestId  String
+  createdAt  DateTime        @default(now())
+
+  @@index([createdAt, id])
+  @@index([actorId, createdAt, id])
+  @@index([action, createdAt, id])
+  @@index([entityType, entityId, createdAt, id])
+}
+
+enum AuditAction {
+  PRODUCT_CREATED
+  PRODUCT_DELETED
+  ORDER_STATUS_CHANGED
+  ORDER_CANCELLED
+}
+
+enum AuditEntityType {
+  PRODUCT
+  ORDER
+}

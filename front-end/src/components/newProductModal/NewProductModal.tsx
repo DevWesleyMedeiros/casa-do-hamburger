@@ -1,3 +1,4 @@
+import { reaisToCents } from '../../shared/utils/currency';
 // src/components/NewProductModal.tsx
 import { zodResolver } from '@hookform/resolvers/zod';
 import { OctagonX, Upload } from 'lucide-react';
@@ -37,32 +38,16 @@ export const NewProductModal = () => {
     resolver: zodResolver(newProductSchema),
   });
 
-  // Fecha com Esc e trava o scroll do body enquanto a modal está aberta
   useEffect(() => {
-    const handleKeyDown = (e: globalThis.KeyboardEvent) => {
-      if (e.key !== 'Escape') return;
-      closeModal();
-    };
+    dialogRef.current?.showModal();
+  }, []);
 
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dialogRef.current && !dialogRef.current.contains(e.target as Node)) {
-        closeModal();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('mousedown', handleClickOutside);
-    document.body.style.overflow = 'hidden';
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.body.style.overflow = '';
-      if (imagePreview) {
-        URL.revokeObjectURL(imagePreview);
-      }
-    };
-  }, [closeModal, imagePreview]);
+  useEffect(
+    () => () => {
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
+    },
+    [imagePreview],
+  );
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -92,151 +77,147 @@ export const NewProductModal = () => {
       name: data.name,
       description: data.description,
       category: data.category,
-      price: data.price.replace(',', '.'),
+      price: reaisToCents(data.price),
       image: imageFile,
     });
     closeModal();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <dialog
-        ref={dialogRef}
-        className="relative flex w-full max-w-sm flex-col items-center rounded-lg bg-[#24201A] p-6 shadow-xl sm:max-w-xl sm:p-8"
-        aria-modal="true"
-        aria-labelledby="new-product-title"
-        open={true}
-        onClose={closeModal}
-      >
-        <h2 id="new-product-title" className="mb-4 text-xl font-bold text-[#9D9D94]">
-          Adicionar Produto
-        </h2>
+    <dialog
+      ref={dialogRef}
+      className="m-auto max-h-[90dvh] w-[calc(100%-2rem)] max-w-sm overflow-y-auto overscroll-contain rounded-lg bg-[#24201A] p-6 shadow-xl backdrop:bg-black/50 open:flex open:flex-col open:items-center sm:max-w-xl sm:p-8"
+      aria-labelledby="new-product-title"
+      closedby="any"
+      onCancel={closeModal}
+      onClose={closeModal}
+    >
+      <h2 id="new-product-title" className="mb-4 text-xl font-bold text-[#9D9D94]">
+        Adicionar Produto
+      </h2>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex w-full flex-col gap-4" noValidate>
-          <div className="flex w-full flex-col items-center gap-4 sm:flex-row sm:items-start">
-            {/* Upload de imagem */}
-            <div className="flex w-full flex-col items-center gap-1 sm:w-40 sm:shrink-0">
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="flex aspect-square w-40 cursor-pointer items-center justify-center overflow-hidden rounded-md border border-[#9D9D94]/40 bg-black/20 transition hover:border-[#C41E00] sm:w-full"
-                aria-label="Selecionar imagem do produto"
-              >
-                {imagePreview ? (
-                  <img
-                    src={imagePreview}
-                    alt="Pré-visualização do produto"
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <Upload size={ICON_CONFIG.mxSize} className="text-[#9D9D94]" />
-                )}
-              </button>
+      <form onSubmit={handleSubmit(onSubmit)} className="flex w-full flex-col gap-4" noValidate>
+        <div className="flex w-full flex-col items-center gap-4 sm:flex-row sm:items-start">
+          {/* Upload de imagem */}
+          <div className="flex w-full flex-col items-center gap-1 sm:w-40 sm:shrink-0">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex aspect-square w-40 cursor-pointer items-center justify-center overflow-hidden rounded-md border border-[#9D9D94]/40 bg-black/20 transition hover:border-[#C41E00] sm:w-full"
+              aria-label="Selecionar imagem do produto"
+            >
+              {imagePreview ? (
+                <img
+                  src={imagePreview}
+                  alt="Pré-visualização do produto"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <Upload size={ICON_CONFIG.mxSize} className="text-[#9D9D94]" />
+              )}
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={[...ACCEPTED_IMAGE_TYPES].join(',')}
+              onChange={handleImageChange}
+              className="hidden"
+            />
+            {imageError && (
+              <span className="max-w-40 text-center text-xs text-[#C41E00]">{imageError}</span>
+            )}
+          </div>
+
+          {/* Inputs de texto */}
+          <div className="flex w-full min-w-0 flex-1 flex-col gap-3">
+            <div className="flex flex-col gap-1">
+              <label htmlFor="name" className="sr-only">
+                Nome do Produto
+              </label>
               <input
-                ref={fileInputRef}
-                type="file"
-                accept={[...ACCEPTED_IMAGE_TYPES].join(',')}
-                onChange={handleImageChange}
-                className="hidden"
+                id="name"
+                type="text"
+                placeholder="Nome do Produto"
+                className="h-9 w-full rounded-md border border-[#9D9D94]/40 bg-transparent px-3 text-sm text-[#9D9D94] outline-none focus:border-[#C41E00]"
+                {...register('name')}
               />
-              {imageError && (
-                <span className="max-w-40 text-center text-xs text-[#C41E00]">{imageError}</span>
+              {errors.name && <span className="text-xs text-[#C41E00]">{errors.name.message}</span>}
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label htmlFor="description" className="sr-only">
+                Descrição
+              </label>
+              <input
+                id="description"
+                type="text"
+                placeholder="Descrição"
+                className="h-9 w-full rounded-md border border-[#9D9D94]/40 bg-transparent px-3 text-sm text-[#9D9D94] outline-none focus:border-[#C41E00]"
+                {...register('description')}
+              />
+              {errors.description && (
+                <span className="text-xs text-[#C41E00]">{errors.description.message}</span>
               )}
             </div>
 
-            {/* Inputs de texto */}
-            <div className="flex w-full min-w-0 flex-1 flex-col gap-3">
-              <div className="flex flex-col gap-1">
-                <label htmlFor="name" className="sr-only">
-                  Nome do Produto
-                </label>
-                <input
-                  id="name"
-                  type="text"
-                  placeholder="Nome do Produto"
-                  className="h-9 w-full rounded-md border border-[#9D9D94]/40 bg-transparent px-3 text-sm text-[#9D9D94] outline-none focus:border-[#C41E00]"
-                  {...register('name')}
-                />
-                {errors.name && (
-                  <span className="text-xs text-[#C41E00]">{errors.name.message}</span>
-                )}
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <label htmlFor="description" className="sr-only">
-                  Descrição
-                </label>
-                <input
-                  id="description"
-                  type="text"
-                  placeholder="Descrição"
-                  className="h-9 w-full rounded-md border border-[#9D9D94]/40 bg-transparent px-3 text-sm text-[#9D9D94] outline-none focus:border-[#C41E00]"
-                  {...register('description')}
-                />
-                {errors.description && (
-                  <span className="text-xs text-[#C41E00]">{errors.description.message}</span>
-                )}
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <label htmlFor="category" className="sr-only">
+            <div className="flex flex-col gap-1">
+              <label htmlFor="category" className="sr-only">
+                Categoria
+              </label>
+              <select
+                id="category"
+                defaultValue=""
+                className="h-9 w-full rounded-md border border-[#9D9D94]/40 bg-[#24201A] px-3 text-sm text-[#9D9D94] outline-none focus:border-[#C41E00]"
+                {...register('category')}
+              >
+                <option value="" disabled>
                   Categoria
-                </label>
-                <select
-                  id="category"
-                  defaultValue=""
-                  className="h-9 w-full rounded-md border border-[#9D9D94]/40 bg-[#24201A] px-3 text-sm text-[#9D9D94] outline-none focus:border-[#C41E00]"
-                  {...register('category')}
-                >
-                  <option value="" disabled>
-                    Categoria
+                </option>
+                {CATEGORIES.map((cat) => (
+                  <option key={cat.value} value={cat.value}>
+                    {cat.label}
                   </option>
-                  {CATEGORIES.map((cat) => (
-                    <option key={cat.value} value={cat.value}>
-                      {cat.label}
-                    </option>
-                  ))}
-                </select>
-                {errors.category && (
-                  <span className="text-xs text-[#C41E00]">{errors.category.message}</span>
-                )}
-              </div>
+                ))}
+              </select>
+              {errors.category && (
+                <span className="text-xs text-[#C41E00]">{errors.category.message}</span>
+              )}
+            </div>
 
-              <div className="flex flex-col gap-1">
-                <label htmlFor="price" className="sr-only">
-                  Preço
-                </label>
-                <input
-                  id="price"
-                  type="text"
-                  inputMode="decimal"
-                  placeholder="Valor inteiro sem vírgulas"
-                  className="h-9 w-full rounded-md border border-[#9D9D94]/40 bg-transparent px-3 text-sm text-[#9D9D94] outline-none focus:border-[#C41E00]"
-                  {...register('price')}
-                />
-                {errors.price && (
-                  <span className="text-xs text-[#C41E00]">{errors.price.message}</span>
-                )}
-              </div>
+            <div className="flex flex-col gap-1">
+              <label htmlFor="price" className="sr-only">
+                Preço
+              </label>
+              <input
+                id="price"
+                type="text"
+                inputMode="decimal"
+                placeholder="Preço em reais (ex.: 29,90)"
+                className="h-9 w-full rounded-md border border-[#9D9D94]/40 bg-transparent px-3 text-sm text-[#9D9D94] outline-none focus:border-[#C41E00]"
+                {...register('price')}
+              />
+              {errors.price && (
+                <span className="text-xs text-[#C41E00]">{errors.price.message}</span>
+              )}
             </div>
           </div>
+        </div>
 
-          <Button
-            title={isPending ? 'Adicionando...' : 'Adicionar Produto'}
-            colorVariation="bgRedVariation"
-            type="submit"
-          />
-        </form>
+        <Button
+          title={isPending ? 'Adicionando...' : 'Adicionar Produto'}
+          colorVariation="bgRedVariation"
+          type="submit"
+        />
+      </form>
 
-        <button
-          type="button"
-          onClick={closeModal}
-          aria-label="Fechar modal"
-          className="absolute top-2 right-3 text-[#9D9D94] transition hover:text-[#C41E00]"
-        >
-          <OctagonX size={ICON_CONFIG.mxSize} />
-        </button>
-      </dialog>
-    </div>
+      <button
+        type="button"
+        onClick={closeModal}
+        aria-label="Fechar modal"
+        className="absolute top-2 right-3 text-[#9D9D94] transition hover:text-[#C41E00]"
+      >
+        <OctagonX size={ICON_CONFIG.mxSize} />
+      </button>
+    </dialog>
   );
 };

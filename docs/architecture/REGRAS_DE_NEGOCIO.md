@@ -3,7 +3,7 @@
 > **Tipo de documento:** Especificação de Requisitos + Regras de Negócio (BRD/SRS)
 > **Projeto:** Casa do Hambúrguer — Sistema de Pedidos para Hamburgueria (E-commerce de Food Service)
 > **Natureza:** Boilerplate reutilizável para aplicações de e-commerce/pedidos
-> **Versão:** 2.1.3
+> **Versão:** 2.1.4
 > **Status:** Reconciliação documental de 29/10/2026 com o código atual: segurança, dashboard RF-44, testes, guarda de banco e automação de qualidade. RF-44 e a validação final das correções de concorrência permanecem 🟡; refresh token, revogação após reset, pagamento real e demais recursos ausentes continuam 🔵. Consulte a seção 14.5 para distinguir implementação inspecionada, resultados registrados em relatórios e verificações desta revisão. As notas antigas do changelog são históricas.
 
 ---
@@ -32,6 +32,7 @@ para justificar a implementação existente.
 
 | Versão | Data | Mudança |
 | --- | --- | --- |
+| 2.1.4 | 29/10/2026 | RF-45 persistente com gravação transacional, consulta protegida e interface responsiva; corrigidos entrada/apresentação monetária e navegação mobile. Registros legados não foram convertidos. Evidências locais e limites no relatório RF-45. |
 | 2.1.3 | 29/10/2026 | Status reconciliados com o código: RN-AUTH-04/13 e RN-DTO-05 🟢; RNF-11/20 e RN-DATA-05 🟡 por entrega parcial. RF-44 detalhado como implementado em validação; RF-42 alinhado à edição de produtos ainda ausente. Atualizadas referências aos DTOs, testes Playwright, CI E2E, hook, quality gate e guarda de banco. Resultados históricos não foram tratados como verificações executadas nesta revisão. |
 | 2.1.2 | 28/10/2026 | Correções de atomicidade/concorrência, isolamento de caches privados, conta/privilégio atual na autenticação, vínculo Google sem sobrescrita e escape de HTML. Guarda de banco descartável adicionada. Integração e revogação de sessões após reset continuam pendentes (ADR-0004/0005 e relatório desta data). |
 | 2.1.0 | *(data do merge)* | Implementado o Módulo de Pedidos completo (RF-32 a RF-40): checkout com Snapshot Pattern (nome, preço e imagem), máquina de estados de 5 status (`PENDING\|PREPARING\|READY\|DELIVERED\|CANCELLED`), entidade `Payment` (simulada, RF-46 continua roadmap), checagem de posse (RN-ORDER-06, mitigação IDOR) e cancelamento com janela de tempo (RF-40). RF-39 (notificação por e-mail via Resend) implementado nesta mesma rodada. |
@@ -181,7 +182,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | RF-42 | Painel administrativo deve permitir CRUD completo de produtos | 🟡 Listagem, criação e exclusão presentes; edição pendente, conforme RF-19 |
 | RF-43 | Painel administrativo deve permitir gestão de pedidos (Kanban de status) | 🟢 |
 | RF-44 | Dashboard administrativo de pedidos e valores simulados, com filtros e agregações no servidor (contrato abaixo) | 🟡 API, UI, filtros, cache privado, suítes e job E2E implementados; aprovação remota e conclusão do fluxo de PR não verificadas nesta revisão (ADR-0006 e seção 14.5) |
-| RF-45 | Deve existir auditoria (log) de ações administrativas sensíveis | 🔵 |
+| RF-45 | Auditoria persistente de ações administrativas sensíveis, com consulta exclusiva de ADMIN e gravação transacional (contrato abaixo) | 🟢 Implementado e validado localmente; situação da CI/PR no relatório RF-45 e ADR-0007 |
 
 #### RF-44 — Contrato de analytics administrativo
 
@@ -214,6 +215,34 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 - Aceitação exige testes de regras, autorização e banco descartável, oito jornadas
   Playwright reais, CI E2E ativa, lint/build/formatação, revisão e fluxo de PR aprovado.
   ADR-0006 registra decisões e limites; relatório técnico registra evidências reais.
+
+#### Contrato RF-45 — auditoria administrativa
+
+- Persistir `PRODUCT_CREATED`, `PRODUCT_DELETED`, `ORDER_STATUS_CHANGED` e
+  `ORDER_CANCELLED`; cancelamento administrativo gera apenas o último evento.
+  Cancelamento pelo cliente não é ação administrativa. Edição de produto continua
+  pendente (RF-19/42), sem evento operacional de edição nesta versão.
+- Ator deriva da sessão validada; requestId do servidor, data do banco, entidade
+  identificada por ID histórico. Não registrar nome/e-mail de clientes nem copiar
+  requisições: produto limita nome/categoria/preço, pedido limita status.
+- Alteração de banco e evento usam a mesma transação. Falha de auditoria causa
+  rollback. CAS de status preserva 409 e somente o vencedor grava evento. Repetição
+  inválida não gera sucesso. Upload externo não participa do rollback PostgreSQL.
+- `GET /admin/audit-logs`: autenticação e admin atual, `private, no-store`, filtros
+  validados de ação, tipo/ID de entidade, ator e intervalo ISO UTC `[from,to)` de
+  até 366 dias. Cursor descendente por data/ID, limite padrão 20 e máximo 100.
+  DTO mínimo; nenhuma API pública para criar/alterar/excluir registros.
+- UI `/admin/audit-logs` responsiva, com responsável identificado por ID estável,
+  ação, data, entidade e resumo dos campos permitidos; filtros de período UTC/tipo,
+  paginação e loading/vazio/erro. Cache privado por usuário/admin/geração/filtros.
+  Logout/troca/expiração cancelam e removem dados antigos; 403 oculta dados em cache.
+- Histórico sobrevive à exclusão do ator/entidade, sem cascata. Fluxos comuns são
+  append-only, sem promessa de imutabilidade contra acesso privilegiado ao banco.
+  Retenção operacional de 365 dias; expurgo e política de backups exigem rotina
+  operacional separada. Não há expurgo automático nesta implementação.
+- Aceite: Vitest, integração em PostgreSQL descartável (incluindo rollback e
+  concorrência), Playwright real, quality gate, builds, revisão e CI/PR protegidos.
+  Consultar ADR-0007 para limites, observabilidade e serviços externos.
 
 ### 3.6 Módulo de Pagamento 🆕
 
@@ -252,7 +281,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | RNF-17 | Escalabilidade | Domínio de Pedidos deve ser isolável em serviço próprio no futuro (ver Seção 10) | 🔵 |
 | RNF-18 | Usabilidade | Feedback visual imediato (otimista) em ações do carrinho | 🟢 |
 | RNF-19 | Observabilidade | Logs estruturados de erros de API (nível mínimo: método, rota, status, tempo) | 🔵 |
-| RNF-20 | Testabilidade | Cobertura de testes automatizados para regras de negócio críticas (carrinho, pedido, autenticação) — ver Seção 14 | 🟡 Existem testes unitários, integração/concorrência e E2E de analytics; jornadas completas de cadastro → carrinho → checkout e admin → criar produto continuam sem suíte E2E correspondente. Cobertura integral não comprovada |
+| RNF-20 | Testabilidade | Cobertura de testes automatizados para regras de negócio críticas (carrinho, pedido, autenticação) — ver Seção 14 | 🟡 Existem testes unitários, integração/concorrência e E2E de analytics; admin → criar produto → consultar auditoria tem suíte RF-45; a jornada completa de cadastro → carrinho → checkout continua sem suíte E2E correspondente. Cobertura integral não comprovada |
 | RNF-21 | Portabilidade | Nenhuma URL hardcoded — todo endpoint via variável de ambiente | 🟢 |
 | RNF-22 | Multi-tenancy | Sistema é single-tenant por design — não há isolamento de dados por loja | 🟢 |
 | RNF-23 🆕 | Segurança | **(Reescrita v1.8.1)** Superado pela ADR-0003 revisada: com Firebase Authentication, o app não implementa nem gerencia Authorization Code Flow/PKCE — esse handshake OAuth com o Google fica inteiramente dentro do SDK do Firebase/Google Identity Services. A obrigação equivalente que o projeto de fato controla é RN-AUTH-08/09 (verificação server-side do Firebase ID Token) | 🟢 (não aplicável no desenho atual; requisito coberto por RN-AUTH-08) |
@@ -457,7 +486,7 @@ Então o vínculo automático NÃO ocorre, e o sistema orienta o usuário a conf
 | RN-RBAC-03 | `requiredAdmin` exige `req.user.admin === true`, definido pelo middleware a partir do banco; demais usuários recebem 403 | 🟢 |
 | RN-RBAC-04 | Middleware de admin **nunca** deve ser aplicado a rotas de recurso pessoal do usuário (ex.: seu próprio carrinho) | 🟢 |
 | RN-RBAC-05 | Autorização é sempre validada no backend — checagens de role no frontend são apenas cosméticas (UX), nunca a fonte de verdade de segurança | 🟢 |
-| RN-RBAC-06 | Hoje `USER` cobre: visualizar produtos, adicionar/remover/editar itens do carrinho, realizar compras. `ADMIN` cobre tudo isso + criar/excluir produtos, acompanhar todos os pedidos e consultar analytics. Edição de produto permanece pendente (RF-19/42); analytics segue em validação (RF-44) | 🟡 |
+| RN-RBAC-06 | Hoje `USER` cobre: visualizar produtos, adicionar/remover/editar itens do carrinho, realizar compras. `ADMIN` cobre tudo isso + criar/excluir produtos, acompanhar todos os pedidos e consultar analytics/auditoria. Edição de produto permanece pendente (RF-19/42); analytics segue em validação (RF-44) | 🟡 |
 | RN-RBAC-07 | **[Proposto]** Role `ATTEND`: acesso de leitura/escrita apenas ao módulo de Pedidos (transições de status `PENDING→PREPARING→READY`); **sem** acesso a CRUD de produtos nem a dados de outros usuários além do necessário para o pedido | 🔵 |
 | RN-RBAC-08 | **[Proposto]** Role `DELIVER`: acesso de leitura restrito a pedidos com status `READY`/`DELIVERED`; única transição permitida é `READY → DELIVERED`; sem acesso a `PENDING`/`PREPARING` nem ao catálogo | 🔵 |
 | RN-RBAC-09 | **[Proposto]** Migrar de checagem de role única (`role === 'ADMIN'`) para checagem baseada em array de permissões (ex.: `hasPermission(user, 'orders:transition:preparing')`) quando a 3ª/4ª role for introduzida — evita `if/else` explosivo no middleware | 🔵 |
@@ -569,6 +598,14 @@ type UserResponseDTO = {
 | RN-ORDER-06 🟢 | Um usuário só pode visualizar/cancelar os próprios pedidos (`Order.userId === req.user.id`), exceto administradores. ⚠️ **Não é opcional nem posterior ao checkout**: a checagem de posse deve nascer na mesma PR que implementa `GET /orders/:id`, nunca como ajuste "depois" — é a mitigação de IDOR (OWASP A01) para este módulo |
 | RN-ORDER-07 🔵 | Quando `ATTEND`/`DELIVER` existirem, a transição de status deve checar não só o papel (role), mas se o papel tem permissão para **aquela transição específica** (ver RN-RBAC-07/08) |
 | RN-ORDER-08 | Ao criar um pedido, o sistema deve armazenar em Order.customerName um snapshot do User.name naquele momento, de modo que alterações futuras no nome do usuário não alterem retroativamente o histórico do pedido. | 🟢 |
+
+Contrato monetário de entrada: `POST /auth/products` recebe `price` como inteiro positivo
+em centavos (string inteira no multipart), limitado ao `Int` PostgreSQL. O formulário
+recebe reais e converte uma única vez, por partes decimais. DTOs, snapshots e analytics
+preservam centavos; a apresentação usa `Intl.NumberFormat` com divisão por 100.
+A correção RF-45/Fase A remove a multiplicação por 10.000 na entrada e a divisão
+por 1.000.000 na apresentação. Dados legados exigem auditoria operacional específica;
+não são corrigidos automaticamente. Clientes HTTP devem enviar centavos.
 
 ### 6.9 Pagamento (Simulado hoje, Gateway real no futuro) 🆕
 
@@ -861,7 +898,7 @@ sequenceDiagram
 | **Fase 2 — Fechar o MVP** | 🟢 Criação de pedidos e máquina de estados implementadas; 🟡 edição de catálogo, validação integral e conclusão operacional pendentes | Alta |
 | **Fase 3 — Robustez** | 🟢 Rate limiting, Helmet e guarda de banco implementados; 🟡 ampliação/validação de testes; 🔵 refresh token, rotação e revogação após reset (ADR-0005) | Alta |
 | **Fase 4 — Experiência** | 🟢 Notificações de status, histórico e login Google; 🟡 validação final de recuperação de senha (RF-09/56/57) | Média |
-| **Fase 5 — Operação** | 🟡 Dashboard RF-44 implementado em validação e soft delete parcial; 🔵 roles `ATTEND`/`DELIVER` e auditoria administrativa | Média |
+| **Fase 5 — Operação** | 🟡 Dashboard RF-44 implementado em validação e soft delete parcial; 🟢 auditoria RF-45 com validação local; 🔵 roles `ATTEND`/`DELIVER` | Média |
 | **Fase 6 — Pagamento real** | Integração Stripe/Mercado Pago em modo live, webhooks | Média |
 | **Fase 7 — Escala** | Extração do domínio de Pedidos para microsserviço dedicado (ver 10.3) | Baixa (só se necessário) |
 
@@ -954,6 +991,12 @@ graph LR
 > Integração/E2E continuam exigindo banco descartável atestado antes da conexão;
 > mocks não comprovam concorrência no PostgreSQL. Consulte a seção 14.5.
 
+Correção E2E de RF-45: cenários/retries usam origens sintéticas distintas no
+proxy local, além de contas separadas, sem alterar RF-12/RNF-06. O helper comprova
+HTTP 200 e cookie httpOnly antes de validar a navegação. A regressão de autenticação
+mantém os limites reais de 20 tentativas por origem e 5 por e-mail/origem. A suíte
+completa contém 26 cenários; evidências e CI em `docs/reports/RF-45-admin-audit.md`.
+
 ### 14.1 Os 3 tipos essenciais (Pirâmide de Testes)
 
 ```
@@ -1026,8 +1069,12 @@ Uma feature só é considerada "pronta" quando:
   RF-44 permanece amarelo até cumprir seus critérios de aceitação. As correções de
   concorrência e vínculo de identidade mantêm validação final em aberto, com referência
   às suítes atuais e à ADR-0004, em vez de afirmar ausência de execução de integração.
+- 🟢 **RF-45 implementado:** auditoria transacional de produtos/pedidos, API e UI
+  protegidas, cursor, minimização de dados e isolamento de sessão. Vitest e
+  Playwright locais aprovados; evidências, falhas corrigidas, CI e limites no
+  relatório `docs/reports/RF-45-admin-audit.md`. Isso não comprova deploy.
 - 🔵 **Ainda proposto:** refresh tokens, revogação de sessões após reset (ADR-0005),
-  roles adicionais, auditoria administrativa, scanner de segredos no histórico e gateway
+  roles adicionais, scanner de segredos no histórico e gateway
   real não foram encontrados implementados. Atualização de dependências ou busca textual
   de segredos não equivalem a scanner contínuo no CI. Lighthouse/CWV também não foi comprovado.
 

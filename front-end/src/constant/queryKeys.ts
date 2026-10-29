@@ -1,3 +1,4 @@
+import type { AuditFilters } from '../types/AuditLog';
 // identificações de nossas chaves no cache. Serão responsáveis por identificar os dados no cache.
 import { sessionRequests } from '../shared/services/sessionRequests';
 
@@ -9,6 +10,9 @@ export const queryKeys = {
   me: ['private', 'me'] as const,
   orders: ['private', 'orders'] as const,
   analytics: ['private', 'analytics'] as const,
+  audit: ['private', 'audit'] as const,
+  auditFor: (id: string | undefined, admin: boolean, filters: AuditFilters) =>
+    ['private', 'audit', id, admin, sessionRequests.generation(), filters] as const,
   analyticsFor: (id: string | undefined, admin: boolean, from: string, to: string) =>
     ['private', 'analytics', id, admin, sessionRequests.generation(), from, to] as const,
   ordersFor: (id?: string, admin = false) =>

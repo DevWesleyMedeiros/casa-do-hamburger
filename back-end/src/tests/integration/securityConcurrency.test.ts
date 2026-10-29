@@ -42,6 +42,7 @@ afterEach(async () => {
   await prisma.orderItem.deleteMany({ where: { order: { userId: { in: userIds } } } });
   await prisma.order.deleteMany({ where: { userId: { in: userIds } } });
   await prisma.cartItem.deleteMany({ where: { userId: { in: userIds } } });
+  await prisma.auditLog.deleteMany({ where: { actorId: { in: userIds } } });
   await prisma.user.deleteMany({ where: { id: { in: userIds } } });
   await prisma.products.deleteMany({ where: { id: { in: productIds } } });
   userIds.length = 0;

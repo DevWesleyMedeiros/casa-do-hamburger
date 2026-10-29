@@ -55,6 +55,7 @@ beforeAll(async () => {
 });
 afterAll(async () => {
   await prisma.order.deleteMany({ where: { userId: { in: ids } } });
+  await prisma.auditLog.deleteMany({ where: { actorId: { in: ids } } });
   await prisma.user.deleteMany({ where: { id: { in: ids } } });
 });
 

@@ -1,7 +1,7 @@
 import { useMe } from '../../hook/useMe';
 import { getCartItemsList } from '../../shared/services/api/cartItems/getCartItems';
 import { useCartUIStore } from '../../shared/stores';
-import { brazilinaCurrencyFormat } from '../../shared/utils/Utils';
+import { formatCurrency } from '../../shared/utils/currency';
 import { Button } from '../button/Button';
 import { CartItem } from '../cartItem/CartItem';
 
@@ -127,7 +127,7 @@ export const Cart = () => {
         <div className="border-brand-dark/20 mx-5 my-3 flex items-center justify-between border-t pt-3">
           <p className="text-brand-dark font-bold uppercase">Total</p>
 
-          <p className="text-brand-dark font-bold">{brazilinaCurrencyFormat(totalPrice)}</p>
+          <p className="text-brand-dark font-bold">{formatCurrency(totalPrice)}</p>
         </div>
 
         <Button

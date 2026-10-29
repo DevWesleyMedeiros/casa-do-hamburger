@@ -9,7 +9,7 @@ export const createProduct = async (input: CreateProductInput): Promise<ProductR
   formData.append('name', input.name);
   formData.append('description', input.description);
   formData.append('category', input.category);
-  formData.append('price', input.price);
+  formData.append('price', String(input.price));
   formData.append('image', input.image);
 
   // — o Axios detecta FormData como content-type automaticamente e gera "multipart/form-data; boundary=..." sozinho

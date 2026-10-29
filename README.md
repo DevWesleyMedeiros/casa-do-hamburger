@@ -2,6 +2,8 @@
 
 RF-44: [contrato, dashboard administrativo e execução segura dos testes E2E](docs/reports/RF-44-admin-analytics.md).
 
+RF-45: [auditoria administrativa, correções monetárias e navegação responsiva](docs/reports/RF-45-admin-audit.md).
+
 > Projeto fullstack de e-commerce para hamburgueria com autenticação multi-provedor, catálogo dinâmico, carrinho de compras, gestão de pedidos, sistema de recuperação de senha e upload de imagens escalável. Aplicação construída com arquitetura de camadas, validação em múltiplas camadas, segurança OWASP e testes automatizados.
 
 ---

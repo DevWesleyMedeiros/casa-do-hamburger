@@ -58,6 +58,9 @@ jobs:
       - name: Instalar dependências
         run: bun install --frozen-lockfile
 
+      - name: Auditar dependências backend
+        run: bun audit --audit-level=high
+
       - name: Gerar Prisma Client
         run: bunx --bun prisma generate
 
@@ -116,6 +119,9 @@ jobs:
 
       - name: Instalar dependências
         run: bun install --frozen-lockfile
+
+      - name: Auditar dependências frontend
+        run: bun audit --audit-level=high
 
       - name: Lint
         run: bun run lint
@@ -191,7 +197,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: rf44-e2e-evidence
+          name: admin-e2e-evidence
           retention-days: 7
           if-no-files-found: warn
           path: |
