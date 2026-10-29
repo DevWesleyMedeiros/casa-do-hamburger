@@ -3,11 +3,19 @@
   "module": "index.ts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "check:tooling": "node scripts/check-tooling-compatibility.mjs"
+  },
   "devDependencies": {
     "@types/bun": "latest",
-    "firebase-tools": "^15.29.0"
+    "firebase-tools": "^15.34.2"
   },
   "peerDependencies": {
     "typescript": "^7"
+  },
+  "overrides": {
+    "@opentelemetry/core": "2.8.0",
+    "qs": "6.16.1",
+    "uuid": "11.1.1"
   }
 }

@@ -1,3 +1,4 @@
+import './safety.js';
 import { faker } from '@faker-js/faker';
 import * as bcrypt from 'bcrypt-ts';
 import type { DecodedIdToken } from 'firebase-admin/auth';
@@ -27,9 +28,6 @@ import { prisma } from '../../db.js';
 
 const verifyFirebaseIdTokenMock = vi.mocked(verifyFirebaseIdToken);
 
-// TODO(#47): reativar quando app.use(errorHandler) parar de receber undefined.
-// madge --circular não aponta ciclo — investigar depois se é hoisting do vi.mock,
-// export default/named mismatch, ou throw silencioso dentro de errorHandler.ts.
 describe('Google Auth Integration', () => {
   describe('POST /auth/google (Login social — RF-51 a RF-55)', () => {
     const cleanupUsers = async () => {
@@ -87,8 +85,8 @@ describe('Google Auth Integration', () => {
     });
 
     it('deve vincular automaticamente a uma conta LOCAL existente quando email_verified=true (RF-54)', async () => {
-      const userEmail = faker.internet.email();
-      await prisma.user.create({
+      const userEmail = `Mixed.Case-${faker.string.uuid()}@example.invalid`;
+      const existing = await prisma.user.create({
         data: {
           name: faker.person.fullName(),
           email: userEmail,
@@ -104,8 +102,11 @@ describe('Google Auth Integration', () => {
 
       expect(response.status).toBe(200);
       const linked = await prisma.user.findUnique({ where: { email: userEmail } });
+      expect(response.body.user.id).toBe(existing.id);
+      expect(await prisma.user.count()).toBe(1);
       expect(linked?.firebaseUid).toBe(decoded.uid);
-      expect(linked?.provider).toBe('GOOGLE');
+      expect(linked?.provider).toBe('LOCAL');
+      expect(linked?.password).not.toBeNull();
     });
 
     it('NÃO deve vincular automaticamente quando email_verified=false (RN-AUTH-11 — segurança)', async () => {
@@ -124,8 +125,90 @@ describe('Google Auth Integration', () => {
 
       const response = await request(app).post('/auth/google').send({ idToken: 'token-valido' });
 
-      // Complete o seu assert do terceiro caso de teste aqui
-      expect(response.status).not.toBe(200);
+      expect(response.status).toBe(409);
+      expect(response.headers['set-cookie']).toBeUndefined();
+      expect(
+        (await prisma.user.findUniqueOrThrow({ where: { email: userEmail } })).firebaseUid,
+      ).toBeNull();
+    });
+
+    it('não aceita identidade Firebase autenticada por outro provedor', async () => {
+      const decoded = fakeDecodedToken({
+        firebase: { sign_in_provider: 'password', identities: {} },
+      });
+      verifyFirebaseIdTokenMock.mockResolvedValue(decoded);
+      const response = await request(app).post('/auth/google').send({ idToken: 'other-provider' });
+      expect(response.status).toBe(401);
+      expect(await prisma.user.findUnique({ where: { email: decoded.email } })).toBeNull();
+    });
+
+    it('não cria conta com e-mail não verificado', async () => {
+      const decoded = fakeDecodedToken({ email_verified: false });
+      verifyFirebaseIdTokenMock.mockResolvedValue(decoded);
+      expect((await request(app).post('/auth/google').send({ idToken: 'unverified' })).status).toBe(
+        409,
+      );
+      expect(await prisma.user.findUnique({ where: { email: decoded.email } })).toBeNull();
+    });
+
+    it('não substitui uma identidade já vinculada por outro UID do mesmo e-mail', async () => {
+      const existing = await prisma.user.create({
+        data: {
+          name: 'Linked',
+          email: faker.internet.email(),
+          provider: 'GOOGLE',
+          firebaseUid: faker.string.uuid(),
+        },
+      });
+      const decoded = fakeDecodedToken({ email: existing.email });
+      verifyFirebaseIdTokenMock.mockResolvedValue(decoded);
+      expect(
+        (await request(app).post('/auth/google').send({ idToken: 'different-uid' })).status,
+      ).toBe(409);
+      expect(
+        (await prisma.user.findUniqueOrThrow({ where: { id: existing.id } })).firebaseUid,
+      ).toBe(existing.firebaseUid);
+    });
+
+    it('conta desativada não recebe sessão via UID conhecido', async () => {
+      const decoded = fakeDecodedToken();
+      await prisma.user.create({
+        data: {
+          name: 'Disabled',
+          email: decoded.email,
+          firebaseUid: decoded.uid,
+          provider: 'GOOGLE',
+          deletedAt: new Date(),
+        },
+      });
+      verifyFirebaseIdTokenMock.mockResolvedValue(decoded);
+      const response = await request(app).post('/auth/google').send({ idToken: 'disabled' });
+      expect(response.status).toBe(401);
+      expect(response.headers['set-cookie']).toBeUndefined();
+    });
+
+    it('vínculos concorrentes de UIDs distintos não sobrescrevem a identidade vencedora', async () => {
+      const existing = await prisma.user.create({
+        data: {
+          name: 'Local',
+          email: faker.internet.email(),
+          provider: 'LOCAL',
+          password: await bcrypt.hash('SenhaLocal123!', 10),
+        },
+      });
+      const first = fakeDecodedToken({ email: existing.email });
+      const second = fakeDecodedToken({ email: existing.email });
+      verifyFirebaseIdTokenMock.mockImplementation(async (token) =>
+        token === 'first' ? first : second,
+      );
+      const responses = await Promise.all(
+        ['first', 'second'].map((idToken) => request(app).post('/auth/google').send({ idToken })),
+      );
+      expect(responses.map((response) => response.status).sort()).toEqual([200, 409]);
+      const winner = responses[0]!.status === 200 ? first.uid : second.uid;
+      expect(
+        (await prisma.user.findUniqueOrThrow({ where: { id: existing.id } })).firebaseUid,
+      ).toBe(winner);
     });
   });
 });

@@ -19,20 +19,22 @@ jobs:
       postgres:
         image: postgres:18
         env:
-          POSTGRES_USER: postgres
+          POSTGRES_USER: casa_security_20261028
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: casa_do_hamburguer_test
+          POSTGRES_DB: casa_security_20261028
         ports:
           - 5432:5432
         options: >-
-          --health-cmd="pg_isready -U postgres"
+          --health-cmd="pg_isready -U casa_security_20261028 -d casa_security_20261028"
           --health-interval=5s
           --health-timeout=5s
           --health-retries=10
 
     env:
       # Banco temporário exclusivo do CI
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/casa_do_hamburguer_test?schema=public
+      DATABASE_URL: postgresql://casa_security_20261028:postgres@127.0.0.1:5432/casa_security_20261028?schema=public
+      TEST_DATABASE_URL: postgresql://casa_security_20261028:postgres@127.0.0.1:5432/casa_security_20261028?schema=public
+      NODE_ENV: test
 
       # Chave exclusiva para testes do CI
       JWT_SECRET: ci-test-secret-nao-usar-em-producao
@@ -72,7 +74,28 @@ jobs:
         run: bunx prettier --check .
 
       - name: Testes
-        run: bun run test
+        # O serviço acima é criado para este job e descartado pelo GitHub Actions.
+        # A autorização expira e vincula a guarda à conexão exclusiva deste serviço.
+        run: |
+          bun --no-env-file -e '
+            const { createHash } = await import("node:crypto");
+            const { writeFileSync } = await import("node:fs");
+            const connection = process.env.TEST_DATABASE_URL;
+            if (!connection || connection !== process.env.DATABASE_URL) {
+              throw new Error("Configuração de banco de CI inconsistente");
+            }
+            writeFileSync(".test-database-authorization.json", JSON.stringify({
+              task: "security-and-data-protection",
+              disposable: true,
+              connectionSha256: createHash("sha256").update(connection).digest("hex"),
+              expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+            }), { flag: "wx", mode: 0o600 });
+          '
+          bun run test
+
+      - name: Remover autorização temporária
+        if: always()
+        run: rm -f .test-database-authorization.json
 
       - name: Build
         run: bun run build

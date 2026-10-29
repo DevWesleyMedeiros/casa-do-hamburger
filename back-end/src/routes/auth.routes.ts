@@ -20,7 +20,7 @@ const router = Router();
 router.post('/login', validateBody(loginSchema), loginLimiter, authController.login);
 router.get('/me', requireAuth, authController.userAuth);
 router.post('/register', validateBody(registerSchema), registerLimiter, authController.register);
-router.post('/logout', requireAuth, clearAuthCookie, authController.logout);
+router.post('/logout', clearAuthCookie, authController.logout);
 
 // rotas para forgot password
 router.post(

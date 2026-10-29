@@ -7,7 +7,6 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@faker-js/faker": "^10.5.0",
-    "@mermaid-js/mermaid-cli": "^11.16.0",
     "@types/bun": "latest",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
@@ -21,13 +20,12 @@
     "eslint-plugin-security": "^4.0.1",
     "globals": "^17.11.0",
     "prettier": "^3.9.8",
-    "prisma": "7.10.0",
-    "prisma-erd-generator": "^2.4.4",
-    "puppeteer": "^25.3.0",
+    "prisma": "7.10.1",
+    "prisma-erd-generator": "^3.2.1",
     "supertest": "^7.2.2",
     "tsx": "^4.22.3",
     "typescript-eslint": "^8.68.0",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.12"
   },
   "scripts": {
     "dev": "tsx --watch --env-file=./.env ./src/index.ts",
@@ -51,8 +49,8 @@
     "typescript": "^6.0.3"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "7.10.0",
-    "@prisma/client": "7.10.0",
+    "@prisma/adapter-pg": "7.10.1",
+    "@prisma/client": "7.10.1",
     "bcrypt-ts": "^8.0.1",
     "cloudinary": "^2.10.0",
     "cookie-parser": "^1.4.7",
@@ -61,13 +59,12 @@
     "express": "^5.2.1",
     "express-rate-limit": "^8.6.1",
     "file-type": "^22.0.1",
-    "firebase": "^12.18.0",
-    "firebase-admin": "^14.3.0",
+    "firebase-admin": "^14.5.0",
     "helmet": "^8.3.0",
     "jose": "^6.2.3",
-    "multer": "^2.2.0",
+    "multer": "^2.5.0",
     "pg": "^8.21.0",
     "resend": "^6.21.0",
-    "zod": "^4.4.3"
+    "zod": "^4.6.6"
   }
 }

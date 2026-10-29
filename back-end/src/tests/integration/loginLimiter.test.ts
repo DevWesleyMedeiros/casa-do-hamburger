@@ -1,3 +1,4 @@
+import './safety.js';
 import { faker } from '@faker-js/faker';
 import request from 'supertest';
 import { beforeEach, describe, expect, it } from 'vitest';

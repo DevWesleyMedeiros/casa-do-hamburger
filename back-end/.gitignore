@@ -36,6 +36,9 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 /generated/prisma
 
+# Autorização local temporária de um banco descartável; nunca versionar.
+.test-database-authorization.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

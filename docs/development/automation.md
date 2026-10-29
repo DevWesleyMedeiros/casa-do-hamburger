@@ -1,5 +1,25 @@
 # Automação de qualidade
 
+## Atualização de integração — 29/10/2026
+
+Nesta execução, `core.hooksPath` foi confirmado como `.githooks`. O bloqueio
+atual foi reproduzido nos três arquivos compartilhados: o checkout Windows
+usava CRLF e o Prettier exige LF. Os dois pacotes já passaram em lint e
+`format:check`, sem reproduzir as contagens antigas de falhas abaixo.
+
+Os arquivos compartilhados foram formatados com a configuração existente.
+O `.gitattributes` agora mantém LF nos arquivos de texto, preservando a
+detecção de binários, sem alterar a configuração local do Git nem as regras
+do Prettier. Não foi executada renormalização indiscriminada do repositório.
+
+O workflow de CI passa a fornecer `TEST_DATABASE_URL` para o PostgreSQL
+temporário do próprio job. Antes dos testes, cria uma autorização de uma hora,
+vinculada ao SHA-256 dessa conexão; ao final, remove o arquivo. A guarda de
+banco continua obrigatória. Isso não autoriza executar integrações contra
+bancos locais existentes. A autorização temporária está no `.gitignore`.
+
+As seções seguintes registram a entrega inicial e seus resultados históricos.
+
 O mesmo verificador atende desenvolvedores e agentes de qualquer fornecedor. O hook
 versionado foi criado em `.githooks/pre-commit`; sua ativação local cabe ao mantenedor
 e não foi realizada nem verificada nesta entrega. Obter ou criar `.githooks/` não

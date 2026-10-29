@@ -2,17 +2,14 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
-import { connection } from './db.js';
 import { errorHandler } from './middlewares/errorHandler.js';
+import { mutationOrigin } from './middlewares/mutationOrigin.js';
 import authRoutes from './routes/auth.routes.js';
 import cartRoutes from './routes/cart.routes.js';
 import googleAuthRoutes from './routes/googleAuth.routes.js';
 import orderRoutes from './routes/order.routes.js';
 import productsRoutes from './routes/products.routes.js';
 import avatarRoutes from './routes/avatar.routes.js';
-
-// conection linka o backend com o banco de dados. Deve ser a primeira linha
-connection();
 
 export const app = express();
 app.disable('x-powered-by'); // desabilita o header X-Powered-By, que contém a versão do Express usado para evitar ataques de informação
@@ -25,11 +22,20 @@ app.set('trust proxy', 1);
 app.use(helmet());
 
 // CORS no top antes de toda resposta
+let productionOrigin = '';
+if (process.env['NODE_ENV'] === 'production') {
+  try {
+    productionOrigin = new URL(process.env['FRONTEND_URL'] ?? '').origin;
+  } catch {
+    throw new Error('FRONTEND_URL inválida');
+  }
+}
 const allowedOrigins =
   process.env['NODE_ENV'] === 'production'
-    ? [process.env['FRONTEND_URL'] || '']
+    ? [productionOrigin]
     : ['http://localhost:5173', 'http://localhost:5174', 'http://127.0.0.1:5173'];
 
+app.use(mutationOrigin(allowedOrigins));
 app.use(
   cors({
     origin: (origin, callback) => {

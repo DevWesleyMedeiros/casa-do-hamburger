@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import { passwordResetService } from '../services/passwordReset.service.js';
 import type { ForgotPasswordInput, ResetPasswordInput } from '../schemas/passwordReset.schema.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
 
 // req.body já chega validado pelo middleware validateBody(schema) aplicado na rota
 
@@ -8,15 +9,19 @@ const GENERIC_MESSAGE = `Se o e-mail informado estiver cadastrado, você receber
 
 // controller responsável por receber do body o e-mail (quando eu clicar no link forgot-password, eu passo um email num input e o envio por uma requisição. Esse email é capiturado aqui) e envia um email com o link de redefinição de senha
 export const passwordResetController = {
-  async forgotPassword(req: Request, res: Response) {
+  forgotPassword: asyncHandler(async (req: Request, res: Response) => {
     const { email } = req.body as ForgotPasswordInput;
-    await passwordResetService.requestPasswordReset(email);
+    try {
+      await passwordResetService.requestPasswordReset(email);
+    } catch {
+      console.error('[PasswordReset] Não foi possível processar a solicitação');
+    }
     // RN-AUTH-15: resposta idêntica sempre — e-mail existindo ou não
     return res.status(200).json({ message: GENERIC_MESSAGE });
-  },
+  }),
 
   // controller responsável por receber do body o token e a nova senha (quando eu clicar no link reset-password, eu passo um token
-  async resetPassword(req: Request, res: Response) {
+  resetPassword: asyncHandler(async (req: Request, res: Response) => {
     const { token, newPassword } = req.body as ResetPasswordInput;
 
     const result = await passwordResetService.resetPassword(token, newPassword);
@@ -29,5 +34,5 @@ export const passwordResetController = {
     return res
       .status(200)
       .json({ message: 'Senha redefinida com sucesso. Faça login com a nova senha' });
-  },
+  }),
 };

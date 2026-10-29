@@ -7,8 +7,8 @@ export const orderSeriviceApi = {
     return data;
   },
   /** RF-36 (usuário comum) — o backend decide o escopo (próprio vs. admin) pelo JWT */
-  getMyOrders: async (): Promise<Order[]> => {
-    const { data } = await api.get<Order[]>('/orders');
+  getMyOrders: async (signal?: AbortSignal): Promise<Order[]> => {
+    const { data } = await api.get<Order[]>('/orders', { signal });
     return data;
   },
   /** RF-35 — admin pode filtrar por status */

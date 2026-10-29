@@ -1,5 +1,14 @@
-import type { OrderStatus } from '../../generated/prisma/index.js';
+import type { OrderStatus, Prisma } from '../../generated/prisma/index.js';
 import { prisma } from '../db.js';
+import { AppError } from '../errors/AppError.js';
+import { withUserLock } from './userLock.js';
+
+const CHECKOUT_INCLUDE = {
+  product: { include: { images: { where: { isPrimary: true }, take: 1 } } },
+  user: { select: { name: true } },
+} as const;
+
+export type CheckoutCartItem = Prisma.CartItemGetPayload<{ include: typeof CHECKOUT_INCLUDE }>;
 
 // snapshot de order
 interface SnapshotItemInput {
@@ -36,16 +45,24 @@ export const OrderRepository = {
    * @param items Os itens do pedido.
    * @returns O pedido criado.
    */
-  async createOrderWithItems(params: {
-    userId: string;
-    customerName: string;
-    total: number;
-    items: SnapshotItemInput[];
-  }) {
-    return prisma.$transaction(async (tx) => {
+  async createOrderFromCart(
+    userId: string,
+    buildSnapshot: (items: CheckoutCartItem[]) => {
+      customerName: string;
+      total: number;
+      items: SnapshotItemInput[];
+    },
+  ) {
+    return withUserLock(userId, async (tx) => {
+      // Leitura e snapshot só depois de adquirir o mesmo lock usado nas mutações do carrinho.
+      const cartItems = await tx.cartItem.findMany({
+        where: { userId },
+        include: CHECKOUT_INCLUDE,
+      });
+      const params = buildSnapshot(cartItems);
       const order = await tx.order.create({
         data: {
-          userId: params.userId,
+          userId,
           customerName: params.customerName,
           total: params.total,
           status: 'PENDING',
@@ -55,7 +72,7 @@ export const OrderRepository = {
         include: ORDER_INCLUDE,
       });
       // após envio do pedido, vamos deletar o cartItem associado a ele no carrinho
-      await tx.cartItem.deleteMany({ where: { userId: params.userId } });
+      await tx.cartItem.deleteMany({ where: { userId } });
 
       return order;
     });
@@ -84,23 +101,18 @@ export const OrderRepository = {
     });
   },
 
-  async updateOrderStatus(orderId: string, orderStatus: OrderStatus) {
-    return prisma.order.update({
-      where: { id: orderId },
-      data: { status: orderStatus },
-      include: ORDER_INCLUDE,
-    });
-  },
-  /** Busca os CartItems do usuário já com o produto e a imagem primária (para snapshot) para só então eu validar um pedido */
-  async findCartItemsForCheckout(userId: string) {
-    return prisma.cartItem.findMany({
-      where: { userId },
-      include: {
-        product: {
-          include: { images: { where: { isPrimary: true }, take: 1 } },
-        },
-        user: { select: { name: true } },
-      },
+  async updateOrderStatus(orderId: string, expectedStatus: OrderStatus, orderStatus: OrderStatus) {
+    return prisma.$transaction(async (tx) => {
+      const updated = await tx.order.updateMany({
+        where: { id: orderId, status: expectedStatus },
+        data: { status: orderStatus },
+      });
+      if (updated.count !== 1)
+        throw new AppError(
+          409,
+          'Pedido alterado por outra requisição. Atualize e tente novamente.',
+        );
+      return tx.order.findUniqueOrThrow({ where: { id: orderId }, include: ORDER_INCLUDE });
     });
   },
 };

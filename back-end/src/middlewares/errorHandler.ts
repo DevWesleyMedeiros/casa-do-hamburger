@@ -33,7 +33,7 @@ export const errorHandler = (err: unknown, _req: Request, res: Response, _next: 
     return res.status(err.statusCode).json({ message: err.message });
   }
 
-  console.error(err); // alterar logger estruturado quando RNF-19 (observabilidade) entrar
+  console.error('[API] Erro interno do servidor'); // Não registrar tokens, parâmetros ou erros de provedores.
 
   return res.status(500).json({ message: 'Erro interno do servidor' });
 };

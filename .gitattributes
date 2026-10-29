@@ -1,0 +1,3 @@
+# Prettier e os hooks POSIX usam LF também em checkouts Windows.
+# A detecção automática preserva arquivos binários, como imagens e fontes.
+* text=auto eol=lf

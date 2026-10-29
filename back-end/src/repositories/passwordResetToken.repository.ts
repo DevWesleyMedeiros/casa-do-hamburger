@@ -1,43 +1,36 @@
 import { prisma } from '../db.js';
+import { withUserLock } from './userLock.js';
 
-// responsável pelo CRUD de tokens de redefinição de senha, ou seja, aqui ele irá criar, tokens de redefinição de senha
 export const passwordResetTokenRepository = {
-  async create(data: { userId: string; tokenHash: string; expiresAt: Date }) {
-    return prisma.passwordResetToken.create({
-      data,
+  async replaceActiveToken(data: { userId: string; tokenHash: string; expiresAt: Date }) {
+    return withUserLock(data.userId, async (tx) => {
+      const user = await tx.user.findUniqueOrThrow({ where: { id: data.userId } });
+      if (user.provider !== 'LOCAL' || !user.password) return false;
+      await tx.passwordResetToken.deleteMany({ where: { userId: data.userId, usedAt: null } });
+      await tx.passwordResetToken.create({ data });
+      return true;
     });
   },
 
-  // responsável pelo buscar um token válido por seu hash; se for um token válido, ele irá retornar o usuário associado a ele. A condição "where" aqui determina que o token deve ser válido (usedAt: null) e não expirado (expiresAt: { gt: new Date() })
-  // a condição "include" aqui determina que ele irá retornar o usuário associado ao token
-  // gt é um operador que determina que a data de expiração do token deve ser maior que a data atual
-  async findValidByHash(tokenHash: string) {
-    return prisma.passwordResetToken.findFirst({
-      where: {
-        tokenHash,
-        usedAt: null,
-        expiresAt: {
-          gt: new Date(),
-        },
-      },
-      include: { user: true },
-    });
-  },
-  // aqui, vai marcar o token como usado (usedAt: new Date()) onde o id passado com parâmetro for igual ao id do token
-  async markAsUsed(id: string) {
-    return prisma.passwordResetToken.update({
-      where: { id },
-      data: { usedAt: new Date() },
-    });
-  },
-
-  /**
-   * RN-AUTH-14: ao emitir um novo token, invalida qualquer token anterior ainda válido do mesmo usuário — evita múltiplos links de reset ativos
-   * simultaneamente (reduz superfície de uso indevido de um link antigo).
-   */
-  async invalidateActiveTokensForUser(userId: string) {
-    return prisma.passwordResetToken.deleteMany({
-      where: { userId, usedAt: null, expiresAt: { gt: new Date() } },
+  async consumeAndUpdatePassword(tokenHash: string, password: string): Promise<boolean> {
+    // Apenas descobre o usuário; a validade é decidida dentro do lock.
+    const token = await prisma.passwordResetToken.findUnique({ where: { tokenHash } });
+    if (!token) return false;
+    return withUserLock(token.userId, async (tx) => {
+      const user = await tx.user.findUniqueOrThrow({ where: { id: token.userId } });
+      if (user.provider !== 'LOCAL' || !user.password) return false;
+      const claimed = await tx.passwordResetToken.updateMany({
+        where: { id: token.id, tokenHash, usedAt: null, expiresAt: { gt: new Date() } },
+        data: { usedAt: new Date() },
+      });
+      if (claimed.count !== 1) return false;
+      // Falha na senha reverte também o consumo do token.
+      await tx.user.update({ where: { id: token.userId }, data: { password } });
+      await tx.passwordResetToken.updateMany({
+        where: { userId: token.userId, usedAt: null },
+        data: { usedAt: new Date() },
+      });
+      return true;
     });
   },
 };

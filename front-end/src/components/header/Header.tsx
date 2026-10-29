@@ -1,13 +1,13 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Box, LayoutDashboard, LogOut, Plus, ShoppingCart } from 'lucide-react';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { ICON_CONFIG } from '../../constant/iconConfig';
 import { queryKeys } from '../../constant/queryKeys';
 import { useMe } from '../../hook/useMe';
 import { getCartItemsList } from '../../shared/services/api/cartItems/getCartItems';
-import { userLogOut } from '../../shared/services/api/logout/Logout';
+import { logoutSession } from '../../shared/services/session';
 import { useCartUIStore } from '../../shared/stores';
 import { useNewProductUIModalStore } from '../../shared/stores/useNewProductUIModal';
 import { Cart } from '../cart/Cart';
@@ -16,6 +16,7 @@ import { AvatarUpload } from '../AvatarUpload';
 
 export const Header = () => {
   const { data: user } = useMe();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -25,8 +26,8 @@ export const Header = () => {
 
   // buscando CartItems
   const { data: totalItems = 0 } = useQuery({
-    queryKey: queryKeys.cartItems,
-    queryFn: () => getCartItemsList.getCartItemsProduct(),
+    queryKey: queryKeys.cartFor(user?.id),
+    queryFn: ({ signal }) => getCartItemsList.getCartItemsProduct(signal),
     select: (cartItem) => cartItem.reduce((sum, item) => sum + item.quantity, 0),
     enabled: Boolean(user), // só busca carrinho se tiver usuário logado
     retry: false,
@@ -34,13 +35,14 @@ export const Header = () => {
 
   // Quando deslogar o usuário
   const handleLogout = useCallback(async () => {
+    setIsLoggingOut(true);
     try {
-      // quando eu deslogar, remova o usuário e a lista de CartItems (identificados pelas queryKeys)
-      await userLogOut();
-      queryClient.removeQueries({ queryKey: queryKeys.me });
-      queryClient.removeQueries({ queryKey: queryKeys.cartItems });
+      await logoutSession(queryClient);
     } catch {
       toast.error('Erro ao sair. Tente novamente.');
+      return;
+    } finally {
+      setIsLoggingOut(false);
     }
     toast.success('Usuário deslogado');
     navigate('/login');
@@ -115,12 +117,18 @@ export const Header = () => {
             </div>
             <div className="item-center flex gap-2">
               <p className="text-white">{user.name.split(' ')[0] || ''}</p>
-              <LogOut
-                size={ICON_CONFIG.mxSize}
-                strokeWidth={ICON_CONFIG.strokWidth}
-                className="cursor-pointer"
+              <button
+                type="button"
+                aria-label="Sair"
+                disabled={isLoggingOut}
                 onClick={handleLogout}
-              />
+              >
+                <LogOut
+                  size={ICON_CONFIG.mxSize}
+                  strokeWidth={ICON_CONFIG.strokWidth}
+                  className="cursor-pointer"
+                />
+              </button>
             </div>
             {/* icone do avatar pelo provider local */}
             {user.provider === 'LOCAL' && (

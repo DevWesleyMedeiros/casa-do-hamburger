@@ -14,19 +14,21 @@ import { queryKeys } from '../../constant/queryKeys.js';
 import { ApiError } from '../../shared/services/api/ApiExceptions.js';
 import { orderSeriviceApi } from '../../shared/services/api/orders/ordersServiceApi';
 import { resolveApiErrorMessage } from '../../shared/utils/apiErrorMessage.js';
+import { sessionRequests } from '../../shared/services/sessionRequests';
 
 export const Cart = () => {
   const { data: user } = useMe();
 
   const queryClient = useQueryClient();
+  const generation = sessionRequests.generation();
 
   const isOpenCart = useCartUIStore((state) => state.isCartOpen);
 
   const closeCart = useCartUIStore((state) => state.closeCart);
 
   const { data: cartItems = [], isLoading } = useQuery({
-    queryKey: queryKeys.cartItems,
-    queryFn: getCartItemsList.getCartItemsProduct,
+    queryKey: queryKeys.cartFor(user?.id),
+    queryFn: ({ signal }) => getCartItemsList.getCartItemsProduct(signal),
     enabled: Boolean(user),
     retry: false,
     staleTime: 30_000,
@@ -38,9 +40,13 @@ export const Cart = () => {
   );
 
   const createOrderMutation = useMutation({
-    mutationFn: orderSeriviceApi.createOrder,
+    mutationFn: () => {
+      sessionRequests.assertCurrent(generation);
+      return orderSeriviceApi.createOrder();
+    },
 
     onSuccess: () => {
+      if (generation !== sessionRequests.generation()) return;
       queryClient.invalidateQueries({
         queryKey: queryKeys.orders,
       });
@@ -55,6 +61,7 @@ export const Cart = () => {
     },
 
     onError: (err: unknown) => {
+      if (generation !== sessionRequests.generation()) return;
       if (err instanceof ApiError) {
         toast.error(resolveApiErrorMessage(err, 'Não foi possível finalizar o pedido'));
 

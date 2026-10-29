@@ -78,8 +78,8 @@ export const authController = {
       return;
     }
     const user = await userRepository.findById(String(jwtPayload['id']));
-    if (!user) {
-      res.status(404).json({ message: 'Usuário não encontrado' });
+    if (!user || user.deletedAt) {
+      res.status(401).json({ message: 'Usuário não autenticado' });
       return;
     }
     res.status(200).json({ user: toUserDTO(user) });
@@ -90,7 +90,6 @@ export const authController = {
    * @returns uma objeto com uma mensagem de logout com sucesso
    */
   logout: asyncHandler(async (_req: Request, res: Response) => {
-    res.clearCookie('user_section');
     res.status(200).json({ message: 'Logout realizado com sucesso' });
   }),
 };

@@ -17,7 +17,7 @@ import { resolveApiErrorMessage } from '../../shared/utils/apiErrorMessage';
 import { displayStrongPassword } from '../../shared/utils/Utils';
 import { firebaseAuthSignOut, signInWithGooglePopup } from '../../shared/config/firebase';
 import { GoogleLoginDate } from '../../shared/services/api/login/googleLogin';
-import { queryKeys } from '../../constant/queryKeys';
+import { establishSession } from '../../shared/services/session';
 import { Seo } from '../../shared/components/SEO';
 
 export const Register = () => {
@@ -100,11 +100,11 @@ export const Register = () => {
       }
 
       toast('Login realizado');
-      queryClient.setQueryData(queryKeys.me, result.user);
+      await establishSession(queryClient, result.user);
       reset();
       navigate('/home');
-    } catch (err) {
-      console.error('[GoogleLogin] Erro no fluxo de popup:', err);
+    } catch {
+      console.error('[GoogleLogin] Erro no fluxo de popup');
       setBackendError('Ocorreu um erro inesperado. Tente novamente.');
     } finally {
       // Limpa sessão do Firebase no cliente — sessão real é o cookie do backend

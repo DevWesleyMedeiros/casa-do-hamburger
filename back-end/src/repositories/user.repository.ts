@@ -1,6 +1,11 @@
 import { prisma } from '../db.js';
 
 export const userRepository = {
+  findSessionUser: (id: string) =>
+    prisma.user.findUnique({
+      where: { id },
+      select: { id: true, admin: true, deletedAt: true },
+    }),
   findByEmail: async (email: string) => {
     return await prisma.user.findUnique({
       where: { email: email },
