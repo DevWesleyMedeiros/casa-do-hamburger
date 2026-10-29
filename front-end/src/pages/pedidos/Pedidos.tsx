@@ -143,8 +143,8 @@ export const Pedidos = () => {
         noIndex
       />
 
-      <div className="mx-auto flex w-full flex-col gap-2 px-3 text-white md:w-184.25 md:px-0">
-        <div className="my-1 mb-3 flex gap-2 md:my-3">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-3 text-white md:px-6">
+        <div className="my-1 mb-3 flex flex-wrap gap-2 md:my-3">
           {FILTER_ITEMS.map((item) => (
             <button
               key={item}
@@ -157,7 +157,7 @@ export const Pedidos = () => {
           ))}
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           {filteredOrders.length === 0 ? (
             <div className="justify-ccenter flex items-center">Nenhum pedido encontrado.</div>
           ) : (

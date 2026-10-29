@@ -41,7 +41,7 @@ test('E2E-01 ADMIN vê KPIs e dados diários reais', async ({ page }) => {
     if (request.url().includes('/admin/analytics/summary')) analyticsRequests.push(request.url());
   });
   await login(page);
-  await page.getByRole('link', { name: 'Analytics administrativo' }).click();
+  await page.getByRole('link', { name: 'Métricas' }).click();
   await expect(total(page)).toContainText('5');
   await expect(value(page)).toContainText(/100,00/);
   expect(analyticsRequests).toHaveLength(1);
@@ -95,13 +95,13 @@ test('E2E-05 visitante retorna ao login e API exige sessão', async ({ page }) =
 });
 test('E2E-06 cancelar pedido pela UI invalida dashboard ainda fresco', async ({ page }) => {
   await login(page);
-  await page.getByRole('link', { name: 'Analytics administrativo' }).click();
+  await page.getByRole('link', { name: 'Métricas' }).click();
   await expect(value(page)).toContainText(/100,00/);
   await page.getByRole('link', { name: 'Gerenciar pedidos' }).click();
   await page.getByLabel('Status do pedido').selectOption('CANCELLED');
   await expect(page.getByText('Pedido cancelado com sucesso')).toBeVisible();
   await expect(page.getByText('Pedido cancelado com sucesso')).toBeHidden();
-  await page.getByRole('link', { name: 'Analytics administrativo' }).click();
+  await page.getByRole('link', { name: 'Métricas' }).click();
   await expect(value(page)).toContainText(/90,00/);
   await expect(total(page)).toContainText('5');
 });
@@ -121,7 +121,8 @@ test('E2E-07 logout e nova conta não veem dados administrativos', async ({ page
 test('E2E-08 dashboard mobile sem rolagem horizontal', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await login(page);
-  await page.getByRole('link', { name: 'Analytics administrativo' }).click();
+  await page.getByRole('button', { name: 'Abrir administração' }).click();
+  await page.getByRole('link', { name: 'Métricas' }).click();
   await expect(total(page)).toContainText('5');
   await expect(page.getByRole('img', { name: /Quantidade de pedidos/ })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
@@ -132,7 +133,7 @@ test('E2E-08 dashboard mobile sem rolagem horizontal', async ({ page }) => {
 
 test('E2E-09 perda da sessão remove métricas e retorna ao login', async ({ page, context }) => {
   await login(page);
-  await page.getByRole('link', { name: 'Analytics administrativo' }).click();
+  await page.getByRole('link', { name: 'Métricas' }).click();
   await expect(total(page)).toContainText('5');
   await context.clearCookies();
   await page.getByRole('button', { name: 'Atualizar dados' }).click();
