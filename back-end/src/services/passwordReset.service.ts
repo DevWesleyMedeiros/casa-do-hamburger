@@ -1,4 +1,5 @@
 import * as bcrypt from 'bcrypt-ts';
+import { AppError } from '../errors/AppError.js';
 import { passwordResetTokenRepository } from '../repositories/passwordResetToken.repository.js';
 import { userRepository } from '../repositories/user.repository.js';
 import {
@@ -18,17 +19,19 @@ export const passwordResetService = {
   async requestPasswordReset(email: string): Promise<void> {
     const user = await userRepository.findByEmail(email);
     // RF-57 / RN-AUTH-10: contas Google não têm passwordHash local — nada a redefinir
-    if (!user || user.provider !== 'LOCAL' || !user.password) {
+    if (!user || user.deletedAt || user.provider !== 'LOCAL' || !user.password) {
       return;
     }
-    await passwordResetTokenRepository.invalidateActiveTokensForUser(user.id);
     const { rawToken, tokenHash } = generateResetToken();
-    await passwordResetTokenRepository.create({
+    const issued = await passwordResetTokenRepository.replaceActiveToken({
       userId: user.id,
       tokenHash,
       expiresAt: resetTokenExpiresAt(),
     });
-    const resetUrl = `${FRONTEND_URL}/reset-password?token=${rawToken}`;
+    if (!issued) return;
+    const resetLink = new URL('/reset-password', FRONTEND_URL);
+    resetLink.searchParams.set('token', rawToken);
+    const resetUrl = resetLink.toString();
     try {
       await resendEmailService.sendPasswordResetEmail({
         to: user.email,
@@ -42,19 +45,16 @@ export const passwordResetService = {
   },
   async resetPassword(rawToken: string, newPassword: string): Promise<'ok' | 'invalid_token'> {
     const tokenHash = hashResetToken(rawToken);
-    const resetToken = await passwordResetTokenRepository.findValidByHash(tokenHash);
-
-    if (!resetToken) {
-      return 'invalid_token';
-    }
-
     const newPasswordHash = await bcrypt.hash(newPassword, BCRYPT_SALT_ROUNDS);
-
-    await Promise.all([
-      userRepository.updatePasswordHash(resetToken.userId, newPasswordHash),
-      passwordResetTokenRepository.markAsUsed(resetToken.id),
-    ]);
-
-    return 'ok';
+    try {
+      const consumed = await passwordResetTokenRepository.consumeAndUpdatePassword(
+        tokenHash,
+        newPasswordHash,
+      );
+      return consumed ? 'ok' : 'invalid_token';
+    } catch (error) {
+      if (error instanceof AppError && error.status === 401) return 'invalid_token';
+      throw error;
+    }
   },
 };

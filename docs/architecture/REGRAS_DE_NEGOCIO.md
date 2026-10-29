@@ -104,12 +104,12 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | RF-06 | O sistema deve permitir logout, invalidando o cookie de sessão | 🟢 |
 | RF-07 | O sistema deve impedir cadastro com e-mail já existente | 🟢 |
 | RF-08 | O sistema deve validar formato de e-mail e força mínima de senha no cadastro | 🟢 |
-| RF-09 | O sistema deve permitir recuperação de senha via e-mail (fluxo "esqueci minha senha") | 🟡 (forgot-password 🟢 / reset-password 🔴 bug — ver Changelog 1.7.0) |
+| RF-09 | Recuperação de senha via e-mail, com atualização da senha e consumo do token atômicos | 🟡 Código corrigido; integração em banco descartável pendente |
 | RF-10 | O sistema deve permitir edição de dados de perfil (nome, avatar) | 🟢 |
 | RF-11 | O sistema deve suportar renovação de token via refresh token (rotação de sessão) | 🔵 |
 | RF-12 | O sistema deve registrar tentativas de login falhas para fins de rate limiting sem persistência auditável | 🟢 |
-| RF-56 🆕 | O token de redefinição de senha deve ser de uso único e expirar 30 minutos após a emissão | 🟡 (lógica de expiração/hash correta; risco de token ser marcado usado mesmo sem a senha mudar, por causa do bug de `reset-password` — ver 1.7.0) |
-| RF-57 🆕 | Contas com `provider=GOOGLE` não podem solicitar redefinição de senha local (não possuem `passwordHash` — RN-AUTH-10); o sistema deve orientar o uso do login social nesse caso | 🟡 (checagem implementada no service; convenção `provider` local='local' vs check='GOOGLE' ainda sem enum formal; teste de integração correspondente falha por `providerId` inexistente no schema) |
+| RF-56 | Token de redefinição de uso único, expiração de 30 minutos e emissão/consumo protegidos contra concorrência | 🟡 Código e regressões preparados; integração pendente |
+| RF-57 | Contas GOOGLE sem senha local não solicitam reset local; conta LOCAL vinculada ao Google preserva o método local | 🟡 Código corrigido; integração pendente |
 | RN-AVATAR-01 | O avatar do usuário autenticado pode ser definido/atualizado independentemente do provider. Avatares locais são persistidos via Cloudinary; contas Google podem utilizar a foto proveniente da identidade Google verificada. Quando o usuário possuir avatar próprio, ele deve ter prioridade sobre a foto do Google. | 🟢 |
 | RF-51 🆕 | O sistema deve permitir login/cadastro via **Google OAuth 2.0** ("Entrar com Google") como alternativa ao login local por e-mail/senha | 🟢 |
 | RF-52 🆕 | O backend deve verificar o `id_token` retornado pelo Google (assinatura, `aud`, `iss`, `exp`) antes de criar qualquer sessão — nunca confiar em dados de identidade enviados diretamente pelo frontend | 🟢 |
@@ -207,7 +207,7 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | RNF-11 | Performance | Consultas frequentes devem ter índices no banco (ex.: `productId`, `userId`, `status`) | 🔵 |
 | RNF-12 | Performance | Core Web Vitals (LCP, CLS, INP) dentro da faixa "Good" do Lighthouse | 🔵 |
 | RNF-13 | Confiabilidade | Migrations de banco devem ser versionadas (`prisma migrate dev`), nunca `db push` em produção | 🟢 |
-| RNF-14 | Confiabilidade | Operações que envolvem múltiplas tabelas (ex.: criar pedido + baixar carrinho) devem usar transação Prisma (`$transaction`) | 🟢 |
+| RNF-14 | Operações relacionadas usam transação e controle de concorrência: senha/token e checkout/carrinho serializam pelo usuário; status usa comparação do estado esperado | 🟡 Código e regressões preparados; integração pendente |
 | RNF-15 | Manutenibilidade | Separação em camadas: `routes → controllers → services → repositories` | 🟢 |
 | RNF-16 | Manutenibilidade | Nenhuma regra de negócio dentro de controller — controller apenas orquestra | 🟢 |
 | RNF-17 | Escalabilidade | Domínio de Pedidos deve ser isolável em serviço próprio no futuro (ver Seção 10) | 🔵 |
@@ -395,9 +395,9 @@ Então o vínculo automático NÃO ocorre, e o sistema orienta o usuário a conf
 | RN-AUTH-11 🟡 | Login Google exige Firebase `sign_in_provider=google.com` e `email_verified=true`. O vínculo nunca substitui outro `firebaseUid`. Contas LOCAL vinculadas mantêm provider/senha locais (RF-53); novas contas Google usam GOOGLE/password=null. Implementação corrigida; integração concorrente pendente (ADR-0004). |
 | RN-AUTH-12 🟢 🆕 | A rota `/auth/google` está sob rate limiting dual camada: `googleAuthBroadLimiter` (por IP, 20/15min, aplicado como middleware da rota) + `googleAuthTargetedStore` (por UID do Google, 5/15min, aplicado dentro do service após decodificar o token). **Nota:** a regra original previa reuso do *mesmo* limiter das demais rotas de auth (RNF-06); o que foi construído é um limiter **dedicado** para `/auth/google` — cumpre o espírito da regra (rota protegida contra brute-force) mas com uma store própria, não compartilhada |
 | RN-AUTH-13 🟡 🆕 | Token de redefinição de senha é opaco, gerado com `crypto.randomBytes(32)` (256 bits de entropia); apenas seu hash SHA-256 é persistido no banco — o valor em texto puro nunca é armazenado, só existe no e-mail enviado uma única vez |
-| RN-AUTH-14 🟡 🆕 | Token de redefinição expira em 30 minutos e é de uso único (`usedAt` marcado no momento do consumo); expirado ou já usado, o token é rejeitado e uma nova solicitação é obrigatória. Emitir um novo token invalida qualquer token anterior ainda válido do mesmo usuário. ⚠️ **Bug (v1.7.0):** `markAsUsed` roda em `Promise.all` junto com a troca de senha (`updatePasswordHash`); se a troca falhar por causa do bug de campo inexistente (ver Changelog 1.7.0), o token ainda pode ser marcado como usado — violação sutil da regra "uso único só depois de sucesso real" |
+| RN-AUTH-14 🟡 | Token expira em 30 minutos e só pode ser consumido uma vez por atualização condicional. Alteração de `User.password` e consumo fazem commit/rollback juntos. Emissão e consumo serializam pela linha do usuário; emitir novo token invalida os anteriores na mesma transação. Código e testes preparados; integração pendente. |
 | RN-AUTH-15 🟢 🆕 | A resposta de `POST /auth/forgot-password` é **sempre genérica** (200, mesma mensagem), independentemente de o e-mail existir na base — mesma diretriz anti-enumeração já corrigida em US-02/RF-12 (v1.3.0). Confirmado em código (`passwordReset.controller.ts`, `ForgotPassword.tsx`) e coberto por 2 dos 7 testes de integração |
-| RN-AUTH-16 🔴 🆕 | A troca efetiva da senha no `reset-password` deve persistir no mesmo campo usado no restante do sistema (`User.password`). **Violação encontrada (v1.7.0):** `userRepository.updatePasswordHash` grava em `data: { passwordHash }`, campo que não existe em `schema.prisma` (o model `User` só tem `password`). Efeito esperado em runtime: `PrismaClientValidationError` no caminho feliz do reset — e como `passwordReset.controller.ts` não usa `asyncHandler` (único controller do projeto nessa situação), o erro não chega ao `errorHandler` global e a requisição trava sem resposta ao invés de devolver um 500 tratado. Bloqueia a promoção de RF-09 para 🟢 |
+| RN-AUTH-16 🟡 | Reset grava em `User.password`, campo já corrigido antes desta entrega. A correção atual elimina operações independentes de senha/consumo; falha parcial reverte ambos. Express 5 propaga rejeições assíncronas; o controller também segue o wrapper `asyncHandler`. Integração pendente. |
 
 ### 6.2 Criptografia de Senhas 🟢
 

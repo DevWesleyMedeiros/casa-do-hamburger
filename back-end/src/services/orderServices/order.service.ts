@@ -18,29 +18,29 @@ export const OrderServiceItems = {
    * O valor enviado pelo cliente (se algum) é sempre ignorado
    */
   createOrder: async (userId: string): Promise<OrderResponseDTO> => {
-    const cartItems = await OrderRepository.findCartItemsForCheckout(userId);
-    const [firstCartItem] = cartItems;
+    const order = await OrderRepository.createOrderFromCart(userId, (cartItems) => {
+      const [firstCartItem] = cartItems;
 
-    if (!firstCartItem) {
-      throw new AppError(400, 'Carrinho vazio - adicione itens para finalizar o pedido');
-    }
-    const snapshotItems = cartItems.map((item) => {
-      const subtotal = item.product.price * item.quantity;
+      if (!firstCartItem) {
+        throw new AppError(400, 'Carrinho vazio - adicione itens para finalizar o pedido');
+      }
+      const snapshotItems = cartItems.map((item) => {
+        const subtotal = item.product.price * item.quantity;
+        return {
+          productId: item.productId,
+          productName: item.product.name, // snapshot — RN-ORDER-01
+          productImageUrl: item.product.images[0]?.url ?? null, // snapshot — RF-33
+          quantity: item.quantity,
+          unitPrice: item.product.price,
+          subtotal: subtotal,
+        };
+      });
+      const total = snapshotItems.reduce((sum, item) => sum + item.subtotal, 0);
       return {
-        productId: item.productId,
-        productName: item.product.name, // snapshot — RN-ORDER-01
-        productImageUrl: item.product.images[0]?.url ?? null, // snapshot — RF-33
-        quantity: item.quantity,
-        unitPrice: item.product.price,
-        subtotal: subtotal,
+        customerName: firstCartItem.user.name,
+        total,
+        items: snapshotItems,
       };
-    });
-    const total = snapshotItems.reduce((sum, item) => sum + item.subtotal, 0);
-    const order = await OrderRepository.createOrderWithItems({
-      userId,
-      customerName: firstCartItem.user.name,
-      total,
-      items: snapshotItems,
     });
     return toOrderDTO({
       ...order,
@@ -112,7 +112,7 @@ export const OrderServiceItems = {
 
     OrderServiceMachine.assertValidTransition(order.status, nextStatus); // RN-ORDER-05 — lança 422 se inválida
 
-    const updated = await OrderRepository.updateOrderStatus(orderId, nextStatus);
+    const updated = await OrderRepository.updateOrderStatus(orderId, order.status, nextStatus);
 
     // RF-39 — best-effort, nunca derruba a resposta principal em caso de falha.
     // Notifica o DONO do pedido (order.user.email), NÃO o requester — quem
@@ -155,7 +155,7 @@ export const OrderServiceItems = {
       throw new AppError(422, `Pedido no status ${order.status} não pode ser cancelado`);
     }
 
-    const update = await OrderRepository.updateOrderStatus(orderId, 'CANCELLED');
+    const update = await OrderRepository.updateOrderStatus(orderId, order.status, 'CANCELLED');
     // Mesma observação: notifica o dono do pedido, não quem chamou a função
     // (relevante quando é o admin cancelando em nome do cliente).
     await notifyOrderStatusChanged(resendEmailService, {
