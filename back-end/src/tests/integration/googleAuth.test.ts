@@ -1,3 +1,4 @@
+import './safety.js';
 import { faker } from '@faker-js/faker';
 import * as bcrypt from 'bcrypt-ts';
 import type { DecodedIdToken } from 'firebase-admin/auth';

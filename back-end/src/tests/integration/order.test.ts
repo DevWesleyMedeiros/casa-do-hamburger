@@ -1,9 +1,9 @@
 // Arquivo NOVO — backend/src/tests/integration/order.test.ts
 //
 // Segue o mesmo padrão de loginLimiter.test.ts/passwordReset.test.ts:
-// app real (app.ts) + Supertest + Prisma real de teste (DATABASE_URL de
-// teste — nunca o banco de desenvolvimento).
+// app real + Supertest + Prisma no TEST_DATABASE_URL descartável atestado.
 
+import './safety.js';
 import { fakerPT_BR as faker, type Faker } from '@faker-js/faker';
 import request from 'supertest';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
