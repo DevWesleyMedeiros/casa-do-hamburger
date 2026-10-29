@@ -13,11 +13,11 @@ import * as jose from 'jose';
 import type { User } from '../../../generated/prisma/index.js';
 import { verifyFirebaseIdToken } from '../../config/firebaseAdmin.js';
 import { getJwtSecret } from '../../config/jwt.js';
-import { prisma } from '../../db.js';
+import { authenticateGoogleIdentity } from '../../repositories/googleIdentity.repository.js';
+import { verifiedGoogleEmail } from './verifiedGoogleIdentity.js';
 import { toJwtPayloadDTO } from '../../dtos/toJwtPayloadDTO.js';
 import { AppError } from '../../errors/AppError.js';
 import { googleAuthTargetedStore } from '../../middlewares/stores/googleAuthTargetStore.js';
-import { userRepository } from '../../repositories/user.repository.js';
 
 // Aplica rate limiting direcionado por UID do Google após decodificar o token.
 async function checkGoogleTargetedRateLimit(uid: string): Promise<void> {
@@ -52,18 +52,6 @@ function sanitizeGoogleAvatar(picture: unknown): string | null {
   }
 }
 
-// Regra RN-AVATAR-01: avatar próprio (avatarKey) tem prioridade sobre o do Google.
-/**
- * @description Sincroniza a foto do Google com a foto do usuário, se for válida e não for igual à foto do usuário.
- * @param user usuário a ser sincronizado
- * @param avatarUrl URL da foto do Google
- * @returns usuário atualizado
- * */
-async function syncGoogleAvatar(user: User, avatarUrl: string | null): Promise<User> {
-  const canSync = avatarUrl && !user.avatarKey && user.avatarUrl !== avatarUrl;
-  return canSync ? userRepository.updateGoogleAvatar(user.id, avatarUrl) : user;
-}
-
 export const googleAuthService = {
   /**
    * @description Realiza o login social via Google.
@@ -87,47 +75,13 @@ export const googleAuthService = {
       throw new AppError(401, 'Autenticação com Google inválida ou expirada');
     }
 
-    if (!decoded.email) {
-      throw new AppError(400, 'Conta Google sem e-mail associado');
-    }
-    // Foto fornecida pelo token Firebase já verificado. Url já sanitizada.
-    const avatarUrl = sanitizeGoogleAvatar(decoded['picture']);
-    // Usuário já vinculado a esse Firebase UID.
-    const byFirebaseUid = await userRepository.findByFirebaseUid(decoded.uid);
-    if (byFirebaseUid) {
-      const user = await syncGoogleAvatar(byFirebaseUid, avatarUrl); // ← novo
-      return { user, token: await signSessionJwt(user) };
-    }
-    // Usuário existente pelo e-mail ou criação de novo usuário.
-    const user = await prisma.user.upsert({
-      where: { email: decoded.email },
-      update: {
-        ...(decoded.email_verified === true
-          ? { firebaseUid: decoded.uid, provider: 'GOOGLE' }
-          : {}),
-      },
-
-      create: {
-        name: decoded['name'] ?? decoded.email.split('@')[0] ?? 'Usuário Google',
-        email: decoded.email,
-        firebaseUid: decoded.uid,
-        avatarUrl,
-        emailVerified: decoded.email_verified ?? false,
-        emailVerifiedAt: decoded.email_verified ? new Date() : null,
-        provider: 'GOOGLE',
-        cep: '',
-      },
+    const email = verifiedGoogleEmail(decoded);
+    const user = await authenticateGoogleIdentity({
+      uid: decoded.uid,
+      email,
+      name: decoded['name'] ?? email.split('@')[0] ?? 'Usuário Google',
+      avatarUrl: sanitizeGoogleAvatar(decoded['picture']),
     });
-
-    // Se a conta já existia e tentamos vincular sem que o e-mail estar verificado.
-    if (user.firebaseUid !== decoded.uid && decoded.email_verified !== true) {
-      throw new AppError(
-        409,
-        'Já existe uma conta com este e-mail. Faça login pela senha local ' +
-          'ou verifique seu e-mail no Google antes de tentar novamente.',
-      );
-    }
-    console.log('[GoogleAuth] Autenticação Google processada com sucesso');
     return {
       user,
       token: await signSessionJwt(user),

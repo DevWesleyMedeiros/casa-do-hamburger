@@ -41,7 +41,7 @@ export const authService = {
       ? await compare(password, user?.password ?? dummyHash)
       : await compare(password, dummyHash);
 
-    if (!user || !passwordMatch) {
+    if (!user || user.deletedAt || user.provider !== 'LOCAL' || !user.password || !passwordMatch) {
       throw new AppError(401, 'Credenciais inválidas');
     }
 

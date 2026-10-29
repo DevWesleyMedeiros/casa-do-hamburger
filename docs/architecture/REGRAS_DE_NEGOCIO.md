@@ -368,7 +368,7 @@ E sou redirecionado para a área autenticada
 
 Dado que já existe uma conta local com o mesmo e-mail
 Quando faço login via Google e o Google reporta email_verified=true
-Então minha conta local é vinculada automaticamente ao provider GOOGLE, sem duplicar o cadastro
+Então minha conta local é vinculada à identidade Google, preservando provider LOCAL e senha
 
 Quando o Google reporta email_verified=false para esse e-mail
 Então o vínculo automático NÃO ocorre, e o sistema orienta o usuário a confirmar a conta por outro meio
@@ -388,11 +388,11 @@ Então o vínculo automático NÃO ocorre, e o sistema orienta o usuário a conf
 | RN-AUTH-04 🔵 | `sameSite` deve ser `lax` em same-site e `none` (+ `secure: true`) quando frontend e backend estão em domínios diferentes (Vercel × Railway) |
 | RN-AUTH-05 🔵 | Deve existir um **refresh token** de vida longa, também `httpOnly`, para renovar o access token sem exigir novo login — rotação de token a cada uso (evita replay) |
 | RN-AUTH-06 🟢 | Logout invalida o cookie no cliente; se o refresh token existir, deve haver blacklist/revogação no servidor |
-| RN-AUTH-07 🟢 | Toda rota protegida passa pelo middleware `requireAuth`, que decodifica e valida o JWT antes de liberar acesso ao `req.user` |
+| RN-AUTH-07 🟢 | Toda rota protegida verifica assinatura HS256, expiração e formato da identidade; consulta existência, `deletedAt` e `admin` atual no banco antes de definir `req.user`. O privilégio antigo do JWT não autoriza a operação. |
 | RN-AUTH-08 🟢 🆕 | **(Reescrita v1.8.1 — mecanismo real difere do proposto na v1.2.0)** Login externo (Google) usa **Firebase Authentication** (`GoogleAuthProvider` + `signInWithPopup`) no frontend; o Firebase já entrega ao client um **Firebase ID Token** pronto (o app nunca manuseia `code`/`CLIENT_SECRET`/PKCE). O backend verifica esse token com o **Firebase Admin SDK** (`verifyFirebaseIdToken`, `back-end/src/config/firebaseAdmin.ts`), que confere assinatura, `aud` (Project ID do Firebase), `iss` e `exp` antes de qualquer criação de sessão — ver ADR-0003 revisada (27/08/2026), Opção D |
 | RN-AUTH-09 🟢 🆕 | **(Reescrita v1.8.1)** O Firebase ID Token **nunca** é usado como sessão da aplicação — serve só para comprovar identidade perante o Firebase Admin. A sessão continua sendo o JWT próprio (RN-AUTH-02, `jose`), emitido pelo backend somente após `verifyFirebaseIdToken` resolver com sucesso (`googleAuth.service.ts`, função `signSessionJwt`, reaproveita `toJwtPayloadDTO` — mesmo formato do login local) |
 | RN-AUTH-10 🟢 🆕 | O campo `User.password` é **opcional** (nullable); contas com `provider=GOOGLE` não possuem senha local e não podem autenticar pelo fluxo de e-mail/senha — confirmado em `schema.prisma` (`password String?`) |
-| RN-AUTH-11 🟢 🆕 | Vínculo automático de conta (conta local existente + login Google no mesmo e-mail) só ocorre se `email_verified=true` no token do Google; caso contrário, o sistema rejeita o vínculo automático (`AppError 409`), para evitar *account takeover* — gate confirmado em `googleAuthService.loginWithGoogle` (`decoded.email_verified === true` antes de setar `firebaseUid` no `upsert`) |
+| RN-AUTH-11 🟡 | Login Google exige Firebase `sign_in_provider=google.com` e `email_verified=true`. O vínculo nunca substitui outro `firebaseUid`. Contas LOCAL vinculadas mantêm provider/senha locais (RF-53); novas contas Google usam GOOGLE/password=null. Implementação corrigida; integração concorrente pendente (ADR-0004). |
 | RN-AUTH-12 🟢 🆕 | A rota `/auth/google` está sob rate limiting dual camada: `googleAuthBroadLimiter` (por IP, 20/15min, aplicado como middleware da rota) + `googleAuthTargetedStore` (por UID do Google, 5/15min, aplicado dentro do service após decodificar o token). **Nota:** a regra original previa reuso do *mesmo* limiter das demais rotas de auth (RNF-06); o que foi construído é um limiter **dedicado** para `/auth/google` — cumpre o espírito da regra (rota protegida contra brute-force) mas com uma store própria, não compartilhada |
 | RN-AUTH-13 🟡 🆕 | Token de redefinição de senha é opaco, gerado com `crypto.randomBytes(32)` (256 bits de entropia); apenas seu hash SHA-256 é persistido no banco — o valor em texto puro nunca é armazenado, só existe no e-mail enviado uma única vez |
 | RN-AUTH-14 🟡 🆕 | Token de redefinição expira em 30 minutos e é de uso único (`usedAt` marcado no momento do consumo); expirado ou já usado, o token é rejeitado e uma nova solicitação é obrigatória. Emitir um novo token invalida qualquer token anterior ainda válido do mesmo usuário. ⚠️ **Bug (v1.7.0):** `markAsUsed` roda em `Promise.all` junto com a troca de senha (`updatePasswordHash`); se a troca falhar por causa do bug de campo inexistente (ver Changelog 1.7.0), o token ainda pode ser marcado como usado — violação sutil da regra "uso único só depois de sucesso real" |
@@ -414,8 +414,8 @@ Então o vínculo automático NÃO ocorre, e o sistema orienta o usuário a conf
 | Regra | Descrição | Status |
 | --- | --- | --- |
 | RN-RBAC-01 | Papéis suportados hoje: `USER` (padrão) e `ADMIN` | 🟢 |
-| RN-RBAC-02 | Role é definida no banco (`User.role`) e embutida no payload do JWT no login | 🟢 |
-| RN-RBAC-03 | Middleware `requiredAdmin` verifica `req.user.role === 'ADMIN'`; qualquer outra role recebe `403 Forbidden` | 🟢 |
+| RN-RBAC-02 | Papel atual é representado por `User.admin` booleano. A autorização usa o valor atual consultado pelo backend, mesmo que o JWT contenha um valor antigo | 🟢 |
+| RN-RBAC-03 | `requiredAdmin` exige `req.user.admin === true`, definido pelo middleware a partir do banco; demais usuários recebem 403 | 🟢 |
 | RN-RBAC-04 | Middleware de admin **nunca** deve ser aplicado a rotas de recurso pessoal do usuário (ex.: seu próprio carrinho) | 🟢 |
 | RN-RBAC-05 | Autorização é sempre validada no backend — checagens de role no frontend são apenas cosméticas (UX), nunca a fonte de verdade de segurança | 🟢 |
 | RN-RBAC-06 | Hoje `USER` cobre: visualizar produtos, adicionar/remover/editar itens do carrinho, realizar compras. `ADMIN` cobre tudo isso + criar produtos, editar/excluir produtos (edição/exclusão ainda 🟡), e acompanhar todos os pedidos | 🟡 |
