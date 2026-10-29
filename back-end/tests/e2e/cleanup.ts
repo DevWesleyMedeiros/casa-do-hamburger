@@ -6,6 +6,9 @@ try {
   const where = { email: { startsWith: 'rf44-', endsWith: '@example.invalid' } };
   const users = await prisma.user.findMany({ where, select: { id: true } });
   await prisma.order.deleteMany({ where: { userId: { in: users.map((user) => user.id) } } });
+  await prisma.auditLog.deleteMany({ where: { actorId: { in: users.map((user) => user.id) } } });
+  await prisma.cartItem.deleteMany({ where: { userId: { in: users.map((user) => user.id) } } });
+  await prisma.products.deleteMany({ where: { name: { startsWith: 'RF45 fixture produto' } } });
   await prisma.user.deleteMany({ where });
 } finally {
   await prisma.$disconnect();

@@ -1,7 +1,8 @@
+import { randomUUID } from 'node:crypto';
 import { hash } from 'bcrypt-ts';
 import { prisma } from '../../src/db.js';
 import { getTestDatabaseUrl } from '../../src/shared/utils/testDatabaseSafety.js';
-import type { OrderStatus } from '../../generated/prisma/index.js';
+import type { OrderStatus, User } from '../../generated/prisma/index.js';
 
 getTestDatabaseUrl();
 const fixtureKey = process.env['RF44_FIXTURE_KEY'] ?? '000000000000';
@@ -16,9 +17,12 @@ try {
     select: { id: true },
   });
   await prisma.order.deleteMany({ where: { userId: { in: old.map((user) => user.id) } } });
+  await prisma.auditLog.deleteMany({ where: { actorId: { in: old.map((user) => user.id) } } });
+  await prisma.cartItem.deleteMany({ where: { userId: { in: old.map((user) => user.id) } } });
+  await prisma.products.deleteMany({ where: { name: { startsWith: 'RF45 fixture produto' } } });
   await prisma.user.deleteMany({ where: { id: { in: old.map((user) => user.id) } } });
   const password = await hash('Rf44-test-only!123', 10);
-  const users = [];
+  const users: User[] = [];
   for (const [index, email] of emails.entries()) {
     users.push(
       await prisma.user.upsert({
@@ -36,6 +40,20 @@ try {
   }
   const userIds = users.map((user) => user.id);
   await prisma.order.deleteMany({ where: { userId: { in: userIds } } });
+  if (process.env['RF45_AUDIT_FIXTURES'] === '1') {
+    await prisma.auditLog.createMany({
+      data: Array.from({ length: 21 }, (_, index) => ({
+        id: randomUUID(),
+        actorId: users[0]!.id,
+        requestId: randomUUID(),
+        action: 'PRODUCT_DELETED',
+        entityType: 'PRODUCT',
+        entityId: `rf45-page-${index}`,
+        before: { name: `RF45 removido ${index}`, category: 'HAMBURGUER', price: 100 },
+        createdAt: new Date(Date.parse('2005-01-01T12:00:00Z') + index),
+      })),
+    });
+  }
   const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(
     new Date(),
   );
