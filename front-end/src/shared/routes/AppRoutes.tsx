@@ -9,6 +9,9 @@ import { PublicRoutes } from './publicRoutes/PublicRoutes';
 const Analytics = lazy(() =>
   import('../../pages/admin/Analytics').then((module) => ({ default: module.Analytics })),
 );
+const AuditLogs = lazy(() =>
+  import('../../pages/admin/AuditLogs').then((module) => ({ default: module.AuditLogs })),
+);
 import { ForgotPassword } from '../../pages/forgotPassword/ForgotPassword';
 import { ResetPassword } from '../../pages/forgotPassword/ResetPassword';
 
@@ -59,6 +62,20 @@ export const AppRoutes = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/pedidos" element={<Pedidos />} />
+        <Route
+          path="/admin/audit-logs"
+          element={
+            <Suspense
+              fallback={
+                <p role="status" className="p-6 text-white">
+                  Carregando auditoria…
+                </p>
+              }
+            >
+              <AuditLogs />
+            </Suspense>
+          }
+        />
         <Route
           path="/admin/analytics"
           element={

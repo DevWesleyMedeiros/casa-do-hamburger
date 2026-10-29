@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, ChartNoAxesCombined, LayoutDashboard, Menu, Plus } from 'lucide-react';
+import { Box, ClipboardList, ChartNoAxesCombined, LayoutDashboard, Menu, Plus } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { ICON_CONFIG } from '../../constant/iconConfig';
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '../ui/sheet';
@@ -8,6 +8,7 @@ const items = [
   { to: '/home', label: 'Produtos', icon: Box },
   { to: '/pedidos', label: 'Pedidos', icon: LayoutDashboard },
   { to: '/admin/analytics', label: 'Métricas', icon: ChartNoAxesCombined },
+  { to: '/admin/audit-logs', label: 'Auditoria', icon: ClipboardList },
 ];
 const controlClass =
   'flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-md p-2 text-brand-amber hover:bg-brand-amber/15 focus-visible:outline-2 focus-visible:outline-brand-amber';

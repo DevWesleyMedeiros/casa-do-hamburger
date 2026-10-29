@@ -11,6 +11,7 @@ export const useCreateProduct = () => {
     mutationFn: (input: CreateProductInput) => createProduct(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.products });
+      queryClient.invalidateQueries({ queryKey: queryKeys.audit });
       toast.success('Produto adicionado com sucesso!');
     },
     onError: () => {

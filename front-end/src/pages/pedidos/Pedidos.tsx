@@ -54,6 +54,7 @@ export const Pedidos = () => {
     onSuccess: (updatedOrder) => {
       if (generation !== sessionRequests.generation()) return;
       queryClient.invalidateQueries({ queryKey: queryKeys.analytics });
+      queryClient.invalidateQueries({ queryKey: queryKeys.audit });
       queryClient.setQueryData(
         queryKeys.ordersFor(user?.id, isAdmin),
         (currentOrders: Order[] = []) => {
@@ -84,6 +85,7 @@ export const Pedidos = () => {
     onSuccess: (cancelledOrder) => {
       if (generation !== sessionRequests.generation()) return;
       queryClient.invalidateQueries({ queryKey: queryKeys.analytics });
+      queryClient.invalidateQueries({ queryKey: queryKeys.audit });
       queryClient.setQueryData(
         queryKeys.ordersFor(user?.id, isAdmin),
         (currentOrders: Order[] = []) => {

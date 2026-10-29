@@ -53,6 +53,7 @@ export const Products = ({ id, name, description, price, images }: ProductsInter
         }
         toast.success('Produto deletado com sucesso');
         await queryClient.invalidateQueries({ queryKey: queryKeys.products });
+        await queryClient.invalidateQueries({ queryKey: queryKeys.audit });
       } catch (err) {
         console.error(err);
         toast.error('Erro ao deletar produto');
