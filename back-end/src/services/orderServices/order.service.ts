@@ -1,3 +1,4 @@
+import { auditService, orderAuditEvent } from '../audit.service.js';
 import type { OrderStatus } from '../../../generated/prisma/index.js';
 import { toOrderDTO, type OrderResponseDTO } from '../../dtos/order.dto.js';
 import { AppError } from '../../errors/AppError.js';
@@ -10,6 +11,7 @@ import { OrderServiceMachine } from './orderStateMachine.service.js';
 interface RequesterContext {
   id: string;
   admin: boolean;
+  requestId?: string;
 }
 
 export const OrderServiceItems = {
@@ -112,7 +114,13 @@ export const OrderServiceItems = {
 
     OrderServiceMachine.assertValidTransition(order.status, nextStatus); // RN-ORDER-05 — lança 422 se inválida
 
-    const updated = await OrderRepository.updateOrderStatus(orderId, order.status, nextStatus);
+    const updated = await OrderRepository.updateOrderStatus(
+      orderId,
+      order.status,
+      nextStatus,
+      (tx) =>
+        auditService.record(tx, requester, orderAuditEvent(orderId, order.status, nextStatus)),
+    );
 
     // RF-39 — best-effort, nunca derruba a resposta principal em caso de falha.
     // Notifica o DONO do pedido (order.user.email), NÃO o requester — quem
@@ -155,7 +163,15 @@ export const OrderServiceItems = {
       throw new AppError(422, `Pedido no status ${order.status} não pode ser cancelado`);
     }
 
-    const update = await OrderRepository.updateOrderStatus(orderId, order.status, 'CANCELLED');
+    const update = await OrderRepository.updateOrderStatus(
+      orderId,
+      order.status,
+      'CANCELLED',
+      requester.admin
+        ? (tx) =>
+            auditService.record(tx, requester, orderAuditEvent(orderId, order.status, 'CANCELLED'))
+        : undefined,
+    );
     // Mesma observação: notifica o dono do pedido, não quem chamou a função
     // (relevante quando é o admin cancelando em nome do cliente).
     await notifyOrderStatusChanged(resendEmailService, {

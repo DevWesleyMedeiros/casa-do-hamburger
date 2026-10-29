@@ -40,6 +40,7 @@ export const orderController = {
     const order = await OrderServiceItems.getOrderForRequester(orderId, {
       id: req.user!['id'] as string,
       admin: req.user!['admin'] as boolean,
+      requestId: res.locals['requestId'] as string,
     });
     res.status(200).json(order);
   },
@@ -58,6 +59,7 @@ export const orderController = {
     const order = await OrderServiceItems.updateStatus(orderId, status, {
       id: req.user!['id'] as string,
       admin: req.user!['admin'] as boolean,
+      requestId: res.locals['requestId'] as string,
     });
     return res.status(200).json(order);
   },
@@ -71,6 +73,7 @@ export const orderController = {
     const order = await OrderServiceItems.cancelOrder(orderId, {
       id: req.user!['id'] as string,
       admin: req.user!['admin'] as boolean,
+      requestId: res.locals['requestId'] as string,
     });
     return res.status(200).json(order);
   },

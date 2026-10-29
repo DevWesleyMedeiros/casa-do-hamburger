@@ -1,3 +1,5 @@
+import auditRoutes from './routes/audit.routes.js';
+import { requestContext } from './middlewares/requestContext.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
@@ -21,6 +23,7 @@ app.disable('x-powered-by'); // desabilita o header X-Powered-By, que contém a 
 // e o rate limiting torna-se completamente ineficaz (todos contam como 1 origem).
 app.set('trust proxy', 1);
 app.use(helmet());
+app.use(requestContext);
 
 // CORS no top antes de toda resposta
 let productionOrigin = '';
@@ -65,5 +68,6 @@ app.use('/auth', cartRoutes);
 // registro da rota de order
 app.use('/orders', orderRoutes);
 app.use('/admin/analytics', adminAnalyticsRoutes);
+app.use('/admin/audit-logs', auditRoutes);
 // middleware que vai sempre por último — Express só invoca middleware de 4 parâmetros depois de todas as rotas; Serve para tratamento de erros
 app.use(errorHandler);
