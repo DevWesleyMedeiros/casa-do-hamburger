@@ -129,9 +129,87 @@ jobs:
       - name: Build
         run: bun run build
 
-  # e2e:
-  #   Ativar quando a suíte Playwright existir.
-  #   Pode ser mantido como workflow separado.
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [backend, frontend]
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: casa_security_20261028
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: casa_security_20261028
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U casa_security_20261028 -d casa_security_20261028"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://casa_security_20261028:postgres@127.0.0.1:5432/casa_security_20261028?schema=public
+      TEST_DATABASE_URL: postgresql://casa_security_20261028:postgres@127.0.0.1:5432/casa_security_20261028?schema=public
+      JWT_SECRET: rf44-disposable-session-key-32-bytes-only
+      RESEND_API_KEY: re_rf44_test_only
+      CLOUDINARY_CLOUD_NAME: rf44-test
+      CLOUDINARY_API_KEY: rf44-test
+      CLOUDINARY_API_SECRET: rf44-test
+    steps:
+      - uses: actions/checkout@v6
+      - uses: oven-sh/setup-bun@v2
+      - name: Instalar backend
+        working-directory: back-end
+        run: bun install --frozen-lockfile
+      - name: Instalar frontend
+        working-directory: front-end
+        run: bun install --frozen-lockfile
+      - name: Autorizar somente a conexão do serviço descartável
+        working-directory: back-end
+        run: bun --no-env-file tests/authorize-ci.mjs
+      - name: Gerar e validar Prisma e aplicar migrations descartáveis
+        working-directory: back-end
+        run: |
+          bunx --bun prisma generate
+          bunx --bun prisma validate
+          bunx --bun prisma migrate deploy
+      - name: Preparar fixtures sintéticas
+        working-directory: back-end
+        run: |
+          bunx tsc -p tests/tsconfig.json
+          bunx tsx tests/e2e/seed.ts
+      - name: Instalar Chromium
+        working-directory: front-end
+        run: bunx playwright install --with-deps chromium
+      - name: E2E real (servidores e health checks geridos pelo Playwright)
+        working-directory: front-end
+        run: |
+          bun run test:e2e:typecheck
+          bun run test:e2e:ci
+      - name: Publicar evidências sem cookies ou traces de rede
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rf44-e2e-evidence
+          retention-days: 7
+          if-no-files-found: warn
+          path: |
+            front-end/test-results/**/*.png
+            front-end/test-results/junit.xml
+            front-end/playwright-report/index.html
+      - name: Limpar fixtures e autorização
+        if: always()
+        working-directory: back-end
+        run: |
+          trap 'rm -f .test-database-authorization.json' EXIT
+          if [ -f .test-database-authorization.json ]; then
+            bunx tsx tests/e2e/cleanup.ts
+          fi
+      - name: Remover traces privados do runner
+        if: always()
+        run: |
+          rm -rf front-end/test-results front-end/playwright-report
 
   # code-review:
   #   needs: [backend, frontend]
