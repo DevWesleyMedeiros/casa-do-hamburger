@@ -174,8 +174,40 @@ Servir como **boilerplate mestre** para qualquer aplicação futura no modelo *c
 | RF-41 | Rotas administrativas devem ser protegidas por middleware `requiredAdmin` | 🟢 |
 | RF-42 | Painel administrativo deve permitir CRUD completo de produtos | 🟢 |
 | RF-43 | Painel administrativo deve permitir gestão de pedidos (Kanban de status) | 🟢 |
-| RF-44 | Painel administrativo deve exibir métricas básicas (pedidos do dia, faturamento) | 🔵 |
+| RF-44 | Dashboard administrativo de pedidos e valores simulados, com filtros e agregações no servidor (contrato abaixo) | 🟡 Em implementação; conclusão depende da validação integral |
 | RF-45 | Deve existir auditoria (log) de ações administrativas sensíveis | 🔵 |
+
+#### RF-44 — Contrato de analytics administrativo
+
+- Acesso exclusivo ao administrador atual (`User.admin`), verificado no backend por
+  `requireAuth` e `requiredAdmin`. Visitante/sessão inválida: 401; usuário comum: 403.
+- `GET /admin/analytics/summary?from=YYYY-MM-DD&to=YYYY-MM-DD` recebe datas civis
+  válidas entre 2000 e 2100, obrigatórias, com intervalo `[from, to)` de 1 a 366 dias.
+  `from` inclui a meia-noite e `to` exclui a meia-noite de `America/Sao_Paulo`.
+  O PostgreSQL aplica as regras IANA inclusive nas datas históricas. Dias da série
+  são datas civis; não são instantes UTC. A resposta informa timezone e limites.
+- Contabilizar pedidos pelo `createdAt` persistido em UTC, com status **atual**,
+  sem confundir criação com transição de status. Incluir todos os pedidos históricos,
+  inclusive os com `deletedAt`, preservando a apuração; soft delete não altera valores.
+- Retornar total, contagens completas de `PENDING`, `PREPARING`, `READY`, `DELIVERED`
+  e `CANCELLED`, quantidade não cancelada, soma do `Order.total` não cancelado e ticket
+  médio desses pedidos. Cancelados permanecem na contagem e saem somente dos valores.
+- Valores da API são inteiros seguros em centavos. Ticket médio usa divisão inteira
+  com arredondamento de meio centavo para cima; denominador zero retorna zero.
+  Não recalcular snapshots a partir do catálogo ou considerar `Payment.SIMULATED`
+  confirmação de recebimento. **Valor de pedidos não significa faturamento recebido.**
+- Série diária contém todos os dias, ordenados, com quantidade de pedidos (inclusive
+  cancelados) e valor não cancelado; dias vazios e períodos vazios retornam zeros.
+- UI em `/admin/analytics`: 7 e 30 dias civis incluindo hoje; personalizado com fim
+  exclusivo explícito; cards, evolução diária, distribuição por status, tabela acessível,
+  loading, erro com nova tentativa, vazio e layout mobile. Não exibir receita confirmada.
+- Agregação somente no servidor, DTO sem PII, sem lista de pedidos e sem escritas.
+  Cache HTTP `no-store`; TanStack Query privado por usuário, admin, geração e filtros,
+  stale time de 30 segundos, revalidação ao voltar à janela e invalidação nas mutations
+  locais de criação/cancelamento/status. Logout/troca/expiração cancelam e removem caches.
+- Aceitação exige testes de regras, autorização e banco descartável, oito jornadas
+  Playwright reais, CI E2E ativa, lint/build/formatação, revisão e fluxo de PR aprovado.
+  ADR-0006 registra decisões e limites; relatório técnico registra evidências reais.
 
 ### 3.6 Módulo de Pagamento 🆕
 
