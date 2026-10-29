@@ -11,6 +11,7 @@ import { resolveApiErrorMessage } from '../../shared/utils/apiErrorMessage.js';
 import { getItemSelectedClass } from '../../shared/utils/Utils';
 import type { Order, OrderStatus } from '../../types/Order';
 import { Seo } from '../../shared/components/SEO';
+import { sessionRequests } from '../../shared/services/sessionRequests';
 
 const FILTER_ITEMS = ['Pendentes', 'Preparando', 'Pronto', 'Cancelados', 'Entregue'] as const;
 
@@ -31,31 +32,41 @@ export const Pedidos = () => {
 
   const { data: user } = useMe();
   const isAdmin = user?.admin ?? false;
+  const generation = sessionRequests.generation();
 
   const {
     data: orders = [],
     isLoading,
     isError,
   } = useQuery({
-    queryKey: queryKeys.orders,
-    queryFn: orderSeriviceApi.getMyOrders,
+    queryKey: queryKeys.ordersFor(user?.id, isAdmin),
+    queryFn: ({ signal }) => orderSeriviceApi.getMyOrders(signal),
+    enabled: Boolean(user),
   });
 
   // mutation para atualizar status do order
   const statusMutation = useMutation({
     mutationFn: ({ orderId, status }: { orderId: string; status: OrderStatus }) => {
+      sessionRequests.assertCurrent(generation);
       return orderSeriviceApi.updateOrderStatus(orderId, status);
     },
 
     onSuccess: (updatedOrder) => {
-      queryClient.setQueryData(queryKeys.orders, (currentOrders: Order[] = []) => {
-        return currentOrders.map((order) => (order.id === updatedOrder.id ? updatedOrder : order));
-      });
+      if (generation !== sessionRequests.generation()) return;
+      queryClient.setQueryData(
+        queryKeys.ordersFor(user?.id, isAdmin),
+        (currentOrders: Order[] = []) => {
+          return currentOrders.map((order) =>
+            order.id === updatedOrder.id ? updatedOrder : order,
+          );
+        },
+      );
 
       toast.success('Status atualizado com sucesso');
     },
 
     onError: (err: unknown) => {
+      if (generation !== sessionRequests.generation()) return;
       if (err instanceof ApiError) {
         toast.error(resolveApiErrorMessage(err, 'Status não atualizado'));
       }
@@ -65,20 +76,26 @@ export const Pedidos = () => {
   // mutation para cancelar order
   const cancelMutation = useMutation({
     mutationFn: (orderId: string) => {
+      sessionRequests.assertCurrent(generation);
       return orderSeriviceApi.cancelOrder(orderId);
     },
 
     onSuccess: (cancelledOrder) => {
-      queryClient.setQueryData(queryKeys.orders, (currentOrders: Order[]) => {
-        return currentOrders.map((order) =>
-          order.id === cancelledOrder.id ? cancelledOrder : order,
-        );
-      });
+      if (generation !== sessionRequests.generation()) return;
+      queryClient.setQueryData(
+        queryKeys.ordersFor(user?.id, isAdmin),
+        (currentOrders: Order[] = []) => {
+          return currentOrders.map((order) =>
+            order.id === cancelledOrder.id ? cancelledOrder : order,
+          );
+        },
+      );
 
       toast.success('Pedido cancelado com sucesso');
     },
 
     onError: (err: unknown) => {
+      if (generation !== sessionRequests.generation()) return;
       if (err instanceof ApiError) {
         toast.error(resolveApiErrorMessage(err, 'Pedido não cancelado'));
       }

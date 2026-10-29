@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { Button } from '../../components/button/Button';
 import { Input } from '../../components/input/Input';
 import { ICON_CONFIG } from '../../constant/iconConfig';
-import { queryKeys } from '../../constant/queryKeys';
+import { establishSession } from '../../shared/services/session';
 import { loginSchema, type loginInput } from '../../shared/schemas/authSchemas';
 import { ApiError } from '../../shared/services/api/ApiExceptions';
 import { LoginDate } from '../../shared/services/api/login/Login';
@@ -61,7 +61,7 @@ export const Login = () => {
         // Escreve o usuário direto no cache da query "me" (React Query) em vez de
         // disparar um novo GET /auth/me — Header e AuthGate reagem de imediato à
         // mudança de estado, sem esperar um round-trip extra à API.
-        queryClient.setQueryData(queryKeys.me, result.user);
+        await establishSession(queryClient, result.user);
         reset();
         navigate('/home');
       } catch {
@@ -99,11 +99,11 @@ export const Login = () => {
       }
 
       toast('Login realizado');
-      queryClient.setQueryData(queryKeys.me, result.user);
+      await establishSession(queryClient, result.user);
       reset();
       navigate('/home');
-    } catch (err) {
-      console.error('[GoogleLogin] Erro no fluxo de popup:', err);
+    } catch {
+      console.error('[GoogleLogin] Erro no fluxo de popup');
       setBackendError('Ocorreu um erro inesperado. Tente novamente.');
     } finally {
       // Limpa sessão do Firebase no cliente — sessão real é o cookie do backend
@@ -229,7 +229,7 @@ export const Login = () => {
                 type="submit"
                 title={isLoading ? 'Entrando...' : 'Entrar'}
                 colorVariation="bgDarkVariation"
-                disabled={isLoading}
+                disabled={isLoading || isGoogleLoading}
               />
 
               <div className="flex w-full items-center justify-center gap-2 text-[#595753]">

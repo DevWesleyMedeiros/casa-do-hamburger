@@ -718,7 +718,7 @@ sequenceDiagram
     alt senha válida
         A->>A: Gera JWT (jose) com { sub, role }
         A-->>F: 200 OK + Set-Cookie httpOnly (JWT)
-        F->>F: Zustand: seta usuário autenticado
+        F->>F: TanStack Query: isola caches e atualiza usuário autenticado
         F-->>C: Redireciona para área logada
     else senha inválida
         A-->>F: 401 Unauthorized (mensagem genérica)

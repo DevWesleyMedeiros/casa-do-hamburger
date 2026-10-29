@@ -4,7 +4,7 @@ import axios from 'axios';
 import { type CartItemType } from '../../../../types/CartItem';
 
 export const updateCartItemQuantity = {
-  update: async (cartItemId: string, quantity: number): Promise<CartItemType | ApiError> => {
+  update: async (cartItemId: string, quantity: number): Promise<CartItemType> => {
     try {
       const { data } = await api.patch(`/auth/cart-item/${cartItemId}`, {
         quantity,
@@ -14,12 +14,12 @@ export const updateCartItemQuantity = {
       if (axios.isAxiosError(error)) {
         const message = error.response?.data?.message ?? 'Erro desconhecido';
         const statusCode = error.response?.status ?? 500;
-        return new ApiError(statusCode, message);
+        throw new ApiError(statusCode, message);
       }
       if (error instanceof Error) {
-        return new ApiError(500, error.message);
+        throw new ApiError(500, error.message);
       }
     }
-    return new ApiError(500, 'Erro no servidor');
+    throw new ApiError(500, 'Erro no servidor');
   },
 };

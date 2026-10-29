@@ -9,7 +9,7 @@ import { getAuth } from '../shared/services/api/me/Me';
 export const useMe = () => {
   return useQuery({
     queryKey: queryKeys.me,
-    queryFn: () => getAuth.getMe(),
+    queryFn: ({ signal }) => getAuth.getMe(signal),
     retry: false,
     staleTime: 5 * 60 * 1000,
   });

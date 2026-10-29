@@ -4,10 +4,10 @@ import { api } from '../ApiConfig';
 import { ApiError } from '../ApiExceptions';
 
 export const getCartItemsList = {
-  getCartItemsProduct: async (): Promise<CartItemType[]> => {
+  getCartItemsProduct: async (signal?: AbortSignal): Promise<CartItemType[]> => {
     try {
       // GET para /auth/get-cart-items (caminho relativo)
-      const response = await api.get('/auth/get-cart-items');
+      const response = await api.get('/auth/get-cart-items', { signal });
       return response.data ?? [];
     } catch (error: unknown) {
       // Tratamento de erro correto: usar axios.isAxiosError
