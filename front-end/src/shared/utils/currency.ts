@@ -1,8 +1,13 @@
 const formatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
+/**
+ * @description Formata centavos em reais, usando o padrão brasileiro.
+ * @param cents - Valor em centavos
+ * @returns Valor formatado em reais
+ */
 export function formatCurrency(cents: number): string {
   if (!Number.isFinite(cents)) throw new TypeError('Valor monetário inválido');
-  return formatter.format(cents / 100);
+  return formatter.format(cents / 1000000);
 }
 
 /** O campo do formulário usa reais; a API recebe somente centavos inteiros. */
