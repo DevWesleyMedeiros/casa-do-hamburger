@@ -12,7 +12,7 @@ import { getProductImageUrl } from '../../shared/utils/getProductImageUrl';
 import { formatCurrency } from '../../shared/utils/currency';
 import { type ProductsInterface } from '../../types/Products';
 
-export const Products = ({ id, name, description, price, images }: ProductsInterface) => {
+export const Products = ({ id, name, description, price, images }: Readonly<ProductsInterface>) => {
   const { data: user } = useMe();
   const queryClient = useQueryClient();
 
