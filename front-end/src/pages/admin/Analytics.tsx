@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useState } from 'react';
-import type { FormEvent } from 'react';
+import type { SubmitEvent } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { AnalyticsEvolution } from '../../components/analytics/AnalyticsEvolution';
 import { useAdminAnalytics } from '../../hook/useAdminAnalytics';
@@ -36,18 +36,13 @@ export function Analytics() {
   const [validation, setValidation] = useState('');
   const query = useAdminAnalytics(period);
 
-  if (sessionPending)
-    return (
-      <p role="status" className="p-6 text-white">
-        Verificando sessão…
-      </p>
-    );
+  if (sessionPending) return <output className="block p-6 text-white">Verificando sessão…</output>;
   if (sessionError)
     return (
-      <div role="alert" className="p-6 text-white">
+      <output className="block p-6 text-white">
         Não foi possível verificar a sessão.{' '}
         <button onClick={() => void retrySession()}>Tentar novamente</button>
-      </div>
+      </output>
     );
   if (!user) return <Navigate to="/login" replace />;
   const forbidden = axios.isAxiosError(query.error) && query.error.response?.status === 403;
@@ -61,7 +56,7 @@ export function Analytics() {
       </main>
     );
 
-  const apply = (event: FormEvent) => {
+  const apply = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     const parsed = analyticsPeriodSchema.safeParse(draft);
     if (!parsed.success) {
@@ -84,7 +79,7 @@ export function Analytics() {
         <p className="text-sm font-medium tracking-widest text-blue-300 uppercase">
           Visão da operação
         </p>
-        <h1 className="text-3xl font-bold">Analytics administrativo</h1>
+        <h1 className="text-3xl font-bold">Métricas administrativas</h1>
         <p className="max-w-3xl text-slate-300">
           Acompanhe os pedidos criados no período e seus status atuais. Os valores são simulados e
           não representam receita recebida.
@@ -124,7 +119,7 @@ export function Analytics() {
           {preset === 'custom' && (
             <>
               <label htmlFor="analytics-from" className="flex min-w-0 flex-col gap-2">
-                Início inclusivo
+                <span>Início inclusivo</span>
                 <input
                   id="analytics-from"
                   className={fieldClass}
@@ -138,7 +133,7 @@ export function Analytics() {
                 />
               </label>
               <label htmlFor="analytics-to" className="flex min-w-0 flex-col gap-2">
-                Fim exclusivo
+                <span>Fim exclusivo</span>
                 <input
                   id="analytics-to"
                   className={fieldClass}
@@ -181,11 +176,7 @@ export function Analytics() {
         {query.isFetching && data ? ' · Atualizando…' : ''}
       </p>
       {query.isPending && (
-        <section
-          role="status"
-          aria-label="Carregando analytics"
-          className="grid gap-4 sm:grid-cols-3"
-        >
+        <section aria-label="Carregando analytics" className="grid gap-4 sm:grid-cols-3">
           <span className="sr-only">Carregando analytics…</span>
           {[1, 2, 3].map((key) => (
             <div key={key} className="h-28 rounded-xl bg-slate-800 motion-safe:animate-pulse" />
@@ -226,9 +217,9 @@ export function Analytics() {
             ))}
           </section>
           {data.orders.total === 0 && (
-            <p role="status" className="rounded-xl border border-slate-700 p-5">
+            <output className="block rounded-xl border border-slate-700 p-5">
               Nenhum pedido neste período. Selecione outro intervalo.
-            </p>
+            </output>
           )}
           <section
             aria-label="Distribuição por status"

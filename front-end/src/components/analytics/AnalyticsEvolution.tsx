@@ -2,7 +2,7 @@ import { useId } from 'react';
 import type { AdminAnalytics } from '../../types/AdminAnalytics';
 import { analyticsCurrency, analyticsDate } from '../../shared/utils/analyticsPeriod';
 
-export function AnalyticsEvolution({ series }: { series: AdminAnalytics['series'] }) {
+export function AnalyticsEvolution({ series }: Readonly<{ series: AdminAnalytics['series'] }>) {
   const id = useId();
   const chart = (field: 'orders' | 'orderValueInCents', label: string) => {
     const max = Math.max(0, ...series.map((day) => day[field]));
