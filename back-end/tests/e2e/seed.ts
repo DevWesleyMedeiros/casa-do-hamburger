@@ -1,3 +1,5 @@
+// código que faz seed (seed significa popular o banco de dados com dados iniciais para testes) do banco de dados para os testes de RF44 (histórico de pedidos) e RF45 (auditoria)
+
 import { randomUUID } from 'node:crypto';
 import { hash } from 'bcrypt-ts';
 import { prisma } from '../../src/db.js';
